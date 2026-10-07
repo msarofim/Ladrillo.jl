@@ -2,6 +2,7 @@
 # in their slots, the Antarctic and thermal-expansion components stock, driven by prescribed GMST and ocean heat content.
 
 const REF_PERIOD = (1995, 2014)          # reporting baseline for sea level (AR6-comparable)
+const FIT_REF = (1995, 2005)             # the calibration's re-reference window (hindcast comparisons use it)
 const DRIVER_BASE = (1850, 1900)         # baseline of every temperature driver
 const ANCHOR_YEARS = 11                  # observed years the anchor-preserving splice matches (the last 11)
 const GIS_V0_M = 7.42                    # Greenland volume, m SLE (structural)
@@ -59,7 +60,7 @@ Construct with `LadrilloModel(gmst, ohc)` or `LadrilloModel(scenario)`.
 struct LadrilloModel
     m::Mimi.Model
     years::Vector{Int}
-    iref::Vector{Int}                        # indices of REF_PERIOD
+    iref::Vector{Int}                        # indices of the `ref` window
     gmst::Vector{Float64}                    # GMST as fed, K rel. 1850-1900
     gmst_rb::Vector{Float64}                 # GMST explicitly re-based to DRIVER_BASE
     glac_obs::Dict{String,Vector{Float64}}   # observed per-reservoir driver, padded to `years`
@@ -72,6 +73,28 @@ struct LadrilloModel
     gis_shape::Vector{Float64}               # amplification shape S(warming level) per year
     gis_shape_anchor::Float64                # mean(S * gmst_rb) over the Greenland anchor window
     tap::Bool
+    ref::Tuple{Int,Int}                      # the window `sea_level` re-references to
+    funch_unit::Vector{Float64}              # F_unch profile per mm of gic_u_unch (m SLE), see `funch_unit`
+end
+
+"""
+    funch_unit(years) -> Vector{Float64}
+
+Per-year profile of the uncharted-ice term per mm of its stock `gic_u_unch`, in m SLE: zero to 1901, linear to 1970,
+the rate tapering to zero by 2005, flat after.
+
+F_unch is a HINDCAST-TARGET construct, not a reservoir. It prices glacier ice that the observational budget contains
+but the RGI inventory does not, so it sits on the model side of the hindcast comparison and never enters the Mimi graph
+(the Antarctic sea-level feedback sees only real melt). Include it in hindcast comparisons (`sea_level(...; funch=u)`);
+leave it out of projections, where after re-referencing to 1995-2014 it is a ~1 mm constant.
+"""
+function funch_unit(years)
+    flat, ramp = 1970 - 1901, 2005 - 1970
+    r = (1.0 / 1000.0) / (flat + ramp / 2)
+    return [y <= 1901 ? 0.0 :
+            y <= 1970 ? r * (y - 1901) :
+            y <= 2005 ? r * flat + r * (y - 1970) * (1 - (y - 1970) / (2.0 * ramp)) :
+                        r * (flat + ramp / 2.0) for y in years]
 end
 
 """Greenland amplification shape S(dT): linear interpolation of the CMIP6-derived table, held flat outside it.
@@ -123,18 +146,20 @@ function fixed_params()
 end
 
 """
-    LadrilloModel(gmst, ohc; years=1850:2300, lws=:observed, tap=true)
+    LadrilloModel(gmst, ohc; years=1850:2300, lws=:observed, tap=true, ref=REF_PERIOD)
 
 Build Ladrillo on prescribed GMST (K rel. 1850-1900) and ocean heat content (1e22 J), one value per year.
 `lws` is :observed (projections) or :central (hindcast-side runs); `tap` switches the Greenland above-threshold
-discharge channel on at the shipped TAP_CELL. `build_scenario` is only the MimiBRICK scenario get_model is called with
+discharge channel on at the shipped TAP_CELL. `ref` is the window `sea_level` re-references to: REF_PERIOD
+(1995-2014) for projections, FIT_REF (1995-2005) to compare with the calibration targets. `build_scenario` is only the MimiBRICK scenario get_model is called with
 (see BUILD_SCENARIO).
 """
 function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real};
                        years=1850:2300, lws::Symbol=:observed, tap::Bool=true,
-                       build_scenario::AbstractString=BUILD_SCENARIO)
+                       ref::Tuple{Int,Int}=REF_PERIOD, build_scenario::AbstractString=BUILD_SCENARIO)
     years = collect(Int, years)
     y0, y1 = first(years), last(years)
+    (y0 <= ref[1] <= ref[2] <= y1) || error("ref window $ref is not inside $y0-$y1")
     length(gmst) == length(years) || error("gmst has $(length(gmst)) values, need $(length(years))")
     length(ohc) == length(years) || error("ohc has $(length(ohc)) values, need $(length(years))")
     yi(y) = findfirst(==(y), years)
@@ -196,10 +221,11 @@ function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real}
         update_param!(m, _GIS, :gis_tap_gmt, zeros(length(years)))
     end
 
-    return LadrilloModel(m, years, [yi(y) for y in REF_PERIOD[1]:REF_PERIOD[2]],
+    return LadrilloModel(m, years, [yi(y) for y in ref[1]:ref[2]],
                          Float64.(gmst), gmst_rb, glac_obs, glac_anchor, years .<= last_obs,
                          mean(gmst_rb[[yi(y) for y in anchor]]),
-                         gis_obs, gis_anchor, years .<= gis_last, shape, shape_anchor, tap)
+                         gis_obs, gis_anchor, years .<= gis_last, shape, shape_anchor, tap,
+                         ref, funch_unit(years))
 end
 
 """Per-reservoir glacier driver: observations where they exist, then `amp * GMST` spliced on with the offset that
@@ -263,13 +289,21 @@ const COMPONENTS = Dict{Symbol,Tuple{Symbol,Symbol}}(
 )
 
 """
-    sea_level(lm, component) -> Vector{Float64}
+    sea_level(lm, component; funch=nothing) -> Vector{Float64}
 
-One component of the last run, in cm relative to REF_PERIOD.
+One component of the last run, in cm relative to the model's `ref` window (REF_PERIOD unless built otherwise).
+`funch` (the draw's `gic_u_unch`, mm) adds the uncharted-ice term to a glacier series before re-referencing; see
+`funch_unit`. Hindcast comparisons only.
 """
-function sea_level(lm::LadrilloModel, component::Symbol)
+function sea_level(lm::LadrilloModel, component::Symbol; funch::Union{Nothing,Real}=nothing)
     haskey(COMPONENTS, component) || error("unknown component :$component; have $(sort(collect(keys(COMPONENTS))))")
     comp, var = COMPONENTS[component]
-    x = [ismissing(e) ? NaN : 100.0 * Float64(e) for e in lm.m[comp, var]]
+    raw = lm.m[comp, var]
+    if funch !== nothing
+        component in (:glaciers, :gsic_hind, :total) ||
+            error("funch applies to :glaciers, :gsic_hind or :total, not :$component")
+        raw = Float64.(raw) .+ Float64(funch) .* lm.funch_unit
+    end
+    x = [ismissing(e) ? NaN : 100.0 * Float64(e) for e in raw]
     return x .- mean(x[lm.iref])
 end

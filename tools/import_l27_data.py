@@ -45,6 +45,8 @@ FILES = [
     ("constants/paleo_fastdyn_draws.csv", "outputs/paleo_fastdyn_draws.csv", "copy"),
     ("constants/paleo_dais_marginals.csv", "outputs/paleo_dais_marginals.csv", "copy"),
     ("observations/calibration_targets.csv", "outputs/recalib_targets_ext.csv", "copy"),
+    ## the glacier target with the RGI-region-19 seam removed (what the hindcast glacier scope is compared against)
+    ("observations/calibration_targets_gsic_adj.csv", "outputs/recalib_targets_ext_gsicadj.csv", "copy"),
     ("forcing/fair_mean_gmst_ssp245harm.csv", "data/observations/fair_mean_gmst_ssp245harm.csv", "copy"),
     ("forcing/fair_mean_ohc_ssp245harm.csv", "data/observations/fair_mean_ohc_ssp245harm.csv", "copy"),
     ("forcing/fair_cube_gmst_ssp585_spliced.csv", "data/observations/fair_cube_gmst_ssp585_spliced.csv", "copy"),

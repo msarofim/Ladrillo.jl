@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-10-07c — posterior predictive ported; identity gate 3 PASS
+
+**`scripts/posterior_predictive.jl`** ports the research `posterior_predictive_ladrillo.jl` on its L27 path. It runs the
+posterior over 1850-2026 on the calibration forcing (ssp245harm), with land water `:central`, the tap off, and sea level
+re-referenced to the calibration window 1995-2005. The parameter and predictive bands, bias and coverage go to
+`outputs/hindcast/`.
+
+**Kernel additions**, both off by default so projections are unchanged:
+- `LadrilloModel(...; ref=)`: the window `sea_level` re-references to. The default is `REF_PERIOD`; the new constant
+  `FIT_REF` = 1995-2005 is the calibration's window.
+- `sea_level(...; funch=u)` and `funch_unit(years)`: the uncharted-ice hindcast term. It never enters the Mimi graph.
+
+**Data:** `observations/calibration_targets_gsic_adj.csv` was imported (the glacier target with the RGI-19 seam removed).
+The manifest's other rows are unchanged except the source commit (0c4de0a → c35513a; data identical).
+
+**Identity gate 3** (`test/identity/compare_postpred.jl`) compares with the shipped research
+`postpred_L27_{components_timeseries,bias,coverage}.csv` using `isequal` on every shared column. All 127 + 30 + 5 rows
+are IDENTICAL. The package files add a `provenance` column to bias and coverage, which the research files lack.
+- **Mutation test**, both mutants killed:
+  - noise seed 2026 → 2027: 1,016 band values and 2 coverage values differ. Bias is unchanged, as it should be,
+    because bias uses the parameter band only.
+  - F_unch dropped from the total only: 381 + 12 + 2 values differ.
+- **v1.0 simplifications:** the research driver's `--tag`, variant, AIS-ramp and `--ais-fit-from` recovery are dropped.
+  L27 fits all four component series from 1900; which series are fitted is still read off the posterior's `sd_*`/`rho_*`
+  columns.
+
 ## 2026-10-07 — package built from the research repository; certified bit-identical
 
 **What this is.** A clean, L27-only `Ladrillo.jl` (Marcus 2026-10-07), built from `SLR-RFF-BRICK` (`ladrillo-dev`,
