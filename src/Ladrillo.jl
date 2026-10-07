@@ -35,5 +35,7 @@ include("landwater.jl")
 include("posterior.jl")
 include("model.jl")
 include("forcing.jl")
+include("targets.jl")
+include("brick20.jl")
 
 end # module

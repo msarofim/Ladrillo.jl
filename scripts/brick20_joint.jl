@@ -17,7 +17,6 @@ arg(flag, default) = (i = findfirst(a -> startswith(a, flag), ARGS); i === nothi
 const SCENARIO = arg("--scenario=", "ssp245")
 const OUTDIR = arg("--outdir=", joinpath(dirname(@__DIR__), "outputs", "projections"))
 const NDRAW = 1000
-const SEED = 2026                 # global RNG before get_model (whose land-water draw is overwritten anyway)
 const PAIR_SEED = 2026
 const YEARS = collect(1850:2300)
 const HORIZONS = [2100, 2150, 2300]
@@ -25,12 +24,12 @@ const COMPS = ["glaciers", "gis", "ais", "te", "lws", "total"]
 const REPORT0 = 1990
 mkpath(OUTDIR)
 
-const POST = CSV.read(Ladrillo.datapath("brick20", "parameters_subsample_brick.csv"), DataFrame)
+const POST = Ladrillo.brick20_posterior()
 const STEP = max(1, nrow(POST) ÷ NDRAW)
 const ROWS = collect(1:STEP:nrow(POST))
 const PROVENANCE = "BRICK 2.0 (MimiBRICK v2.0.0, post-PR#93 posterior) | scripts/brick20_joint.jl | Ladrillo " *
     "$(pkgversion(Ladrillo)) forcing helpers | scenario $SCENARIO | FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, " *
-    "spliced at $(Ladrillo.SPLICE_YEAR) | rows 1:$(STEP):$(nrow(POST)) | pairing seed $PAIR_SEED | land water " *
+    "spliced at $(Ladrillo.SPLICE_YEAR) | rows 1:$(STEP):$(nrow(POST)) | Random.seed!($(Ladrillo.BRICK20_SEED)) before get_model | pairing seed $PAIR_SEED | land water " *
     ":observed ($(Ladrillo.LWS_OBS_ANCHOR)) | cm rel 1995-2014 | julia $(VERSION)"
 
 mg, mo = mean_forcing(SCENARIO; years = YEARS)
@@ -43,41 +42,13 @@ end
 const IB = [findfirst(==(y), YEARS) for y in 1995:2014]
 reref(v) = 100 .* (v .- sum(v[IB]) / length(IB))
 
-"""Apply one BRICK posterior row (MimiBRICK's own parameter names; precip log-transformed for v2.0.0)."""
-function update_brick20!(m, r)
-    update_param!(m, :antarctic_ocean, :anto_α, r.anto_alpha)
-    update_param!(m, :antarctic_ocean, :anto_β, r.anto_beta)
-    for (col, sym) in ((:antarctic_s0, :ais_sea_level₀), (:antarctic_bed_height0, :ais_bedheight₀),
-                       (:antarctic_slope, :ais_slope), (:antarctic_mu, :ais_μ),
-                       (:antarctic_runoff_height0, :ais_runoffline_snowheight₀), (:antarctic_c, :ais_c),
-                       (:antarctic_kappa, :ais_κ), (:antarctic_nu, :ais_ν), (:antarctic_flow0, :ais_iceflow₀),
-                       (:antarctic_gamma, :ais_γ), (:antarctic_alpha, :ais_α),
-                       (:antarctic_temp_threshold, :temperature_threshold), (:antarctic_lambda, :λ))
-        update_param!(m, :antarctic_icesheet, sym, r[col])
-    end
-    update_param!(m, :antarctic_icesheet, :ais_precipitation₀, log(r.antarctic_precip0))
-    update_param!(m, :glaciers_small_icecaps, :gsic_β₀, r.glaciers_beta0)
-    update_param!(m, :glaciers_small_icecaps, :gsic_v₀, r.glaciers_v0)
-    update_param!(m, :glaciers_small_icecaps, :gsic_s₀, r.glaciers_s0)
-    update_param!(m, :glaciers_small_icecaps, :gsic_n,  r.glaciers_n)
-    update_param!(m, :greenland_icesheet, :greenland_a,  r.greenland_a)
-    update_param!(m, :greenland_icesheet, :greenland_b,  r.greenland_b)
-    update_param!(m, :greenland_icesheet, :greenland_α,  r.greenland_alpha)
-    update_param!(m, :greenland_icesheet, :greenland_β,  r.greenland_beta)
-    update_param!(m, :greenland_icesheet, :greenland_v₀, r.greenland_v0)
-    update_param!(m, :thermal_expansion, :te_α,  r.thermal_alpha)
-    update_param!(m, :thermal_expansion, :te_s₀, r.thermal_s0)
-end
-
 alloc() = Dict(c => Matrix{Float64}(undef, length(ROWS), length(YEARS)) for c in COMPS)
-Random.seed!(SEED)
-const M = MimiBRICK.get_model(ssprcp_scenario = Ladrillo.BUILD_SCENARIO, start_year = first(YEARS), end_year = last(YEARS))
+const M = Ladrillo.brick20_model(years = YEARS)        # seeds the global RNG to BRICK20_SEED, then get_model
 Ladrillo.set_lws!(M, :observed)
 function run_into!(store, ks, g, o)
-    update_param!(M, :model_global_surface_temperature, g)
-    update_param!(M, :thermal_expansion, :ocean_heat_interior, o)
+    Ladrillo.set_brick20_forcing!(M, g, o)
     for k in ks
-        update_brick20!(M, POST[ROWS[k], :])
+        Ladrillo.apply_brick20!(M, POST[ROWS[k], :])
         run(M)
         ais  = reref(M[:antarctic_icesheet,     :ais_sea_level])
         gsic = reref(M[:glaciers_small_icecaps, :gsic_sea_level])

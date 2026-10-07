@@ -26,7 +26,7 @@ using Ladrillo, CSV, DataFrames, Printf, Random, Statistics
 const Y0, Y1 = 1850, 2026
 const FIT_REF = Ladrillo.FIT_REF
 const FORCING = "ssp245harm"
-const FIT_START = 1900                     # every target series starts here
+const FIT_START = Ladrillo.FIT_START        # every target series starts here
 const NOISE_SEED = 2026
 const NDRAW_ARG = let p = filter(a -> !startswith(a, "--"), ARGS); isempty(p) ? 2000 : parse(Int, p[1]); end
 const OUTDIR = let i = findfirst(a -> startswith(a, "--outdir="), ARGS)
@@ -42,32 +42,13 @@ const DELTA_END = 1960                     # the glacier delta ramp is zero from
 const SERIES = [(:ais, :ais, "ais"), (:glaciers, :gsic, "gsic"), (:gis, :gis, "gis"),
                 (:te, :steric, "steric"), (:total, :dang, "dang")]
 
-## ---------------------------------------------------------------------------------------------------------------
-## targets
-## ---------------------------------------------------------------------------------------------------------------
-tg   = CSV.read(Ladrillo.datapath("observations", "calibration_targets.csv"), DataFrame)
-gadj = CSV.read(Ladrillo.datapath("observations", "calibration_targets_gsic_adj.csv"), DataFrame)
-tgi(y) = findfirst(==(y), tg.year)
-haveobs(col, y) = (r = tgi(y); r !== nothing && !ismissing(tg[r, col]) && !isnan(Float64(tg[r, col])))
-
-const FY = collect(FIT_START:Y1)
-gsic_target = let d = Dict(Int(gadj[i, :year]) => Float64(gadj[i, :gsic_adj]) for i in 1:nrow(gadj))
-    Dict(y => get(d, y, NaN) for y in FY)
-end
-obs_of(key, y) = key === :gsic ? gsic_target[y] : (haveobs(key, y) ? Float64(tg[tgi(y), key]) : NaN)
-lws_obs = [haveobs(:lws, y) ? Float64(tg[tgi(y), :lws]) : NaN for y in FY]
+## targets (calibration_targets: the observations, their per-year sigma, the observed land water)
+tgt = Ladrillo.calibration_targets(years = FIT_START:Y1)
+const FY = tgt.years
+obs_of(key, y) = tgt.obs[key][y - FIT_START + 1]
+lws_obs = tgt.lws
 delta_ramp = [y < DELTA_END ? (DELTA_END - y) / 10.0 : 0.0 for y in FY]
-
-## Per-year observational sigma, as the likelihood builds it: half the reported band over 1.645, floored at 0.05 cm;
-## the total also carries the land-water budget error.
-band_sigma(lo, hi) = max((Float64(hi) - Float64(lo)) / (2 * 1.645), 0.05)
-function obs_sigma(tcol, y)
-    r = tgi(y)
-    (r === nothing || isnan(obs_of(tcol, y))) && return NaN
-    tcol === :dang && return sqrt(Float64(tg[r, :dang_sig])^2 + band_sigma(tg[r, :lws_lo], tg[r, :lws_hi])^2)
-    return band_sigma(tg[r, Symbol("$(tcol)_lo")], tg[r, Symbol("$(tcol)_hi")])
-end
-const OBS_SIGMA = Dict(tcol => [obs_sigma(tcol, y) for y in FY] for (_, tcol, _) in SERIES)
+const OBS_SIGMA = Dict(tcol => tgt.sigma[tcol] for (_, tcol, _) in SERIES)
 
 ## ---------------------------------------------------------------------------------------------------------------
 ## run the posterior

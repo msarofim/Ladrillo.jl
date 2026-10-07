@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-10-07d — BRICK 2.0 hindcast and IC residuals ported; shared targets and BRICK 2.0 code moved into src/
+
+**New in `src/`:**
+- `targets.jl`: `calibration_targets()`, the observations, the per-year sigma the likelihood uses, and the observed
+  land water. One definition, used by every hindcast script.
+- `brick20.jl`: `brick20_posterior`, `brick20_model`, `set_brick20_forcing!`, `apply_brick20!` and
+  `brick20_sea_level`. `brick20_model` seeds the global RNG to BRICK20_SEED immediately before `get_model`.
+  `scripts/brick20_joint.jl` now uses them, and its provenance column records the seed.
+
+**New scripts:**
+- `posterior_predictive_brick20.jl`: the BRICK 2.0 hindcast bands, on the same conventions as the Ladrillo check.
+- `ic_hindcast_residuals.jl`: per-draw residuals of both models (10,000 draws each), the input to Table 5. Its built-in
+  gate requires the residual medians to reproduce both posterior-predictive p50 series to 1e-9.
+- `python/ic_ladrillo_vs_brick20.py`: Table 5 itself, ported (gate 5 pending).
+
+**Regression after the refactor:**
+- Gate 2: all 7 vv markers, both models; 504,000 Ladrillo and 252,000 BRICK 2.0 values identical.
+- Gate 3: identical.
+
+**Identity gate 4** (`test/identity/compare_hindcast.jl`): `postpred_brick20` and the two 10,000 × 644 residual files
+are identical to the research `postpred_oldbrick`, `ic_hindcast_residuals_{ladrillo_L27,brick20}` and
+`ic_hindcast_obs_sigma`.
+
+**Mutation test of gate 4:**
+- BRICK 2.0 arm re-referenced to 1995-2014: killed (6,270,000 values).
+- Ladrillo land water `:observed` instead of `:central`: killed (2,510,000 values, up to 0.018 cm). Only AIS and the
+  total move, through MimiBRICK's global-sea-level feedback onto Antarctica.
+- **The planned no-power control was NOT one.** I expected the BRICK 2.0 get_model seed not to matter, because the
+  hindcast never reads BRICK's own land water. It does matter: it moves 110,000 values by up to 8.8e-4 cm, in
+  `ais_2020-2025` and `total_2020-2024` only. BRICK's random land-water realisation starts in 2019 and reaches
+  Antarctica through the same sea-level feedback. So the seed is a real input of the BRICK 2.0 hindcast, and recording
+  it in the artifact is required, not cosmetic.
+
+**Also:** CITATION.cff (author Marcus C. Sarofim, NYU Marron Institute; the paper DOI is added when it exists).
+
 ## 2026-10-07c — posterior predictive ported; identity gate 3 PASS
 
 **`scripts/posterior_predictive.jl`** ports the research `posterior_predictive_ladrillo.jl` on its L27 path. It runs the

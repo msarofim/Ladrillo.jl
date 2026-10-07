@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use Ladrillo, please cite it as below."
+title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea-level rise"
+type: software
+version: 1.0.0
+license: MIT
+authors:
+  - family-names: Sarofim
+    given-names: Marcus C.
+    affiliation: "NYU Marron Institute"
+## The model-description paper (Geoscientific Model Development, in preparation) becomes `preferred-citation` once it
+## has a DOI; the software DOI goes in `doi:` when the release is archived.
+references:
+  - type: software
+    title: "MimiBRICK.jl"
+    version: 2.0.0
+    url: "https://github.com/raddleverse/MimiBRICK.jl"
