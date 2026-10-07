@@ -3,3 +3,4 @@ test/identity/out/
 .DS_Store
 __pycache__/
 *.pyc
+outputs/

@@ -1,6 +1,6 @@
 name = "Ladrillo"
 uuid = "a7357428-476d-4570-8bf3-97ba83aac5dd"
-authors = ["Marcus C. Sarofim", "Tony E. Wong"]
+authors = ["Marcus C. Sarofim"]
 version = "1.0.0"
 
 [deps]

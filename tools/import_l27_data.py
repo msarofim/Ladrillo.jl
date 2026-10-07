@@ -48,6 +48,9 @@ FILES = [
     ("forcing/fair_mean_gmst_ssp245harm.csv", "data/observations/fair_mean_gmst_ssp245harm.csv", "copy"),
     ("forcing/fair_mean_ohc_ssp245harm.csv", "data/observations/fair_mean_ohc_ssp245harm.csv", "copy"),
     ("forcing/fair_cube_gmst_ssp585_spliced.csv", "data/observations/fair_cube_gmst_ssp585_spliced.csv", "copy"),
+    ## BRICK 2.0 comparison arm: the post-PR#93 MimiBRICK v2.0.0 posterior subsample (10,000 draws; linear-units
+    ## antarctic_precip0, see brick20.jl). Redistribution to be confirmed with its author before the repo is public.
+    ("brick20/parameters_subsample_brick.csv", "data/MimiBRICK/parameters_subsample_brick.csv", "copy"),
 ] + [("forcing/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else
       "forcing/fair_%s_%s_%s_raw.csv" % (kind, var, k),
       "data/observations/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else

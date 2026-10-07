@@ -127,10 +127,12 @@ end
 
 Build Ladrillo on prescribed GMST (K rel. 1850-1900) and ocean heat content (1e22 J), one value per year.
 `lws` is :observed (projections) or :central (hindcast-side runs); `tap` switches the Greenland above-threshold
-discharge channel on at the shipped TAP_CELL.
+discharge channel on at the shipped TAP_CELL. `build_scenario` is only the MimiBRICK scenario get_model is called with
+(see BUILD_SCENARIO).
 """
 function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real};
-                       years=1850:2300, lws::Symbol=:observed, tap::Bool=true)
+                       years=1850:2300, lws::Symbol=:observed, tap::Bool=true,
+                       build_scenario::AbstractString=BUILD_SCENARIO)
     years = collect(Int, years)
     y0, y1 = first(years), last(years)
     length(gmst) == length(years) || error("gmst has $(length(gmst)) values, need $(length(years))")
@@ -163,7 +165,7 @@ function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real}
     ianch = [yi(y) for y in ganch]
     shape_anchor = mean(shape[ianch] .* gmst_rb[ianch])
 
-    m = MimiBRICK.get_model(ssprcp_scenario=BUILD_SCENARIO, start_year=y0, end_year=y1)
+    m = MimiBRICK.get_model(ssprcp_scenario=build_scenario, start_year=y0, end_year=y1)
     replace!(m, _GLAC => ladrillo_glaciers)
     set_lws!(m, lws)
     replace!(m, _GIS => ladrillo_greenland)
