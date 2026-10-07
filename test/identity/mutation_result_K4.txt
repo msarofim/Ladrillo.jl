@@ -1,0 +1,5 @@
+M1: gate FAILED -- mutant KILLED  (4 component rows failed)
+M2: gate FAILED -- mutant KILLED  (4 component rows failed)
+M3: gate FAILED -- mutant KILLED  (3 component rows failed)
+M4: gate PASSED -- mutant SURVIVED
+M5: gate PASSED -- mutant SURVIVED

@@ -33,17 +33,21 @@ const COMPONENTS = [:glaciers, :gis, :ais, :te, :lws, :total]
 const SUM_PARTS = [:glaciers, :gis, :ais, :te, :lws]
 const SUM_TOL_CM = 1e-6                  # an identity in BRICK; float noise only
 const REPORT0 = 1990
-const SFX = TAP ? "" : "_notap"
+## --paleo=v1 (default): paleo rows assigned per chain, as v1.0 ran. --paleo=single: one assignment over all 10,000
+## posterior draws, then the 2,000-row subset (each draw keeps the paleo row it has in the full table).
+const PALEO = arg("--paleo=", "v1")
+PALEO in ("v1", "single") || error("--paleo must be v1 or single")
+const SFX = (TAP ? "" : "_notap") * (PALEO == "v1" ? "" : "_paleosingle")
 
 SCENARIO in Ladrillo.SCENARIOS || error("no shipped forcing for '$SCENARIO'; have $(Ladrillo.SCENARIOS)")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_joint.jl | scenario $SCENARIO | " *
     "FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, spliced at $(Ladrillo.SPLICE_YEAR) | draws rows $(ROWS) " *
-    "(paleo block $PALEO_BLOCK, seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
+    "(paleo $(PALEO == "v1" ? "block $PALEO_BLOCK" : "single assignment over 10000"), seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
     ":observed ($(Ladrillo.LWS_OBS_ANCHOR)) | cm rel $(Ladrillo.REF_PERIOD[1])-$(Ladrillo.REF_PERIOD[2]) | " *
     "julia $(VERSION)"
 
-post = posterior(rows = ROWS, paleo_block = PALEO_BLOCK)
+post = PALEO == "v1" ? posterior(rows = ROWS, paleo_block = PALEO_BLOCK) : posterior()[ROWS, :]
 const NDRAW = nrow(post)
 mg, mo = mean_forcing(SCENARIO; years = YEARS)
 yrs, cfg, G, O = forcing_cube(SCENARIO)

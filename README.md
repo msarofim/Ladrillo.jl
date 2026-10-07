@@ -60,7 +60,10 @@ FaIR forcing builders and the figure scripts.*
 
 `test/identity/` holds the gate that certified this package against the research code that produced the paper:
 every component, every year and every draw must be bit-identical (`==`), on the full 10,000-draw posterior and on
-the joint-climate arm. The gate is mutation-tested by `test/identity/mutation_test.sh`.
+the joint-climate arm. The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
+`test/identity/mutation_result_K4.txt`): a one-ulp change to a Greenland volume share, a re-associated glacier sum,
+and a different paleo-draw assignment are each caught; two mutants on paths that never bind in v1.0 (the glacier
+floor, the Greenland whole-sheet clamp) survive, as they should.
 
 ## Repository layout
 
