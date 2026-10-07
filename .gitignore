@@ -4,3 +4,4 @@ test/identity/out/
 __pycache__/
 *.pyc
 outputs/
+data/brick20/
