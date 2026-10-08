@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-10-08k — Joint arm conditioned on the record by default; the vv re-import and the conditioning certified bit-for-bit
+
+Marcus 10-08: "go with b and any pending fixes that can be done simultaneously". His rulings:
+- the vv forcing moves to the published emissions;
+- the joint arms take the record-conditioned draws ("own-config, drop");
+- MAGICC-SLR is re-run;
+- the pulse arc waits.
+
+The research side is SLR-RFF-BRICK CHANGELOG 2026-10-08k.
+
+- **`scripts/project_joint.jl`:**
+  - Drops every joint draw whose Antarctic fast dynamics fires by `record_end()` (2025) on the GMST it actually runs
+    with (`fastdyn_onset_year` on its own spliced config).
+  - Statistics and the draws file use the kept draws; the [SPLICE-IDENTITY] and [SUM] gates still see all draws.
+  - The gates file lists every rejected draw with its onset year: SSP draws 229, 610, 1260; vv draws 187 (2024) and
+    610 (2022).
+  - `--no-record-conditioning` gives the v1.1 joint arm, suffixed `_uncond`; `--v1.0` does not condition.
+- **Certified** (`test/identity/run_products.sh`, 24 runs, then `compare_all.sh` against SLR-RFF-BRICK f7942da+):
+  - Ladrillo joint arms: 3 SSP × 71,946 values and 7 vv × 71,964 values, all identical. The row counts are 2,000 minus
+    3 (or 2) dropped draws × 18, so the two codebases dropped the SAME draws.
+  - BRICK 2.0: 10 × 36,000 identical.
+  - Panel, posterior predictive, BRICK 2.0 hindcast and the IC residuals: identical.
+- `test/runtests.jl`: 92 / 92, exact.
+- README *Versions* and *Known issues* now describe v1.2 as it is: new vv forcing and the conditioned joint arm. The
+  paper's version label for these numbers is Marcus's call.
+
 ## 2026-10-08j — The vv forcing rebuilds from public inputs (a names-only skeleton replaces the IIASA template); an absent input no longer blocks the build
 
 Follows 696a603 (the vv files re-imported on the published Zenodo emissions). Closes items 1, 2, 5 and 6 of the

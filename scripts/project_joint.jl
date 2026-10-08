@@ -42,15 +42,23 @@ const PALEO = Symbol(arg("--paleo=", V10 ? "v1" : String(Ladrillo.PALEO_ASSIGNME
 PALEO in Ladrillo.PALEO_ASSIGNMENTS || error("--paleo must be one of $(Ladrillo.PALEO_ASSIGNMENTS)")
 const ANCHOR = Symbol(arg("--lws-anchor=", V10 ? "v1_step" : String(Ladrillo.LWS_OBS_ANCHOR)))
 ANCHOR in Ladrillo.LWS_OBS_ANCHORS || error("--lws-anchor must be one of $(Ladrillo.LWS_OBS_ANCHORS)")
+## RECORD CONDITIONING (v1.2; Marcus 2026-10-08 "own-config, drop", the research driver's rule): the joint arm drops
+## every draw whose Antarctic fast dynamics fire by record_end() on the GMST it actually runs with (its own spliced
+## config). That is exact rejection = the calibration likelihood's own weighting (CHANGELOG 2026-10-08d). The fixed arm
+## (mean climate, on which no projection row crosses) keeps every draw. OFF under --v1.0 (v1.0 did not condition) and
+## with --no-record-conditioning (the v1.1 joint arm), which writes "_uncond" names.
+const RECORD_CONDITION = !V10 && !("--no-record-conditioning" in ARGS)
 const SFX = (TAP ? "" : "_notap") * (PALEO === Ladrillo.PALEO_ASSIGNMENT ? "" : "_paleo$(PALEO)") *
-            (ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)")
+            (ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)") *
+            (RECORD_CONDITION || V10 ? "" : "_uncond")
 
 SCENARIO in Ladrillo.SCENARIOS || error("no shipped forcing for '$SCENARIO'; have $(Ladrillo.SCENARIOS)")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_joint.jl | scenario $SCENARIO | " *
     "FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, spliced at $(Ladrillo.SPLICE_YEAR) | draws rows $(ROWS) " *
     "(paleo $(PALEO === :v1 ? "v1, blocks of $PALEO_BLOCK" : "single assignment over 10000"), seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
-    ":observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-$(Ladrillo.REF_PERIOD[2]) | " *
+    ":observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-$(Ladrillo.REF_PERIOD[2]) | record conditioning " *
+    "$(RECORD_CONDITION ? "ON (joint draws firing by $(Ladrillo.record_end()) on their own config dropped)" : "OFF") | " *
     "julia $(VERSION)"
 
 post = PALEO === :v1 ? posterior(rows = ROWS, paleo = :v1, paleo_block = PALEO_BLOCK) : posterior(rows = ROWS)
@@ -80,6 +88,9 @@ for (n, j) in enumerate(unique(ASSIGN))
     n % 100 == 0 && (@printf("  %d configs\n", n); flush(stdout))
 end
 yi(y) = findfirst(==(y), YEARS)
+const ONSET = [Ladrillo.fastdyn_onset_year(post[k, :], splice(G[:, ASSIGN[k]], mg, yrs), YEARS) for k in 1:NDRAW]
+const JKEEP = RECORD_CONDITION ? findall(>(Ladrillo.record_end()), ONSET) : collect(1:NDRAW)
+const JSTAT = Dict(c => JOINT[c][JKEEP, :] for c in COMPONENTS)    # every STATISTIC of the joint arm uses this
 
 ## ---- gates -------------------------------------------------------------------------------------------------------
 gates = DataFrame(gate = String[], key = String[], value = Float64[], verdict = String[])
@@ -102,6 +113,13 @@ for (arm, R) in (("fixed", FIXED), ("joint", JOINT))
     w = maximum(maximum(abs.(sum(R[c][:, yi(H)] for c in SUM_PARTS) .- R[:total][:, yi(H)])) for H in HORIZONS)
     push!(gates, ("SUM", "$(arm)_max_cm", w, w < SUM_TOL_CM ? "PASS" : "FAIL"))
 end
+## [RECORD-CONDITIONING] what was dropped, and why (onset year per rejected draw).
+let ncross = count(<=(Ladrillo.record_end()), ONSET), drop = setdiff(1:NDRAW, JKEEP)
+    push!(gates, ("RECORD-CONDITIONING", "record_end", Float64(Ladrillo.record_end()), "measured"))
+    push!(gates, ("RECORD-CONDITIONING", "joint_draws_firing_by_record_end", Float64(ncross), "measured"))
+    push!(gates, ("RECORD-CONDITIONING", "joint_draws_dropped", Float64(length(drop)), RECORD_CONDITION ? "ON" : "OFF"))
+    for k in drop; push!(gates, ("REJECTED", "draw_$(k)_cfg_$(cfg[ASSIGN[k]])", Float64(ONSET[k]), "onset_year")); end
+end
 gates.provenance .= PROVENANCE
 for r in eachrow(gates); @printf("  [%s] %-32s %.3e  %s\n", r.gate, r.key, r.value, r.verdict); end
 any(==("FAIL"), gates.verdict) && error("a gate FAILED; outputs not written")
@@ -109,18 +127,19 @@ any(==("FAIL"), gates.verdict) && error("a gate FAILED; outputs not written")
 ## ---- outputs -----------------------------------------------------------------------------------------------------
 cells = DataFrame(scenario = String[], component = String[], horizon = Int[], arm = String[], n_draws = Int[],
                   med_cm = Float64[], mean_cm = Float64[], p05_cm = Float64[], p95_cm = Float64[])
-for c in COMPONENTS, H in HORIZONS, (arm, A) in (("fixed", FIXED[c]), ("joint", JOINT[c]))
+for c in COMPONENTS, H in HORIZONS, (arm, A) in (("fixed", FIXED[c]), ("joint", JSTAT[c]))
     v = A[:, yi(H)]
     push!(cells, (SCENARIO, String(c), H, arm, length(v), median(v), mean(v), quantile(v, 0.05), quantile(v, 0.95)))
 end
 draws = DataFrame(draw = Int[], config = String[], component = String[], horizon = Int[], arm = String[],
                   value_cm = Float64[])
-for c in COMPONENTS, H in HORIZONS, (arm, A) in (("fixed", FIXED[c]), ("joint", JOINT[c])), k in 1:NDRAW
+for c in COMPONENTS, H in HORIZONS, (arm, A) in (("fixed", FIXED[c]), ("joint", JOINT[c])),
+    k in (arm == "joint" ? JKEEP : 1:NDRAW)          # rejected joint draws are not written: conditioning DELETES them
     push!(draws, (k, cfg[ASSIGN[k]], String(c), H, arm, A[k, yi(H)]))
 end
 paths = DataFrame(year = Int[], component = String[], arm = String[], med_cm = Float64[], p05_cm = Float64[],
                   p95_cm = Float64[])
-for c in COMPONENTS, (arm, A) in (("fixed", FIXED[c]), ("joint", JOINT[c])), (i, y) in enumerate(YEARS)
+for c in COMPONENTS, (arm, A) in (("fixed", FIXED[c]), ("joint", JSTAT[c])), (i, y) in enumerate(YEARS)
     y < REPORT0 && continue
     v = A[:, i]
     push!(paths, (y, String(c), arm, median(v), quantile(v, 0.05), quantile(v, 0.95)))

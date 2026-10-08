@@ -168,15 +168,23 @@ tools/               data import, test-reference builder, BRICK 2.0 fetch; forci
   and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
 - `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
 
-**v1.2** (in development, `1.2.0-DEV`). Adds an OPT-IN conditioning of the propagated paleo draws on the record; the
-defaults, and every v1.1 product, are unchanged. `v1.1.0` is tagged.
+**v1.2** (in development, `1.2.0-DEV`). Two changes since `v1.1.0` (tagged), both made in the research code first and
+certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
+- **The van Vuuren forcing** (`data/forcing/*vv*`) is built from the PUBLISHED Zenodo v1.1.1 scenario. v1.1's files put
+  the published post-2100 extension on the 2100 level of an earlier, gated prerelease; for Medium-to-Low that left the
+  CO2 tail 10.5 GtCO2/yr low for two centuries. The SSP forcing is unchanged.
+- **The joint-climate arm is conditioned on the record by default**: `scripts/project_joint.jl` drops every draw whose
+  Antarctic fast dynamics fires by `record_end()` on its OWN paired FaIR config (3 of the 2,000 SSP draws, 2 of the
+  van Vuuren). That is exact rejection, the same as the calibration likelihood's own weighting.
+  `--no-record-conditioning` restores the v1.1 joint arm (outputs suffixed `_uncond`); `--v1.0` does not condition.
+  The fixed-climate products are unchanged: on the mean climate no projection row crosses.
 - `posterior(; drop_record_crossings=true)` drops the draws whose Antarctic fast dynamics fires by the end of the
   Antarctic record (`record_end()`, 2025) on the calibration's own climate. That is rejection sampling, i.e. exact
   conditioning of the joint (posterior x paleo) draws on "no fast dynamics through 2025". It drops 3 of the 10,000 draws
   (`record_last_year=2026`: 4), none of them among the 2,000 projection rows.
-- That tests ONE climate. In the joint-climate arm each draw runs on its own FaIR config, and more draws cross there
-  (see *Known issues*). Condition such a run on each pair's own GMST with `fastdyn_onset_year(row, gmst, years)`, after
-  pairing: the arm pairs draws with configs by position.
+- `posterior(; drop_record_crossings=true)` tests ONE climate. In the joint-climate arm each draw runs on its own FaIR
+  config, and more draws cross there; `scripts/project_joint.jl` therefore tests each pair on its own GMST with
+  `fastdyn_onset_year(row, gmst, years)`, AFTER pairing (the arm pairs draws with configs by position).
 - `fastdyn_onset_year` is the model's own trigger with the model's arithmetic. `test/conditioning/check_record_crossing.jl`
   checks it against model runs (10,000 draws on the record climate, 2,000 joint draws) and at the threshold to 1 ulp,
   and is mutation-tested. `scripts/record_crossings.jl` lists the onset year of every projection draw in each climate.
@@ -191,7 +199,9 @@ defaults, and every v1.1 product, are unchanged. `v1.1.0` is tagged.
     projection draws fire by 2025 under each SSP (2 under each van Vuuren marker), and 7-8 (5) by 2026; on the mean
     climate, none.
   - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
-  - v1.1 (and the paper) does not condition on the record; v1.2 offers it as an option (*Versions*).
+  - v1.1 does not condition on the record. v1.2 conditions the joint-climate arm by default and offers the
+    calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper's label for the
+    conditioned numbers is still to be decided.
 
 ## License
 
