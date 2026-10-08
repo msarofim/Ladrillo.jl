@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-10-08i — The suite FAILED from a fresh GitHub clone (90 / 1 fail); the BRICK 2.0 posterior's MANIFEST row now skips when absent
+
+**Found** by the fresh-clone test FROM GITHUB (README's literal `git clone`, empty `JULIA_DEPOT_PATH`):
+- `Pkg.instantiate()`: 3 min 18 s, every dependency downloaded and precompiled from scratch, MimiBRICK from its
+  `v2.0.0` tag. ⚠ `Pkg.status()` prints MimiBRICK as
+  `v1.2.0-dev`: that is the version field in MimiBRICK v2.0.0's own Project.toml, not a wrong pin.
+- Quick start: runs, 10,000 draws, 451 years.
+- `test/runtests.jl` and `Pkg.test()`: **90 passed, 1 FAILED, 1 broken**. The failure was the data-MANIFEST check on
+  `brick20/parameters_subsample_brick.csv`, which ruling 6 says is fetched, not shipped, so EVERY fresh clone lacks it.
+  The 92 / 92 of 10-08e/g ran only in Marcus's checkout, which has the file; so did the "Pkg.test() also passes" check.
+  The README's "from a fresh clone; nothing outside this repository is needed" was false.
+
+**Fix (Marcus: skip-if-absent):** `FETCHED_DATA` in `test/runtests.jl` names that row, derived from
+`Ladrillo.BRICK20_FILE`. It is checked when the file is present and recorded as `@test_skip` when it is absent, as
+the BRICK 2.0 testset already is. The README's Validation section says so.
+
+**Checked on three frozen copies of the fixed tree:**
+
+| state | result |
+|---|---|
+| file absent | 90 pass, 2 broken, exit 0 |
+| file present, correct | 92 / 92, exit 0 |
+| file present, one digit changed (byte 498) | **MANIFEST check FAILS**, exit 1 |
+
+⚠ In the third state the BRICK 2.0 comparison still PASSES. The changed digit is in row 1, which IS sampled (rows
+1:10:10000), but in column `sd_glaciers`, a likelihood noise parameter that never enters a model run. (First guess, that
+the row was unsampled, was checked and was wrong.) For the noise columns, and for the 9,000 unsampled rows, the checksum
+is the only guard.
+
 ## 2026-10-08h — Private GitHub repo `msarofim/Ladrillo.jl` created; `main` and tags `v1.0.0`, `v1.1.0` pushed
 
 Per the 10-07 ruling: Claude creates the repo PRIVATE; Marcus makes it public and adds Tony. Name confirmed by Marcus

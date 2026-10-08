@@ -102,7 +102,9 @@ NumPy and pandas is available).
   A one-ulp change to a live parameter fails it.
 - **Elsewhere, including `Pkg.test()`, which forces `--check-bounds=yes`,** values must agree to a relative 1e-12. The
   last bits can move with code generation: 1.7e-15 measured under bounds checking.
-- **BRICK 2.0** is compared only once its posterior is in place (see *BRICK 2.0 posterior* below).
+- **BRICK 2.0** is compared only once its posterior is in place (see *BRICK 2.0 posterior* below), and so is that
+  file's checksum. Until then a fresh clone reports those two checks as skipped (Julia's Test prints them as "Broken");
+  a fetched file whose checksum is wrong fails.
 
 `test/identity/` holds the gate that certified this package against the research code that produced the paper:
 every component, every year and every draw must be bit-identical (`==`), on the full 10,000-draw posterior and on

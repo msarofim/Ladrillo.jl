@@ -16,7 +16,8 @@
 # the coverage counts unchanged). A threshold draw (fast dynamics, the Greenland tap) can in principle turn such a
 # difference into a large one; that FAILS, as it should. Portable mode cannot see a 1-ulp mutation; only the exact run can.
 #
-# The BRICK 2.0 comparison runs only if its posterior has been fetched (tools/fetch_brick20_posterior.sh).
+# The BRICK 2.0 comparison runs only if its posterior has been fetched (tools/fetch_brick20_posterior.sh), and so does
+# that file's row of the data/MANIFEST.csv check (FETCHED_DATA). Without it a fresh clone reports 2 skipped ("Broken").
 #
 # Tables A1/A2 (python/tables/) run only if a Python with NumPy and pandas is found: LADRILLO_PYTHON, else
 # ~/climate-env/bin/python, else python3 on the PATH. Their numbers are compared exactly on the PINNED runtime
@@ -36,6 +37,8 @@ const SCENARIOS = ("ssp245", "ssp585")
 const PROJ_ROWS = 1:5:10000            # the Ladrillo joint arm's posterior rows (scripts/project_joint.jl)
 const PAIR_SEED = 2026                 # scripts/project_joint.jl, scripts/brick20_joint.jl
 const BRICK20_NDRAW = 1000             # scripts/brick20_joint.jl
+"""data/MANIFEST.csv rows that are fetched, not shipped: checked when present, skipped when absent (a wrong file FAILS)."""
+const FETCHED_DATA = (join(Ladrillo.BRICK20_FILE, "/"),)
 const COMPS = (:glaciers, :gis, :ais, :te, :lws, :total)
 const SUM_PARTS = (:glaciers, :gis, :ais, :te, :lws)
 const SUM_TOL_CM = 1e-6                # scripts/project_joint.jl [SUM]: an identity up to re-referencing float noise
@@ -91,7 +94,12 @@ end
     man = CSV.read(joinpath(ROOT, "data", "MANIFEST.csv"), DataFrame)
     for r in eachrow(man)
         p = joinpath(ROOT, "data", r.file)
-        @test isfile(p) && bytes2hex(open(sha256, p)) == r.sha256
+        if r.file in FETCHED_DATA && !isfile(p)
+            @info "$(r.file) not fetched (tools/fetch_brick20_posterior.sh): skipping its MANIFEST check"
+            @test_skip false
+        else
+            @test isfile(p) && bytes2hex(open(sha256, p)) == r.sha256
+        end
     end
 end
 
