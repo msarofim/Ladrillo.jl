@@ -25,7 +25,7 @@ the paper, is the git tag `v1.0.0`, and both of its behaviours remain reachable 
 Julia 1.12 (tested on 1.12.6).
 
 ```bash
-git clone <this repository> Ladrillo && cd Ladrillo
+git clone https://github.com/msarofim/Ladrillo.jl.git Ladrillo && cd Ladrillo
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 ```
 

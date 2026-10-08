@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-10-08h — Private GitHub repo `msarofim/Ladrillo.jl` created; `main` and tags `v1.0.0`, `v1.1.0` pushed
+
+Per the 10-07 ruling: Claude creates the repo PRIVATE; Marcus makes it public and adds Tony. Name confirmed by Marcus
+(`Ladrillo.jl`, the Julia convention).
+- **Pre-push checks** (the repo will later be public, so they were run as a publication review):
+  - working tree clean at 08a9b99; refs are `main` and the two tags only; no stash;
+  - no path ever committed is absent from HEAD, so the 10-07 purge of the BRICK 2.0 posterior left nothing behind;
+  - no `/Users/`, scratch, HPC, email or token strings in any tracked file or in any added line of history;
+  - `test/runtests.jl`: 92 / 92, EXACT, 2 min 06 s.
+- **Commit identity.** All 15 commits are authored `Marcus Sarofim <MarcusMarcus@MacBook-Pro-2.local>`, because the
+  repo had no `user.email`. GitHub cannot link that address to the account.
+  - Marcus: keep the history as it is (a rewrite would change every SHA, including both tags, and both repos'
+    CHANGELOGs, the notes and memory cite them).
+  - New commits use the repo-local identity `Marcus C. Sarofim <msarofim@users.noreply.github.com>`.
+- **Remote:** tags resolve to v1.0.0 = a2bb3b0 and v1.1.0 = 78b03c6, as certified.
+- `CITATION.cff` gains `repository-code`; the README's Install section gets the clone URL. Both 404 for anyone
+  else until the repo is public.
+
+**Before the repo is made PUBLIC** (a delegated read of all 22 `tools/forcing/` files plus the three other `tools/`
+scripts; the rebuildability claim was re-checked here). None of these blocks the private push:
+1. ⛔ **The 28 shipped `data/forcing/*vv*` files derive from the gated IIASA `scenariomip-2026-prerelease`**, whose
+   redistribution terms are not established. They are DATA in the repo, not just a missing input. Options: clear it
+   with IIASA, wait for the final public ScenarioMIP release, or rebuild on Zenodo 20713982 (changes numbers; the
+   `zenodo` variant still reads the step-5 template, which itself needs the IIASA file).
+2. **The forcing README overstates what a reviewer can rebuild.** The 10-08b handoff said a reviewer could rebuild
+   the SSP and calibration forcing. Through `build_forcing.py` they can rebuild NONE of the 43 files:
+   - `build_forcing.py` calls `fi.verify()` over all 15 inputs whatever `--stages` says, and stops on any failure;
+   - `build_emissions_v160_ssp245.py` requires `--ar6-file` unconditionally, so `ssp245harm` (the calibration driver)
+     needs the Rennels file, not only its post-2100 tail.
+   The 13 SSP files that need only public inputs can be rebuilt by running steps 1, 2, 4, 9 and 11 by hand. Fix:
+   verify only the inputs the requested stages read, or say so in the README.
+3. The EDF / Rennels AR6 file has no recorded public origin or licence.
+4. Licences now checked through the APIs: Zenodo 18828694 is CC-BY-4.0 (attribution required); Zenodo 20713982 and
+   both chrisroadmap repos are MIT; RCMIP is unchecked. The chrisroadmap `fair-calibrate` URL points at the moving
+   `main` branch; pin it to a commit. Nothing has been downloaded and compared against `inputs.sha256` yet.
+5. Internal references to trim: memory and skill names, the branch names `heat-ed-morbidity` and
+   `claude/calib160-migration`, session ids, private handoff paths, the "NCC revision / submitted version" lines in
+   `build_vanvuuren_extended_splice.py`, "on Marcus's machine" / `~/Documents/...` paths in the forcing README,
+   `build_forcing.py`, `check_forcing_identity.py`, `forcing_inputs.py` and `import_l27_data.py`, and the
+   collaborator-status lines in `fetch_brick20_posterior.sh` and `import_l27_data.py`.
+6. Stale `scripts/...` paths in five forcing builders (the files now live in `tools/forcing/`). Two are written into a
+   generated README; none reaches a forcing CSV, so correcting them is safe.
+7. `test/runtests.jl` defaults to `~/climate-env` for Python, and `requirements-forcing.txt` names it too.
+8. Unchanged from 10-08: the BRICK 2.0 posterior has no public URL.
+
 ## 2026-10-08g — Tables A1 and A2 ported (`python/tables/`); the test suite gains them (92 checks)
 
 Ported by a delegated agent and verified here.
