@@ -1,5 +1,52 @@
 # Changelog
 
+## 2026-10-08d — Likelihood weights for the record-crossing draws: the record rejects every onset through 2025
+
+**Asked (Marcus 10-08):** run the likelihood-weighting test on the crossing draws, in place of a hard cutoff at the
+record end.
+
+**Method** (`scripts/record_likelihood_weights.jl`):
+- L27 was sampled with λ and T_crit at their paleo medians, and the propagated pair is attached afterwards. So the
+  posterior conditioned on the record is reached exactly by importance weights,
+  w = L(θ, λ_i, T_crit,i) / L(θ, λ_med, T_crit,med).
+- Only the Antarctic level term can move: the SMB anchor is a 1979–2008 mean, before any onset. So
+  log w = log L_ais(fast dynamics on) − log L_ais(T_crit = +∞).
+- The likelihood is the calibrator's own (`hetero_logl_ar1`, L27's `--obs-corr-len=100`, target 1900–2025), with each
+  draw's `sd_ais` and `rho_ais`.
+
+**Gates (PASS):**
+- [RESID]: the on-residuals equal the Table 5 residual file (gate-4 identical to the research code) for all 10,000
+  draws.
+- [W=1]: all 9,996 non-firing draws have identical on and off residuals, so w = 1 exactly.
+- The comparator has power: the 4 firing draws do differ.
+
+**Calibration climate (the posterior's own importance weights):**
+
+| file row | onset | excess AIS 2025 | Δ log L | w |
+|---|---|---|---|---|
+| 9713 | 2021 | 1.33 cm | −802 | 0 |
+| 4618 | 2025 | 0.63 cm | −397 | 6e-173 |
+| 4588 | 2025 | 0.20 cm | −46.2 | 9e-21 |
+| 4182 | 2026 | 0 | 0 | 1 exactly (after the record) |
+
+- **Pre-check for 4588:** a 0.20 cm jump against an innovation sd of 0.023 cm is 8.6 sd, so Δ log L ≈ −37. The
+  measured −46 agrees.
+- **So the likelihood reproduces `record_end()` as the cutoff:** an onset by 2025 is rejected, and an onset in 2026 is
+  untouched. `posterior(; drop_record_crossings=true)` at its default is the likelihood-weighted posterior, up to weights
+  ≤ 1e-20.
+
+**Joint arm (each pair on its own spliced config, the same ratio; a flagged choice):**
+- All 3 SSP pairs and both vv pairs that fire by 2025 have Δ log L between −609 and −1703 (excess 1.1–2.3 cm).
+- Every 2026 onset gets w = 1.
+
+**Noise-model sensitivity (reported, not used):**
+- The band collapses from 0.091 cm (2014–18) to the 0.05 cm floor at the 2019 GRACE-FO splice, and a correlated band
+  (L = 100) cannot absorb a one-year jump. Three lenient models: diagonal band; diagonal band widened to its 2014–18
+  level; diagonal band tripled.
+- Under them, row 4588 gets w = 4e-4 / 0.05 / 0.35. Its rejection is therefore a property of L27's error model.
+- Every other crossing, including all five joint pairs, is rejected under all three (w ≤ 2e-14).
+- 4588 is not a projection row, so the paper's joint arm is the same under every variant.
+
 ## 2026-10-08c — v1.2-DEV: opt-in conditioning of the paleo draws on the record; v1.1.0 tagged
 
 **Ruling (Marcus 10-08, decision 2 of SLR-RFF-BRICK handoff 2026-10-08):** no change to the paper's method or numbers.
