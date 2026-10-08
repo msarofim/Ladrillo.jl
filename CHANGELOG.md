@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-08f — The FaIR forcing builders ported (`tools/forcing/`): all 43 shipped forcing files rebuild byte-for-byte
+
+**Item 3** (Marcus: "3, 5, and 6 should be done first"). Ported from the private FaIRtoFrEDI @ 8984a13 by a delegated
+agent and verified here.
+- **Contents:** the calibration setup, the emissions builders, the mean / cube / spliced / van Vuuren cube builders,
+  and two van Vuuren upstream splice builders the chain needed. Only the I/O plumbing changed; the numerical code is
+  copied, and the diff against the originals is plumbing and docstrings.
+- **Entry and gates:**
+  - Entry point: `build_forcing.py --work-dir W {--fairtofredi-root R | --inputs-dir I} [--jobs N]`. It writes
+    `data/forcing/` only with `--install`.
+  - Every input is checked against `inputs.sha256`; nothing is ever downloaded mid-build. `fetch_inputs.py` holds the
+    download code.
+  - `check_forcing_identity.py` is the gate.
+- **Verified independently in this session:**
+  - a fresh rebuild (55 s, `--jobs 3`) → 43 of 43 PASS in the gate;
+  - a separate `shasum -a 256` comparison of every rebuilt file with `data/forcing/` → 0 differ.
+  - The agent reports four rebuilds (`--jobs 1/3`, both input layouts) all byte-identical, every intermediate
+    byte-identical to the research copies, and the gate self-test passing.
+- **Mutation:**
+  - the calibration forcing with the obvious `calibration_v160 --marker none` → GMST FAIL (−0.030 K at 2024, max
+    0.037 K), matching memory `l24_forcing_rebuild_command`;
+  - vvM with `--stochastic on` → FAIL.
+- **⛔ Two inputs are NOT public:**
+  - The IIASA `scenariomip-2026-prerelease` harmonized + infilled emissions (gated login, redistribution not
+    established) feed ALL 28 van Vuuren files, 2023–2100.
+    - Checked as a substitute: the public Zenodo 20713982 v1.1.1 `emissions_1750-2500.csv` is NOT one. Only 14,196 of
+      the IIASA file's 30,030 rows match by species name (CO2 is split differently), only 18% of those are equal, and
+      minor gases differ by up to 4× at 2100.
+  - The EDF / Rennels `AR6_emissions_ssp245_1750_2300.csv` (no licence recorded) shapes ssp245harm after 2100 only,
+    outside the calibration window.
+  - The build stops at its input check without them. Marcus decides.
+- `calibration_v160_prod/` (research-only, no LICENCE) is no longer an input: the setup steps regenerate it
+  byte-identically from Zenodo 18828694.
+
 ## 2026-10-08e — A self-contained test suite; Julia compat 1.12; CITATION 1.1.0; the BRICK 2.0 URL question
 
 **`test/runtests.jl`** (Marcus: "3, 5, and 6 should be done first"). It runs from a fresh clone, with no research repo.
