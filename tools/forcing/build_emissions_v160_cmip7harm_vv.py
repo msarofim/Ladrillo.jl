@@ -52,11 +52,28 @@ multiplicative scale = hist(2023.5) / vv(2023.5). Identical in form to
 year-on-year step across the join is preserved to float64 (`MAX_JOIN_STEP_RESIDUAL`).
 
 The input is the ALREADY-SPLICED marker file, not the raw IIASA/Zenodo sources,
-so the post-2100 extension convention (`build_vanvuuren_extended_splice.py`:
-additive for the sign-crossing CO2 species, multiplicative for the rest) is
-inherited UNCHANGED and this script adds exactly one join, at the front. The
-front scale is a positive number within a few percent of 1 for every species, so
-it is sign-safe on CO2 FFI and CO2 AFOLU where they cross zero after 2100.
+and this script adds exactly one join, at the front. The front scale is
+non-negative for every species, so it is sign-safe on CO2 FFI and CO2 AFOLU where
+they cross zero after 2100 (zenodo: x1.0014 and x1.0000).
+
+⛔ THE DEFAULT VARIANT IS `zenodo` SINCE 2026-10-08 (Marcus: "go with b").
+Until then it was `harmonized`: the IIASA prerelease to 2100, then the published
+extension ADDED to the prerelease 2100 level for CO2
+(`ours(2100) + [ext(t) - ext(2100)]`). That is exact only where the prerelease
+and the published Zenodo v1.1.1 file agree at 2100, which was verified for H
+only. Medium-to-Low was revised before publication: its CO2 at 2100 is -9.23
+GtCO2/yr in the prerelease and +1.26 published. So the `harmonized` ML tail sat
+10.49 GtCO2/yr low for 200 years: -2,098 GtCO2 of removal not in the scenario,
+CO2 below pre-industrial by 2300, and 0.73 K too cold at 2300 (L -167 and LN
+-112 GtCO2; H, HL, M and VL within 27). Measured in SLR-RFF-BRICK
+`python/diag_vv_zenodo_ab/` (CHANGELOG 2026-10-08j). The continuity gate could
+not see it: continuity at 2100 held BY CONSTRUCTION.
+`zenodo` takes the WHOLE scenario period 2024.5-2300.5 from the published file,
+so there is no 2100 join at all. Its history vintage differs from the 1.6.0
+record (ozone-depleting gases 5-25% lower), so the front scale is no longer the
+identity; that choice (b: keep the 1.6.0 history, scale the future) was measured
+against (a: take Zenodo's own history) on ML at <= 0.009 K. See
+SCALE_DEVIATION_OVERRIDE for the three gases whose scale leaves the 25% band.
 
 THE ALTERNATIVE WE DID NOT TAKE, AND WHY IT IS STILL USEFUL
 -----------------------------------------------------------
@@ -99,10 +116,12 @@ SCEN_PREFIX = "vv"                  # output key = SCEN_PREFIX + MARKER, e.g. vv
 HIST_FILE = None             # set from --hist-file in main()
 SPLICED_EXT_ROOT = None      # set from --spliced-ext-root in main()
 
-# ── THE POST-2100 TAIL VARIANT, AND HOW IT REACHES THE FILENAME ─────────────
-# The spliced_ext_* variants differ ONLY after 2100.5; the front rescale this
-# script applies is the identity to ~1e-8, so the history basis and the tail
-# choice are independent axes. Both must be readable from the filename, or two
+# ── THE SCENARIO VARIANT, AND HOW IT REACHES THE FILENAME ─────────────────────
+# `harmonized` and `native` share the IIASA prerelease 2024-2100 and differ only
+# after 2100.5; `zenodo` is the published file over the whole 2024.5-2300.5. For
+# the prerelease variants the front rescale is the identity to ~1e-8; for
+# `zenodo` it is not (see SCALE_DEVIATION_OVERRIDE). The history basis and the
+# variant are independent axes. Both must be readable from the filename, or two
 # different objects collide at one path.
 #   DEFAULT_VARIANT  -> emissions_v160_cmip7harm_vv<MARKER>.csv
 #   any other        -> emissions_v160_cmip7harm_<variant>_vv<MARKER>.csv
@@ -115,7 +134,7 @@ SPLICED_EXT_ROOT = None      # set from --spliced-ext-root in main()
 # match (checked with fnmatch, 2026-10-02). An earlier version of this comment
 # claimed the opposite -- that a second variant would make resolve_marker() match
 # two files per marker and exit. It would not; it is simply ignored.
-DEFAULT_VARIANT = "harmonized"      # the tail convention the cube drivers use
+DEFAULT_VARIANT = "zenodo"          # the cube drivers' basis since 2026-10-08 (was "harmonized"; see docstring)
 VARIANTS = ("harmonized", "zenodo", "native")
 
 HIST_LAST_YEAR_INT = 2023           # CMIP7 history ends here = the join anchor
@@ -128,6 +147,19 @@ MAX_JOIN_STEP_RESIDUAL = 1e-9
 # of the same world. A species moving more than this is a unit or definition
 # mismatch, not a reconstruction difference -- stop rather than scale it.
 MAX_ABS_SCALE_DEVIATION = 0.25
+# MEASURED exceptions, not loosened tolerances (2026-10-08; memory
+# `zenodo_vv_history_vintage`). The Zenodo v1.1.1 file carries its OWN history
+# vintage, and for these gases the two reconstructions genuinely differ by more
+# than 25% at 2023 -- not a unit error (a unit error is x1000):
+#   CCl4        x1.257  Zenodo's history runs 10-22% below the 1.6.0 record in
+#                       every decade since 1960, so 2023 is not an outlier
+#   CFC-115     x0.181  near zero and noisy; BOTH records hold 0 in 2021-2022
+#                       and a non-zero 2023 (a data oddity in both)
+#   Halon-2402  x0      the 1.6.0 record has 0 in 2023, so the scale zeroes the
+#                       future (published 2023: 0.28 kt/yr)
+# Each value is the largest |scale - 1| the species may take; it applies to every
+# variant, and every other species keeps MAX_ABS_SCALE_DEVIATION.
+SCALE_DEVIATION_OVERRIDE = {"CCl4": 0.30, "CFC-115": 0.85, "Halon-2402": 1.0}
 
 # Declared, not parsed out of the prose scenario name: "High-to-Low - SSP5
 # (Marker)" -> HL is a READING, and a reading belongs in a constant a human can
@@ -203,9 +235,10 @@ def build_one(marker, path, scen, dfh, ycols, hist_cols):
         h = dfh.loc[sp, ycols].to_numpy(float)
         h_a, v_a = float(h[-1]), float(dv.loc[sp, a_col])
         scale = (h_a / v_a) if abs(v_a) > 1e-12 else (1.0 if abs(h_a) < 1e-12 else 0.0)
-        if abs(scale - 1.0) > MAX_ABS_SCALE_DEVIATION:
+        band = SCALE_DEVIATION_OVERRIDE.get(sp, MAX_ABS_SCALE_DEVIATION)
+        if abs(scale - 1.0) > band:
             sys.exit(f"ERROR: {sp} needs a x{scale:.4f} front rescale, beyond the "
-                     f"{MAX_ABS_SCALE_DEVIATION:.0%} band two reconstructions of the "
+                     f"{band:.0%} band two reconstructions of the "
                      f"same history should differ by. Suspect units or a definition "
                      f"change, not a reconstruction difference.")
         scales[sp] = scale
@@ -305,6 +338,9 @@ def main():
         dest = (args.out_dir
                 / f"emissions_v160_{BASIS_SLUG}_{vtag}{SCEN_PREFIX}{m}.csv")
         out.to_csv(dest, index=False)
+        # The variant travels WITH the file (a CSV comment would break fill_from_csv), so the cube
+        # driver's provenance is read off what was built, not asserted from today's default.
+        dest.with_suffix(".variant").write_text(args.variant + "\n")
         s = pd.Series(scales)
         print(f"\n  {m} ({scen}): {out.shape[0]} species x "
               f"{len(hist_cols) + n_fut} timepoints "

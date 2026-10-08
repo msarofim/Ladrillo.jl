@@ -87,6 +87,15 @@ CALIB_VERSION = "1.6.0"
 MODEL_LABEL = "FaIR 2.2.4"
 SCEN_PREFIX = "vv"              # scenario key = SCEN_PREFIX + MARKER, e.g. "vvH"
 
+# What each emissions variant's SCENARIO period is, for the provenance string. The variant is read from the
+# `.variant` file build_emissions_v160_cmip7harm_vv.py writes beside each CSV (since 2026-10-08), not assumed.
+VARIANT_LABEL = {
+    "zenodo": "scenario 2024-2300 = the published Zenodo 20713982 v1.1.1 file, truncated at 2300",
+    "harmonized": ("SUPERSEDED: IIASA prerelease 2024-2100 + the Zenodo 20713982 v1.1.1 extension ADDED at the "
+                   "prerelease 2100 level (post-2100 CO2 offset; ML -2,098 GtCO2)"),
+    "native": "IIASA prerelease 2024-2100 + the Zenodo 20713982 v1.1.1 extension verbatim after 2100",
+}
+
 CAL_DIR = None                  # set from --calib-dir in main()
 
 # ── THE EMISSIONS BASIS IS NOW A CHOICE, AND THE DEFAULT CHANGED 2026-10-02 ──
@@ -234,10 +243,17 @@ def main():
     # from the emissions filename by fair_basis.classify_basis, so changing the
     # input changes the label by construction.
     decl = declare(species, properties, forcing_file, df_configs)
+    vfile = emis.with_suffix(".variant")
+    if args.legacy_basis:
+        vlabel = "legacy spliced_ext_harmonized file (Smith history; superseded)"
+    elif vfile.exists():
+        vlabel = VARIANT_LABEL[vfile.read_text().strip()]
+    else:
+        sys.exit(f"ERROR: {vfile.name} missing: rebuild {emis.name} with "
+                 f"build_emissions_v160_cmip7harm_vv.py so its variant is recorded")
     provenance = (
         f"{MODEL_LABEL} (calib {CALIB_VERSION}); van Vuuren ScenarioMIP-CMIP7 "
-        f"{scen_name}; {basis.text}; published post-2100 extension "
-        f"(Zenodo 20713982 v1.1.1), truncated at 2300; prescribed "
+        f"{scen_name}; {basis.text}; {vlabel}; prescribed "
         f"land use + irrigation from its OWN CMIP7 marker {marker} (exact, not "
         f"mapped); {decl.text}; stochastic_run={stoch}; anomaly vs "
         f"{BASELINE_START}-{BASELINE_END}")
