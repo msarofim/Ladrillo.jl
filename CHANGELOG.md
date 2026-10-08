@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-07e — Table 5 ported; identity gate 5 PASS
+
+`python/ic_ladrillo_vs_brick20.py` (Table 5) reproduces the research `ic_ladrillo_vs_brick20_L27{,_rho0.95,_rho0.9}`
+outputs exactly: 3 × 182 table values and 3 × 420,000 per-draw likelihood values
+(`test/identity/compare_ic_table.py`). It runs on 10,000 draws per model, about 40 min per rho bound with 4 workers.
+
+**Comparator power:** a 1-ulp change to one table value, or to one per-draw value, is caught (exactly 1 difference
+each).
+- **Tried and fixed:** the first version parsed with pandas' default float parser. Re-serialising a file through that
+  parser changed 310 other near-zero values (max 4e-25). The parser is not exact, so it could in principle merge two
+  values 1 ulp apart. Both files are now read with `float_precision="round_trip"`. The Julia comparators use CSV.jl,
+  which is exact.
+
+`requirements.txt` pins numpy 2.4.2, pandas 2.3.3 and scipy 1.17.1, the environment the gate ran in. The README gains
+the hindcast and Table 5 reproduction steps and the list of product gates.
+
 ## 2026-10-07d — BRICK 2.0 hindcast and IC residuals ported; shared targets and BRICK 2.0 code moved into src/
 
 **New in `src/`:**

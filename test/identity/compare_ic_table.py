@@ -4,7 +4,8 @@
 
 Compares ic_ladrillo_vs_brick20_L27{sfx}.csv with outputs/tables/ic_ladrillo_vs_brick20{sfx}.csv on every
 (arm, model, series, stat) value, and the _perdraw files on every column, with exact equality on the parsed floats
-(NaN == NaN). `provenance` is excluded: it names the producing script and its inputs, which differ by construction.
+(NaN == NaN), parsed with float_precision="round_trip" (pandas' default parser is not exact and can merge values
+1 ulp apart). `provenance` is excluded: it names the producing script and its inputs, which differ by construction.
 """
 import os
 import sys
@@ -14,15 +15,15 @@ import pandas as pd
 
 RES = os.path.abspath(sys.argv[1])
 RHOS = [float(r) for r in sys.argv[2:]] or [0.99, 0.95, 0.9]
-PKG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "outputs", "tables")
+PKG = os.environ.get("LADRILLO_TABLES") or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "outputs", "tables")
 KEY = ["arm", "model", "series", "stat"]
 
 bad = 0
 for rho in RHOS:
     sfx = "" if rho == 0.99 else f"_rho{rho:g}"
     for kind in ("", "_perdraw"):
-        a = pd.read_csv(os.path.join(RES, f"ic_ladrillo_vs_brick20_L27{sfx}{kind}.csv"))
-        b = pd.read_csv(os.path.join(PKG, f"ic_ladrillo_vs_brick20{sfx}{kind}.csv"))
+        a = pd.read_csv(os.path.join(RES, f"ic_ladrillo_vs_brick20_L27{sfx}{kind}.csv"), float_precision="round_trip")
+        b = pd.read_csv(os.path.join(PKG, f"ic_ladrillo_vs_brick20{sfx}{kind}.csv"), float_precision="round_trip")
         a, b = (d.drop(columns=["provenance"], errors="ignore") for d in (a, b))
         name = f"rho {rho:<5g} {'perdraw' if kind else 'table'}"
         if list(a.columns) != list(b.columns) or len(a) != len(b):

@@ -49,12 +49,28 @@ Components: `:glaciers`, `:gis`, `:ais`, `:te`, `:lws`, `:total`, and the glacie
 |---|---|---|
 | projection with FaIR climate uncertainty (one scenario) | `julia --project=. scripts/project_joint.jl --scenario=ssp245` | ~5 min |
 | BRICK 2.0 on the same climate | `julia --project=. scripts/brick20_joint.jl --scenario=ssp245` | ~1 min |
+| the fixed-climate SSP panel | `julia --project=. scripts/project_fixed.jl` | |
 
 Outputs go to `outputs/projections/`; every file carries a `provenance` column. Scenarios: `ssp126 ssp245 ssp585
 vvVL vvLN vvL vvML vvM vvHL vvH`.
 
-*In progress (v1.0 release): the fixed-climate SSP panel, the posterior predictive hindcast, the calibration, the
-FaIR forcing builders and the figure scripts.*
+## Reproducing the hindcast comparison (Table 5)
+
+Run in this order; each later step checks itself against the earlier ones.
+
+| product | command | runtime |
+|---|---|---|
+| Ladrillo posterior predictive (bands, bias, coverage) | `julia --project=. scripts/posterior_predictive.jl` | ~2 min |
+| BRICK 2.0 hindcast on the same conventions | `julia --project=. scripts/posterior_predictive_brick20.jl` | ~2 min |
+| per-draw residuals of both models, 10,000 draws each | `julia --project=. scripts/ic_hindcast_residuals.jl` | ~5 min |
+| Table 5, the information-criterion test (rho bound 0.99; 0.95 and 0.9 for the sensitivity) | `python python/ic_ladrillo_vs_brick20.py --rho-max=0.99` | |
+
+The Python step needs `pip install -r requirements.txt` (NumPy, pandas, SciPy). `IC_WORKERS` sets its process count.
+
+Outputs go to `outputs/hindcast/` and `outputs/tables/`. Runtimes were measured on an Apple M4 that was busy with other
+jobs; expect them to be shorter.
+
+*In progress (v1.0 release): the calibration, the FaIR forcing builders and the figure scripts.*
 
 ## Validation
 
@@ -65,6 +81,12 @@ the joint-climate arm. The gate is mutation-tested (`test/identity/mutation_test
 and a different paleo-draw assignment are each caught; two mutants on paths that never bind in v1.0 (the glacier
 floor, the Greenland whole-sheet clamp) survive, as they should.
 
+The paper's products are gated the same way, against the research drivers' own output files:
+- `compare_products.jl`: the joint-climate projections on all seven van Vuuren scenarios, both models.
+- `compare_postpred.jl`: the posterior predictive.
+- `compare_hindcast.jl`: the BRICK 2.0 hindcast and the residuals behind Table 5.
+- `compare_ic_table.py`: Table 5 itself.
+
 ## Repository layout
 
 ```
@@ -72,11 +94,12 @@ src/                 the model: components/, land water, posterior, forcing help
 data/posterior/      the v1.0 posterior
 data/drivers/        observed glacier-region and Greenland temperature drivers (HadCRUT5-based)
 data/constants/      fixed constants, the Greenland amplification shape, paleo draws
-data/observations/   the calibration targets
+data/observations/   the calibration targets (and the glacier target with the RGI-19 seam removed)
 data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
 data/brick20/        the BRICK 2.0 comparison posterior
 data/MANIFEST.csv    source file, commit and sha256 of every data file
-scripts/             drivers that produce the paper's products
+scripts/             Julia drivers that produce the paper's products
+python/              the Table 5 information-criterion test
 test/                tests and the identity gate
 tools/               one-time import of the data from the research repository
 ```
