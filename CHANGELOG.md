@@ -29,6 +29,11 @@ the BRICK 2.0 testset already is. The README's Validation section says so.
 the row was unsampled, was checked and was wrong.) For the noise columns, and for the 9,000 unsampled rows, the checksum
 is the only guard.
 
+**Re-run from GitHub at ab55bd2** (a fresh clone, using the depot the empty-depot run built): `test/runtests.jl` gives
+90 pass + 2 broken, exit 0, every comparison EXACT; `Pkg.test()` gives 90 pass + 2 broken, exit 0, in portable mode,
+max relative difference 1.7e-15. Tables A1/A2 used `~/climate-env`'s Python; without NumPy and pandas those checks
+skip as well.
+
 ## 2026-10-08h — Private GitHub repo `msarofim/Ladrillo.jl` created; `main` and tags `v1.0.0`, `v1.1.0` pushed
 
 Per the 10-07 ruling: Claude creates the repo PRIVATE; Marcus makes it public and adds Tony. Name confirmed by Marcus
