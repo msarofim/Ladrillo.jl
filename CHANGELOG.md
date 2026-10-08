@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-10-08c — v1.2-DEV: opt-in conditioning of the paleo draws on the record; v1.1.0 tagged
+
+**Ruling (Marcus 10-08, decision 2 of SLR-RFF-BRICK handoff 2026-10-08):** no change to the paper's method or numbers.
+Conditioning is offered to package users as an OPTION, in v1.2, not v1.1.
+
+**Versioning:** `v1.1.0` tagged at 78b03c6, the commit certified against the research v1.1 outputs. `Project.toml` →
+`1.2.0-DEV`. Defaults are unchanged, so every v1.1 product is unchanged. (`CITATION.cff` still says 1.0.0, a staleness
+that predates this entry; left for the release.)
+
+**Code:**
+- `src/record_crossing.jl`:
+  - `fastdyn_onset_year(row, gmst, years)`: the first year fast dynamics is on. It uses MimiBRICK's trigger,
+    T_ant(t) = (GMST(t−1) − intercept) / coefficient > T_crit, with the arithmetic `apply_draw!` sets up.
+  - `record_end()`: the Antarctic target's last observed year (2025), read from `calibration_targets.csv`.
+  - `record_crossings(post; ...)`.
+  - The record climate is `RECORD_FORCING = "ssp245harm"`, the calibration's own hindcast forcing.
+- `posterior(; drop_record_crossings=false, record_last_year=nothing)`.
+  - With the option on, the selected draws whose fast dynamics fires by the record end on that climate are deleted,
+    and the dropped file rows are logged. That is rejection sampling, i.e. exact conditioning.
+  - It drops file rows 4588, 4618 and 9713 (onsets 2025, 2025, 2021). With `record_last_year=2026` it also drops 4182.
+    None is in `1:5:10000`.
+- `scripts/record_crossings.jl` writes the onset year of all 2,000 projection draws, per scenario, in three climates:
+  the record climate, the scenario mean (the fixed arm), and the draw's own spliced config (the joint arm).
+
+**Finding: the joint arm DOES contain crossing draws.**
+- The handoff's "none of the 4 is among the 2,000 projection rows, so no reported projection contains one" was
+  measured on the mean climate only.
+- On each draw's own FaIR config:
+  - **SSPs:** 3 of the 2,000 fire by 2025 (in 2021–2023) and 7–8 by 2026.
+  - **van Vuuren markers:** 2 fire by 2025 and 5 by 2026.
+  - On the mean climate, none.
+- Across all 10,000 draws paired the same way: 20 by 2025 for the SSPs, 8 for the markers.
+- Effect on the reported numbers: SLR-RFF-BRICK CHANGELOG 2026-10-08e.
+
+**Checks** (`test/conditioning/check_record_crossing.jl`, PASS):
+
+| check | what it tests |
+|---|---|
+| [AGREE-RECORD] | `fastdyn_onset_year` equals the model's own trigger (first year `disintegration_rate ≠ 0`) on all 10,000 draws, 1850–2026: 0 mismatches. The crossing set is the documented one. |
+| [AGREE-JOINT] | The same on the SSP2-4.5 joint arm, 2,000 draws on their own configs: 0 mismatches. |
+| [BOUNDARY] | T_crit set to a draw's own record-maximum T_ant must not fire (the trigger is strict); 1 ulp below, it must fire, in the test and in the model, on 5 draws. |
+| [INERT] | `drop_record_crossings=false` returns the v1.1 posterior; on `1:5:10000` the option drops nothing. |
+| [DELETION] | The conditioned frame is the unconditioned one with exactly the crossing rows deleted, every kept row unchanged. |
+| tag diff | Default `posterior()`, `rows=1:5:10000` and the v1.0 joint-arm call are `isequal` to the same calls at tag `v1.1.0`. |
+
+**Mutation test (2/2 killed):**
+- `>` → `>=` is caught only by [BOUNDARY] (5 failures). No real draw sits exactly on the threshold, so the agreement
+  checks are blind to it. That is why [BOUNDARY] exists.
+- The off-by-one year (`gmst[j]` for `gmst[j−1]`) is caught by every block (10 failures).
+- Both mutants ran on scratch copies; `src/` was never edited for them.
+
 ## 2026-10-08b — v1.1 re-certified against the research v1.1 outputs: gates 2–4 PASS, plus a new panel gate
 
 The research rerun is SLR-RFF-BRICK `run_ladrillo_v11_rerun_20261008.sh`, 0 failures. It passed three gates of its own:

@@ -18,7 +18,8 @@ module Ladrillo
 
 using CSV, DataFrames, Mimi, MimiBRICK, Random, Statistics
 
-export LadrilloModel, apply_draw!, run_draw!, sea_level, posterior, mean_forcing, forcing_cube, splice
+export LadrilloModel, apply_draw!, run_draw!, sea_level, posterior, mean_forcing, forcing_cube, splice,
+       fastdyn_onset_year, record_crossings, record_end
 
 const DATA_DIR = normpath(joinpath(@__DIR__, "..", "data"))
 datapath(parts...) = joinpath(DATA_DIR, parts...)
@@ -37,5 +38,6 @@ include("model.jl")
 include("forcing.jl")
 include("targets.jl")
 include("brick20.jl")
+include("record_crossing.jl")
 
 end # module

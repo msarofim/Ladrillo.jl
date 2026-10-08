@@ -89,6 +89,8 @@ The paper's products are gated the same way, against the research drivers' own o
 - `compare_hindcast.jl`: the BRICK 2.0 hindcast and the residuals behind Table 5.
 - `compare_ic_table.py`: Table 5 itself.
 
+`test/conditioning/check_record_crossing.jl` checks the v1.2 record-crossing test (*Versions*).
+
 ## Repository layout
 
 ```
@@ -127,13 +129,30 @@ tools/               one-time import of the data from the research repository
   and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
 - `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
 
+**v1.2** (in development, `1.2.0-DEV`). Adds an OPT-IN conditioning of the propagated paleo draws on the record; the
+defaults, and every v1.1 product, are unchanged. `v1.1.0` is tagged.
+- `posterior(; drop_record_crossings=true)` drops the draws whose Antarctic fast dynamics fires by the end of the
+  Antarctic record (`record_end()`, 2025) on the calibration's own climate. That is rejection sampling, i.e. exact
+  conditioning of the joint (posterior x paleo) draws on "no fast dynamics through 2025". It drops 3 of the 10,000 draws
+  (`record_last_year=2026`: 4), none of them among the 2,000 projection rows.
+- That tests ONE climate. In the joint-climate arm each draw runs on its own FaIR config, and more draws cross there
+  (see *Known issues*). Condition such a run on each pair's own GMST with `fastdyn_onset_year(row, gmst, years)`, after
+  pairing: the arm pairs draws with configs by position.
+- `fastdyn_onset_year` is the model's own trigger with the model's arithmetic. `test/conditioning/check_record_crossing.jl`
+  checks it against model runs (10,000 draws on the record climate, 2,000 joint draws) and at the threshold to 1 ulp,
+  and is mutation-tested. `scripts/record_crossings.jl` lists the onset year of every projection draw in each climate.
+
 ## Known issues
 
 - **The fast-dynamics threshold is crossed inside the hindcast by a few propagated draws.**
   - The calibration holds lambda and T_crit at their paleo medians, which never cross, but the paleo ensemble's
     low-T_crit tail does: 4 of the 10,000 draws (T_crit -16.4 to -16.9 C, DAIS scale) start fast dynamics in
-    2021-2026, adding up to 1.6 cm of Antarctic sea level by 2026.
+    2021-2026 on the calibration climate, adding up to 1.6 cm of Antarctic sea level by 2026.
+  - On its own FaIR config a draw can cross where it does not on the mean. In the joint-climate arm, 3 of the 2,000
+    projection draws fire by 2025 under each SSP (2 under each van Vuuren marker), and 7-8 (5) by 2026; on the mean
+    climate, none.
   - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
+  - v1.1 (and the paper) does not condition on the record; v1.2 offers it as an option (*Versions*).
 
 ## License
 

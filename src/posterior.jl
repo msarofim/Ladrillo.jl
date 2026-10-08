@@ -77,7 +77,8 @@ function native_greenland!(df)
 end
 
 """
-    posterior(; rows=:, paleo=PALEO_ASSIGNMENT, paleo_block=nothing) -> DataFrame
+    posterior(; rows=:, paleo=PALEO_ASSIGNMENT, paleo_block=nothing,
+              drop_record_crossings=false, record_last_year=nothing) -> DataFrame
 
 The L27 posterior with every per-draw quantity the model needs. `rows` selects draws (e.g. `1:5:10000`, the 2,000
 draws of the projection arms).
@@ -86,10 +87,20 @@ draws of the projection arms).
 - `paleo = :v1`: `rows` is taken first and the assignment is made over the selection in blocks of `paleo_block`
   (default: one block). `posterior(rows=1:5:10000, paleo=:v1, paleo_block=500)` is the v1.0 joint arm,
   `posterior(rows=1:5:10000, paleo=:v1)` the v1.0 fixed-climate panel.
+- `drop_record_crossings = true` (opt-in, v1.2; OFF in v1.1 and in the paper): drop the selected draws whose Antarctic
+  fast dynamics fires by `record_last_year` (`nothing` = `record_end()`, the Antarctic record's last year) on the
+  calibration's own climate, i.e. condition the propagated paleo draws on the record (see record_crossing.jl). Of the
+  10,000 draws, 3 fire by 2025 on that climate (file rows 4588, 4618, 9713) and a 4th in 2026 (4182); none is among
+  `1:5:10000`. The dropped file rows are logged. ⚠ This tests ONE climate. A joint-climate run puts each draw on its own FaIR config,
+  where more draws cross: test those pairs with `fastdyn_onset_year` on their own GMST, after pairing.
 """
-function posterior(; rows=:, paleo::Symbol=PALEO_ASSIGNMENT, paleo_block::Union{Nothing,Int}=nothing)
+function posterior(; rows=:, paleo::Symbol=PALEO_ASSIGNMENT, paleo_block::Union{Nothing,Int}=nothing,
+                   drop_record_crossings::Bool=false, record_last_year::Union{Nothing,Int}=nothing)
     paleo in PALEO_ASSIGNMENTS || error("paleo must be one of $(PALEO_ASSIGNMENTS), got :$paleo")
+    drop_record_crossings || record_last_year === nothing ||
+        error("record_last_year applies to drop_record_crossings = true only")
     df = CSV.read(datapath(POSTERIOR_FILE...), DataFrame)
+    filerow = collect(1:nrow(df))[rows]
     if paleo === :single
         paleo_block === nothing || error("paleo_block applies to paleo = :v1 only")
         attach_paleo!(df)
@@ -97,6 +108,14 @@ function posterior(; rows=:, paleo::Symbol=PALEO_ASSIGNMENT, paleo_block::Union{
     else
         df = df[rows, :]
         attach_paleo!(df; block = paleo_block === nothing ? nrow(df) : paleo_block)
+    end
+    if drop_record_crossings
+        ly = record_last_year === nothing ? record_end() : record_last_year
+        onset = record_crossings(df; last_year = ly)
+        drop = onset .<= ly
+        @info "posterior: dropped $(count(drop)) of $(nrow(df)) draws whose fast dynamics fires by $ly on the " *
+              "$(RECORD_FORCING) mean climate (file rows $(filerow[drop]), onset $(onset[drop]))"
+        df = df[.!drop, :]
     end
     return native_greenland!(df)
 end
