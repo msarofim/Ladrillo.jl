@@ -1,4 +1,4 @@
-# The Ladrillo v1.0 posterior (calibration L27) and the per-draw quantities derived from it.
+# The Ladrillo posterior (calibration L27; v1.0 and v1.1 share it) and the per-draw quantities derived from it.
 #
 # data/posterior/ladrillo_L27_posterior.csv: 10,000 draws pooled from four 2M-iteration chains (second halves, every
 # 400th iteration, in chain order: rows 1-2500 are chain 1, ...). 50 columns. NOT columns, because L27 does not sample
@@ -14,6 +14,13 @@ const PALEO_DRAWS_FILE = ("constants", "paleo_fastdyn_draws.csv")
 const PALEO_MARGINALS_FILE = ("constants", "paleo_dais_marginals.csv")
 """Seed of the fixed RNG that assigns paleo (lambda, T_crit) rows to posterior draws."""
 const PALEO_SEED = 20260920
+"""How the paleo (lambda, T_crit) rows are assigned to posterior draws. `:single` (v1.1): one assignment over all
+10,000 draws of the posterior file, so any subset keeps the rows its draws have in the full table. `:v1` (v1.0): the
+rows are selected FIRST and the assignment is made over the selection, in blocks of `paleo_block` (the v1.0 joint arm
+used 500, one per chain, so its four chains reused the same 500 paleo rows; the fixed-climate panel used one block
+over its 2,000)."""
+const PALEO_ASSIGNMENT = :single
+const PALEO_ASSIGNMENTS = (:single, :v1)
 """Draws per chain in the 10k posterior file."""
 const DRAWS_PER_CHAIN = 2500
 const N_CHAINS = 4
@@ -70,14 +77,26 @@ function native_greenland!(df)
 end
 
 """
-    posterior(; rows=:, paleo_block=nothing) -> DataFrame
+    posterior(; rows=:, paleo=PALEO_ASSIGNMENT, paleo_block=nothing) -> DataFrame
 
-The v1.0 posterior with every per-draw quantity the model needs. `rows` selects draws (e.g. `1:5:10000`, the 2,000
-draws of the joint-climate arm) BEFORE the paleo parameters are attached, so the attachment depends only on the
-selection. `paleo_block` is passed to `attach_paleo!` (default: one block).
+The L27 posterior with every per-draw quantity the model needs. `rows` selects draws (e.g. `1:5:10000`, the 2,000
+draws of the projection arms).
+- `paleo = :single` (v1.1, the default): the paleo rows are assigned over the whole file, then `rows` is taken, so a
+  draw's (lambda, T_crit) does not depend on which other draws were selected.
+- `paleo = :v1`: `rows` is taken first and the assignment is made over the selection in blocks of `paleo_block`
+  (default: one block). `posterior(rows=1:5:10000, paleo=:v1, paleo_block=500)` is the v1.0 joint arm,
+  `posterior(rows=1:5:10000, paleo=:v1)` the v1.0 fixed-climate panel.
 """
-function posterior(; rows=:, paleo_block::Union{Nothing,Int}=nothing)
-    df = CSV.read(datapath(POSTERIOR_FILE...), DataFrame)[rows, :]
-    attach_paleo!(df; block = paleo_block === nothing ? nrow(df) : paleo_block)
+function posterior(; rows=:, paleo::Symbol=PALEO_ASSIGNMENT, paleo_block::Union{Nothing,Int}=nothing)
+    paleo in PALEO_ASSIGNMENTS || error("paleo must be one of $(PALEO_ASSIGNMENTS), got :$paleo")
+    df = CSV.read(datapath(POSTERIOR_FILE...), DataFrame)
+    if paleo === :single
+        paleo_block === nothing || error("paleo_block applies to paleo = :v1 only")
+        attach_paleo!(df)
+        df = df[rows, :]
+    else
+        df = df[rows, :]
+        attach_paleo!(df; block = paleo_block === nothing ? nrow(df) : paleo_block)
+    end
     return native_greenland!(df)
 end

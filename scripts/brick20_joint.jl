@@ -1,6 +1,7 @@
 # BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with its post-PR#93 posterior, on the SAME climate as Ladrillo.
 #
 #   julia --project=. scripts/brick20_joint.jl --scenario=ssp245 [--outdir=outputs/projections]
+#        [--lws-anchor=zero_at_first_year|v1_step] [--v1.0]
 #
 # Like-for-like with scripts/project_joint.jl: same FaIR forcing, same 2014 splice, same draw -> config pairing seed,
 # same land-water series (:observed), same 1995-2014 reference. Two arms: `fixed` (ensemble-mean climate) and `joint`
@@ -9,7 +10,9 @@
 # MimiBRICK v2.0.0 changed `ais_precipitation₀` to log space; the posterior stores it in linear units, so it is
 # log-transformed on the way in (the "precip_log" shim). Total = glaciers + Greenland + Antarctica + TE + land water.
 #
-# Writes outputs/projections/brick20_{cells,draws,paths}_<scenario>.csv with a provenance column.
+# Land water: v1.1 starts the observed series at 0 (the default); `--v1.0` (= `--lws-anchor=v1_step`) reproduces the
+# v1.0 1900 frame step, which BRICK 2.0's Antarctic sea-level feedback also sees (src/landwater.jl).
+# Writes outputs/projections/brick20_{cells,draws,paths}_<scenario>[_lwsv1_step].csv with a provenance column.
 
 using Ladrillo, CSV, DataFrames, Mimi, MimiBRICK, Printf, Random, Statistics
 
@@ -22,6 +25,9 @@ const YEARS = collect(1850:2300)
 const HORIZONS = [2100, 2150, 2300]
 const COMPS = ["glaciers", "gis", "ais", "te", "lws", "total"]
 const REPORT0 = 1990
+const ANCHOR = Symbol(arg("--lws-anchor=", "--v1.0" in ARGS ? "v1_step" : String(Ladrillo.LWS_OBS_ANCHOR)))
+ANCHOR in Ladrillo.LWS_OBS_ANCHORS || error("--lws-anchor must be one of $(Ladrillo.LWS_OBS_ANCHORS)")
+const SFX = ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)"
 mkpath(OUTDIR)
 
 const POST = Ladrillo.brick20_posterior()
@@ -30,7 +36,7 @@ const ROWS = collect(1:STEP:nrow(POST))
 const PROVENANCE = "BRICK 2.0 (MimiBRICK v2.0.0, post-PR#93 posterior) | scripts/brick20_joint.jl | Ladrillo " *
     "$(pkgversion(Ladrillo)) forcing helpers | scenario $SCENARIO | FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, " *
     "spliced at $(Ladrillo.SPLICE_YEAR) | rows 1:$(STEP):$(nrow(POST)) | Random.seed!($(Ladrillo.BRICK20_SEED)) before get_model | pairing seed $PAIR_SEED | land water " *
-    ":observed ($(Ladrillo.LWS_OBS_ANCHOR)) | cm rel 1995-2014 | julia $(VERSION)"
+    ":observed ($ANCHOR) | cm rel 1995-2014 | julia $(VERSION)"
 
 mg, mo = mean_forcing(SCENARIO; years = YEARS)
 yrs, cfg, G, O = forcing_cube(SCENARIO)
@@ -44,7 +50,7 @@ reref(v) = 100 .* (v .- sum(v[IB]) / length(IB))
 
 alloc() = Dict(c => Matrix{Float64}(undef, length(ROWS), length(YEARS)) for c in COMPS)
 const M = Ladrillo.brick20_model(years = YEARS)        # seeds the global RNG to BRICK20_SEED, then get_model
-Ladrillo.set_lws!(M, :observed)
+Ladrillo.set_lws!(M, :observed; anchor = ANCHOR)
 function run_into!(store, ks, g, o)
     Ladrillo.set_brick20_forcing!(M, g, o)
     for k in ks
@@ -89,6 +95,6 @@ for c in COMPS, (arm, A) in (("fixed", FIXED[c]), ("joint", JOINT[c])), (i, y) i
 end
 for (nm, df) in (("cells", cells), ("draws", draws), ("paths", paths))
     df.provenance .= PROVENANCE
-    CSV.write(joinpath(OUTDIR, "brick20_$(nm)_$(SCENARIO).csv"), df)
+    CSV.write(joinpath(OUTDIR, "brick20_$(nm)_$(SCENARIO)$(SFX).csv"), df)
 end
-println("wrote ", joinpath(OUTDIR, "brick20_{cells,draws,paths}_$(SCENARIO).csv"))
+println("wrote ", joinpath(OUTDIR, "brick20_{cells,draws,paths}_$(SCENARIO)$(SFX).csv"))

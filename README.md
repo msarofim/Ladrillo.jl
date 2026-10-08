@@ -15,8 +15,10 @@ The model is driven by prescribed global mean surface temperature and ocean heat
 FaIR 2.2.4 (calib 1.6.0) forcing for SSP1-2.6, SSP2-4.5, SSP5-8.5 and the seven van Vuuren et al. (2025) scenario
 markers, as both the 841-config ensemble mean and the full ensemble.
 
-**This is version 1.0, the posterior of the model-description paper (calibration L27).** The posterior is
-`data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains.
+**This is version 1.1, on the posterior of the model-description paper (calibration L27).** The posterior is
+`data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. Version 1.1 changes no parameter; it
+fixes two things in how projections use the posterior (see *Versions* below). Version 1.0, the code as submitted with
+the paper, is the git tag `v1.0.0`, and both of its behaviours remain reachable as options.
 
 ## Install
 
@@ -70,13 +72,13 @@ The Python step needs `pip install -r requirements.txt` (NumPy, pandas, SciPy). 
 Outputs go to `outputs/hindcast/` and `outputs/tables/`. Runtimes were measured on an Apple M4 that was busy with other
 jobs; expect them to be shorter.
 
-*In progress (v1.0 release): the calibration, the FaIR forcing builders and the figure scripts.*
+*In progress: the calibration, the FaIR forcing builders and the figure scripts.*
 
 ## Validation
 
 `test/identity/` holds the gate that certified this package against the research code that produced the paper:
 every component, every year and every draw must be bit-identical (`==`), on the full 10,000-draw posterior and on
-the joint-climate arm. The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
+the joint-climate arm, for both the v1.0 settings and the v1.1 defaults (`cases.jl`). The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
 `test/identity/mutation_result_K4.txt`): a one-ulp change to a Greenland volume share, a re-associated glacier sum,
 and a different paleo-draw assignment are each caught; two mutants on paths that never bind in v1.0 (the glacier
 floor, the Greenland whole-sheet clamp) survive, as they should.
@@ -104,13 +106,34 @@ test/                tests and the identity gate
 tools/               one-time import of the data from the research repository
 ```
 
+## Versions
+
+**v1.1** (2026-10-08). Same posterior; two projection-side fixes.
+- **Paleo assignment** (`Ladrillo.PALEO_ASSIGNMENT = :single`). The Antarctic fast-dynamics pair (lambda, T_crit) is
+  attached to each posterior draw as a joint draw from the paleo ensemble.
+  - v1.0 made that assignment after selecting draws, so its joint-climate arm, which assigned chain by chain, gave all
+    four chains the same 500 paleo rows.
+  - v1.1 assigns once over all 10,000 draws, and any subset keeps the rows its draws have in the full table.
+  - Measured on SSP5-8.5 (joint arm, 2026-10-07): medians move by at most 1.3 bootstrap standard errors; the 2100 95th percentile moves
+    -3.6 cm (total) and -5.0 cm (Antarctica).
+- **Land-water frame step** (`Ladrillo.LWS_OBS_ANCHOR = :zero_at_first_year`).
+  - The observed land-water series is in the calibration target's 1995-2005 frame, while the other components start
+    at 0 in 1850. v1.0 started the land-water component at the series' 1900 value, +1.565 cm, and Antarctica's
+    sea-level feedback saw that step. v1.1 starts it at 0.
+  - Glaciers, Greenland and thermal expansion are bit-identical.
+  - Antarctica moves by about -1e-4 of its own contribution: at most 0.014 cm at 2100 and 0.049 cm at 2300 under
+    SSP5-8.5.
+- `--v1.0` on `scripts/project_joint.jl`, `project_fixed.jl` and `brick20_joint.jl` (or `posterior(paleo=:v1, ...)`
+  and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
+- `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
+
 ## Known issues
 
-- **Land-water frame step (fix scheduled for v1.1).** The observed land-water series is in the calibration target's
-  1995-2005 frame, while the other components start at 0 in 1850, so the land-water component steps by +1.565 cm in
-  1900 and Antarctica's sea-level feedback sees the step. The effect is at most 0.012 cm of Antarctic contribution at
-  any year to 2300, and reported totals are re-referenced. v1.0 keeps the step so the paper's numbers reproduce
-  (`Ladrillo.LWS_OBS_ANCHOR`).
+- **The fast-dynamics threshold is crossed inside the hindcast by a few propagated draws.**
+  - The calibration holds lambda and T_crit at their paleo medians, which never cross, but the paleo ensemble's
+    low-T_crit tail does: 4 of the 10,000 draws (T_crit -16.4 to -16.9 C, DAIS scale) start fast dynamics in
+    2021-2026, adding up to 1.6 cm of Antarctic sea level by 2026.
+  - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
 
 ## License
 

@@ -96,7 +96,7 @@ end
 lnoise = [(c, Float64.(post[!, c])) for c in ("sd_ais", "rho_ais", "sd_gsic", "rho_gsic",
                                               "sd_gis", "rho_gis", "sd_steric", "rho_steric")]
 write_residuals(OUT_L, ldraws, lnoise, resL,
-    "$PKG | Ladrillo v1.0 (posterior L27) rows $(nrow(post)) evenly thinned of $NPOST (paleo single block, seed " *
+    "$PKG | Ladrillo $(pkgversion(Ladrillo)) (posterior L27) rows $(nrow(post)) evenly thinned of $NPOST (paleo :$(Ladrillo.PALEO_ASSIGNMENT) over the file, seed " *
     "$(Ladrillo.PALEO_SEED)) | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING | land water :central | tap off | run " *
     "$Y0-$Y1 scored $(first(FY))-$(last(FY)) | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | gsic = gsic_hind + F_unch vs " *
     "the RGI-19-adjusted target, no delta ramp, no d2 | total = glaciers+ais+gis+te+OBSERVED lws | residual = model - obs")

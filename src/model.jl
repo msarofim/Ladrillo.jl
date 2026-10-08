@@ -146,16 +146,17 @@ function fixed_params()
 end
 
 """
-    LadrilloModel(gmst, ohc; years=1850:2300, lws=:observed, tap=true, ref=REF_PERIOD)
+    LadrilloModel(gmst, ohc; years=1850:2300, lws=:observed, lws_anchor=LWS_OBS_ANCHOR, tap=true, ref=REF_PERIOD)
 
 Build Ladrillo on prescribed GMST (K rel. 1850-1900) and ocean heat content (1e22 J), one value per year.
-`lws` is :observed (projections) or :central (hindcast-side runs); `tap` switches the Greenland above-threshold
+`lws` is :observed (projections) or :central (hindcast-side runs); `lws_anchor` is the observed series' start
+(`:v1_step` reproduces v1.0, see landwater.jl); `tap` switches the Greenland above-threshold
 discharge channel on at the shipped TAP_CELL. `ref` is the window `sea_level` re-references to: REF_PERIOD
 (1995-2014) for projections, FIT_REF (1995-2005) to compare with the calibration targets. `build_scenario` is only the MimiBRICK scenario get_model is called with
 (see BUILD_SCENARIO).
 """
 function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real};
-                       years=1850:2300, lws::Symbol=:observed, tap::Bool=true,
+                       years=1850:2300, lws::Symbol=:observed, lws_anchor::Symbol=LWS_OBS_ANCHOR, tap::Bool=true,
                        ref::Tuple{Int,Int}=REF_PERIOD, build_scenario::AbstractString=BUILD_SCENARIO)
     years = collect(Int, years)
     y0, y1 = first(years), last(years)
@@ -192,7 +193,7 @@ function LadrilloModel(gmst::AbstractVector{<:Real}, ohc::AbstractVector{<:Real}
 
     m = MimiBRICK.get_model(ssprcp_scenario=build_scenario, start_year=y0, end_year=y1)
     replace!(m, _GLAC => ladrillo_glaciers)
-    set_lws!(m, lws)
+    set_lws!(m, lws; anchor=lws_anchor)
     replace!(m, _GIS => ladrillo_greenland)
 
     fp = fixed_params()

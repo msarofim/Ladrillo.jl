@@ -1,5 +1,46 @@
 # Changelog
 
+## 2026-10-08 — v1.1: paleo single assignment and land-water frame fix (defaults); v1.0 tagged and kept reachable
+
+**Rulings (Marcus 10-08):**
+- The GMD paper moves to v1.1.
+- The research drivers produce the numbers, and this package is re-certified against them.
+- `v1.0.0` is tagged at a2bb3b0, certified against SLR-RFF-BRICK 5184a57.
+
+**Code:**
+- `Project.toml` 1.1.0.
+- `PALEO_ASSIGNMENT = :single`: `posterior()` assigns over the whole file, then takes `rows`. `paleo = :v1` with
+  `paleo_block` reproduces v1.0.
+- `LWS_OBS_ANCHOR = :zero_at_first_year`, plus `LadrilloModel(...; lws_anchor=)`.
+- The three projection scripts take `--paleo=`, `--lws-anchor=` and `--v1.0`. Non-default settings go into the
+  output names and the provenance.
+
+**Identity gate:**
+- `cases.jl` now carries the paleo rule and the anchor per case. K1–K4 are the v1.0 regression; `_v11` runs the new
+  defaults.
+- `dump_old.jl` serves the cases that match the research kernel's settings, which it reads from the environment.
+
+**Results:**
+- **v1.0 regression PASS:** this package with its v1.0 options is bit-identical to the v1.0 research kernel on K1–K4,
+  using freshly regenerated references (sha256 in `out/v10_research_5d3add0/SHA256SUMS`).
+- **v1.1 PASS:** bit-identical to the edited research kernel on K1_v11–K4_v11. Two independent implementations of the
+  single assignment agree.
+- **`fix_effects.jl` PASS, mutation-tested (2/2 mutants killed).**
+  - K1 → K1_v11 isolates the land-water fix.
+    - Glaciers, Greenland and TE are identical.
+    - Land water moves only before 1900, by exactly the 1.5646 cm step.
+    - Antarctica moves at ~1e-4 of itself, within 3× of the analytic (1+γ)/depth × step: max 0.014 cm at 2100 and
+      0.049 cm at 2300.
+  - K3 → K3_v11 isolates the paleo fix on the hindcast.
+    - One of the 1,000 draws moves (from 2024), and only through a fast-dynamics threshold crossing: with T_crit = +∞
+      in both assignments it agrees exactly.
+  - **Tried and abandoned:** the first version of this gate bounded Antarctica by the 10-01 "≤ 0.012 cm" and FAILED at
+    0.049 cm.
+    - That number was the transient observed-vs-stylized land-water swap. The step is a permanent offset, and a
+      linearity test (doubling the step doubles ΔAIS, ratio 2.000) confirmed the mechanism.
+    - Its hindcast block asserted "identical" and FAILED.
+    - Both were replaced by the physics and channel gates above.
+
 ## 2026-10-07e — Table 5 ported; identity gate 5 PASS
 
 `python/ic_ladrillo_vs_brick20.py` (Table 5) reproduces the research `ic_ladrillo_vs_brick20_L27{,_rho0.95,_rho0.9}`

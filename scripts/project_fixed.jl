@@ -1,10 +1,14 @@
 # Sea-level components on the FaIR ensemble-MEAN climate (the fixed-climate panel), per scenario.
 #
 #   julia --project=. scripts/project_fixed.jl [--scenarios=ssp126,ssp245,ssp585] [--no-tap] [--outdir=...]
+#        [--paleo=single|v1] [--lws-anchor=zero_at_first_year|v1_step] [--v1.0]
 #
-# 2,000 posterior draws (rows 1:5:10000). v1.0 assigns their paleo (lambda, T_crit) rows in ONE block over the 2,000
-# (the joint arm, scripts/project_joint.jl, assigns per chain; see CHANGELOG 2026-10-07).
-# Writes outputs/projections/fixed_components_<tag>.csv: year, scenario, component, gmst, med, p05, p17, p83, p95,
+# 2,000 posterior draws (rows 1:5:10000).
+# v1.1 (the defaults): paleo (lambda, T_crit) rows from ONE assignment over all 10,000 draws; land water starts at 0.
+# v1.0 (`--v1.0` = `--paleo=v1 --lws-anchor=v1_step`): paleo rows assigned in one block over the 2,000 selected draws
+# (the v1.0 joint arm assigned per chain instead; see CHANGELOG 2026-10-07); land water carried the 1900 frame step.
+# Writes outputs/projections/fixed_components_<scenarios>[_notap][_paleov1][_lwsv1_step].csv: year, scenario,
+# component, gmst, med, p05, p17, p83, p95,
 # n_finite, provenance -- one row per year from 1990, cm rel. 1995-2014.
 
 using Ladrillo, CSV, DataFrames, Printf, Statistics
@@ -18,19 +22,26 @@ const YEARS = 1850:2300
 const REPORT0 = 1990
 const COMPONENTS = [:glaciers, :gis, :ais, :te, :lws, :total]
 const LABEL = Dict("ssp126" => "SSP1-2.6", "ssp245" => "SSP2-4.5", "ssp585" => "SSP5-8.5")
-const OUT = joinpath(OUTDIR, "fixed_components_$(join(SCENS, "_"))$(TAP ? "" : "_notap").csv")
+const V10 = "--v1.0" in ARGS
+const PALEO = Symbol(arg("--paleo=", V10 ? "v1" : String(Ladrillo.PALEO_ASSIGNMENT)))
+PALEO in Ladrillo.PALEO_ASSIGNMENTS || error("--paleo must be one of $(Ladrillo.PALEO_ASSIGNMENTS)")
+const ANCHOR = Symbol(arg("--lws-anchor=", V10 ? "v1_step" : String(Ladrillo.LWS_OBS_ANCHOR)))
+ANCHOR in Ladrillo.LWS_OBS_ANCHORS || error("--lws-anchor must be one of $(Ladrillo.LWS_OBS_ANCHORS)")
+const SFX = (TAP ? "" : "_notap") * (PALEO === Ladrillo.PALEO_ASSIGNMENT ? "" : "_paleo$(PALEO)") *
+            (ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)")
+const OUT = joinpath(OUTDIR, "fixed_components_$(join(SCENS, "_"))$(SFX).csv")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_fixed.jl | FaIR 2.2.4 (calib " *
-    "1.6.0) CMIP7-basis ensemble-mean forcing | draws rows $(ROWS) (paleo one block, seed $(Ladrillo.PALEO_SEED)) | " *
-    "tap $TAP | land water :observed ($(Ladrillo.LWS_OBS_ANCHOR)) | cm rel $(Ladrillo.REF_PERIOD[1])-" *
+    "1.6.0) CMIP7-basis ensemble-mean forcing | draws rows $(ROWS) (paleo $(PALEO === :v1 ? "v1, one block over the selection" : "single assignment over 10000"), " *
+    "seed $(Ladrillo.PALEO_SEED)) | tap $TAP | land water :observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-" *
     "$(Ladrillo.REF_PERIOD[2]) | julia $(VERSION)"
 
-post = posterior(rows = ROWS)
+post = posterior(rows = ROWS, paleo = PALEO)
 out = DataFrame(year = Int[], scenario = String[], component = String[], gmst = Float64[], med = Float64[],
                 p05 = Float64[], p17 = Float64[], p83 = Float64[], p95 = Float64[], n_finite = Int[])
 for scen in SCENS
     g, o = mean_forcing(scen; years = YEARS)
-    lm = LadrilloModel(g, o; years = YEARS, tap = TAP)
+    lm = LadrilloModel(g, o; years = YEARS, tap = TAP, lws_anchor = ANCHOR)
     series = Dict(c => Matrix{Float64}(undef, length(YEARS), nrow(post)) for c in COMPONENTS)
     for j in 1:nrow(post)
         run_draw!(lm, post[j, :])

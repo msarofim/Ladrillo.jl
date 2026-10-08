@@ -1,4 +1,4 @@
-# Package side of the v1.0 identity gate: run Ladrillo on every case in cases.jl and serialize every component x year x
+# Package side of the identity gate: run Ladrillo on every case in cases.jl and serialize every component x year x
 # draw.   julia --project=. test/identity/dump_new.jl [case ...]
 
 using Ladrillo, CSV, DataFrames, Serialization, Printf
@@ -6,11 +6,12 @@ include(joinpath(@__DIR__, "cases.jl"))
 mkpath(OUTDIR)
 
 function run_case(name, c)
-    post = posterior(rows = c.rows, paleo_block = c.block)
+    post = c.paleo === :v1 ? posterior(rows = c.rows, paleo = :v1, paleo_block = c.block) :
+                             posterior(rows = c.rows, paleo = c.paleo)
     n, ny = nrow(post), length(c.years)
     out = Dict(new => Matrix{Float64}(undef, n, ny) for (_, new) in COMPONENT_MAP)
     function run_into!(idx, g, o)
-        lm = LadrilloModel(g, o; years = c.years, lws = c.lws, tap = c.tap)
+        lm = LadrilloModel(g, o; years = c.years, lws = c.lws, lws_anchor = c.anchor, tap = c.tap)
         for k in idx
             run_draw!(lm, post[k, :])
             for (_, new) in COMPONENT_MAP
