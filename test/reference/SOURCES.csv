@@ -1,0 +1,7 @@
+file,source,research_commit,source_sha256,lines_kept,regression_draws
+research_joint_draws_ssp245.csv,outputs/scope_slr_fairunc_draws_ssp245_spliced_L27_tap4p69K_V5p64m_tau800.csv,e2d8827,21f0f031be480380bda29d481cc208de5380729ec560fb5bfc5cff5322eebedf,1188,1 68 135 202 229 269 336 403 470 537 604 610 671 738 805 872 939 1006 1073 1140 1207 1260 1274 1341 1408 1475 1542 1609 1676 1743 1810 1877 1944
+research_joint_draws_ssp585.csv,outputs/scope_slr_fairunc_draws_ssp585_spliced_L27_tap4p69K_V5p64m_tau800.csv,e2d8827,48bfa404c9a967a4d012dfd8b53ba7222d248801250c0240ae851a69ded16c57,1188,1 68 135 202 229 269 336 403 470 537 604 610 671 738 805 872 939 1006 1073 1140 1207 1260 1274 1341 1408 1475 1542 1609 1676 1743 1810 1877 1944
+research_brick20_joint_draws_ssp245.csv,outputs/scope_slr_fairunc_draws_ssp245_spliced_oldbrick.csv,e2d8827,082ddc9e3c0297c3b06bc78d3ca898e08debfb782e3362d90942f7565f10d686,612,1 68 135 202 229 269 336 403 470 537 604 610 671 738 805 872 939 1006 1073 1140 1207 1260 1274 1341 1408 1475 1542 1609 1676 1743 1810 1877 1944
+research_postpred_components_timeseries.csv,outputs/postpred_L27_components_timeseries.csv,e2d8827,8bf8452b28bd7c4de369179bf4eb658bfceec221058a71ac1e9147c84adcf046,127,
+research_postpred_bias.csv,outputs/postpred_L27_bias.csv,e2d8827,f623224d3b2ba85d50a4e3bbce8ee489aac93267483eaafd71d9a92b13fc4666,30,
+research_postpred_coverage.csv,outputs/postpred_L27_coverage.csv,e2d8827,ab51a3259863fbd310f7de91d274757417be1829b2c0b97a209093d8969e88c2,5,

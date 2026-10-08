@@ -2,7 +2,10 @@ cff-version: 1.2.0
 message: "If you use Ladrillo, please cite it as below."
 title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea-level rise"
 type: software
-version: 1.0.0
+## The version the GMD paper reports is the git tag v1.1.0 ("Ladrillo v1.1"); main may carry a -DEV version ahead of
+## it. v1.0.0 is the code as first submitted. Update this field and date-released at each tagged release.
+version: 1.1.0
+date-released: 2026-10-08
 license: MIT
 authors:
   - family-names: Sarofim

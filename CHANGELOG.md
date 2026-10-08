@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-10-08e — A self-contained test suite; Julia compat 1.12; CITATION 1.1.0; the BRICK 2.0 URL question
+
+**`test/runtests.jl`** (Marcus: "3, 5, and 6 should be done first"). It runs from a fresh clone, with no research repo.
+- **References:** `tools/build_test_reference.py <SLR-RFF-BRICK>` copies values the RESEARCH drivers wrote into
+  `test/reference/` (264 KB). Lines are copied as text, so no float is re-printed. It refuses dirty sources.
+  `SOURCES.csv` records each file's source, commit (SLR e2d8827) and sha256.
+- **Tests (83 checks):**
+  - every data file against `MANIFEST.csv`;
+  - 33 joint-arm draws × both arms × SSP2-4.5 and SSP5-8.5 (2,376 values). The set includes the three draws that cross
+    the fast-dynamics threshold inside the record, and checks the pairing itself;
+  - the full posterior predictive (bands, bias, coverage);
+  - the component-sum and splice identities;
+  - the v1.0 options (paleo moves only λ / T_crit; the land-water step moves glaciers / GIS / TE not at all, and land
+    water by exactly the step);
+  - the record-crossing check, as a subprocess;
+  - 612 BRICK 2.0 values, skipped with a notice if its posterior is absent.
+- **Exactness:**
+  - On the REFERENCE RUNTIME (macOS arm64, Julia 1.12.6, default bounds checking) every comparison is `==`: all 2,988
+    reference values are bit-identical.
+  - Elsewhere the comparison is to rtol 1e-12 (~451 steps × eps × 10).
+  - **Tried and fixed:** the first `Pkg.test()` FAILED 4 checks that the direct run passed. Test: a direct run with
+    `--check-bounds=yes` reproduced exactly the same counts (241 / 183 / 21 / 4). So it is Pkg.test's forced bounds
+    checking re-associating float operations: ≤ 1.7e-15 relative, coverage counts unchanged, only `mean_bias` moves
+    by 1–2 ulp. The reference runtime now requires default bounds checking. `Pkg.test()` runs in portable mode and
+    passes.
+  - **Tried and fixed:** `Printf` was missing from the test targets.
+- **Mutation test** (scratch copies; `src/` untouched):
+  - 1 ulp on `AIS_TANT0` (the Antarctic temperature map, a live path) → 4 testsets fail.
+  - 1 ulp on BRICK 2.0's `te_s₀` → the BRICK testset fails (13 values).
+  - 1 ulp on `GIS_V0_M` SURVIVES. It enters only clamps that never bind (`_gis_eq`'s [0, v0] clip, the whole-sheet
+    headroom), the same no-power control as `mutation_test.sh`'s.
+  - Portable mode cannot see a 1-ulp mutation by construction; only the exact run can.
+
+**Item 6:**
+- `[compat] julia = "1.12"`, was "1.11" though the Manifest is 1.12-format and the README says 1.12.
+- `Pkg.resolve()` prunes NOTHING from the Manifest: all 306 entries are MimiBRICK v2.0.0's own dependency closure
+  (Plots, XLSX, NetCDF, …), which cannot be trimmed without changing MimiBRICK. Its stale self-entry version
+  (1.0.0 → 1.2.0-DEV) is refreshed; no other entry changes.
+- `CITATION.cff` → version 1.1.0 (the paper's tag), date-released 2026-10-08, with a note that `main` may run ahead.
+- `[extras]` / `[targets]` for the tests: Printf, SHA, Test.
+
+**The BRICK 2.0 posterior URL: not found.**
+- MimiBRICK v2.0.0's README points to Zenodo 10.5281/zenodo.20592337 (2026-06-08, CC-BY-4.0). Its
+  `parameters_subsample_brick.csv` (7,011,352 B, md5 `6487623e…`, sha256 `fecabef3…`) is a DIFFERENT calibration from
+  ours (6,621,725 B, sha256 `78247db8…`, Tony's post-PR#93 subsample of 2026-05-22):
+  - 0 of 350,000 cells match;
+  - `antarctic_precip0` is stored in log space;
+  - the median `thermal_alpha` is 0.054 against 0.158.
+- The three earlier versions of the record (17966962, 6626335, 6461560) do not match either.
+- Like-for-like on this package's FaIR forcing (1,000 draws each):
+
+  | | TE hindcast RMSE 1900–2025 | SSP2-4.5 TE 2100 | other components |
+  |---|---|---|---|
+  | ours | 0.52 cm | 19.4 cm | — |
+  | Zenodo | 1.97 cm | 6.6 cm | within ~15% of ours |
+
+- So it is not a drop-in substitute. My guess, untested, is that it was calibrated on a different ocean-heat driver.
+  Tony would know.
+- The fetch script documents all of this; the URL is still owed for OUR file.
+
 ## 2026-10-08d — Likelihood weights for the record-crossing draws: the record rejects every onset through 2025
 
 **Asked (Marcus 10-08):** run the likelihood-weighting test on the crossing draws, in place of a hard cutoff at the

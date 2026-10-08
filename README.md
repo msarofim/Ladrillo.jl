@@ -76,6 +76,23 @@ jobs; expect them to be shorter.
 
 ## Validation
 
+**Run the tests** (from a fresh clone; nothing outside this repository is needed):
+
+```bash
+julia --project=. test/runtests.jl
+```
+
+That takes about 2 minutes on an Apple M4, and `julia --project=. -e 'using Pkg; Pkg.test()'` runs the same tests in
+Pkg's sandbox. The suite re-runs 33 posterior draws in both projection arms (SSP2-4.5, SSP5-8.5), the full posterior
+predictive and a BRICK 2.0 sample. It compares them with values the RESEARCH code wrote (`test/reference/`, sources and
+sha256 in `test/reference/SOURCES.csv`). It also checks every data file against `data/MANIFEST.csv`, the component-sum
+and splice identities, the v1.0 options, and the record-crossing test.
+- **On the reference runtime** (macOS arm64, Julia 1.12.6, default bounds checking) every comparison is exact (`==`).
+  A one-ulp change to a live parameter fails it.
+- **Elsewhere, including `Pkg.test()`, which forces `--check-bounds=yes`,** values must agree to a relative 1e-12. The
+  last bits can move with code generation: 1.7e-15 measured under bounds checking.
+- **BRICK 2.0** is compared only once its posterior is in place (see *BRICK 2.0 posterior* below).
+
 `test/identity/` holds the gate that certified this package against the research code that produced the paper:
 every component, every year and every draw must be bit-identical (`==`), on the full 10,000-draw posterior and on
 the joint-climate arm, for both the v1.0 settings and the v1.1 defaults (`cases.jl`). The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
@@ -91,6 +108,14 @@ The paper's products are gated the same way, against the research drivers' own o
 
 `test/conditioning/check_record_crossing.jl` checks the v1.2 record-crossing test (*Versions*).
 
+## BRICK 2.0 posterior
+
+The BRICK 2.0 comparison uses Tony Wong's post-PR#93 MimiBRICK posterior subsample (10,000 draws, sha256 `78247db8…`).
+It is not redistributed here, and `tools/fetch_brick20_posterior.sh` still needs its public URL.
+- ⚠ The public MimiBRICK v2.0.0 Zenodo record (10.5281/zenodo.20592337) ships a different calibration under the same
+  file name. On this package's forcing its thermal-expansion hindcast is 4× worse.
+- It is therefore not a substitute: the paper's BRICK 2.0 numbers rest on the sha256 above.
+
 ## Repository layout
 
 ```
@@ -104,8 +129,8 @@ data/brick20/        the BRICK 2.0 comparison posterior
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
 python/              the Table 5 information-criterion test
-test/                tests and the identity gate
-tools/               one-time import of the data from the research repository
+test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo)
+tools/               data import, test-reference builder, BRICK 2.0 fetch
 ```
 
 ## Versions
