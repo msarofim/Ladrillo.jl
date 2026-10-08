@@ -13,7 +13,7 @@ its `prior_form` text). Every numeric field is copied byte-for-byte; data/MANIFE
 destination and the transform, and `verify()` re-checks that a renamed file differs from its source ONLY in the renamed
 tokens.
 
-Usage:  python tools/import_l27_data.py --src ~/Documents/2026/CodeProjects/SLR-RFF-BRICK
+Usage:  python tools/import_l27_data.py --src <SLR-RFF-BRICK checkout>
         python tools/import_l27_data.py --src ... --only constants/ladrillo_priors_L27.csv constants/paleo_geo_prior_ton.csv
 --only imports just the named destinations: it refuses a source with uncommitted changes, rewrites (or appends) only
 those files' MANIFEST rows, and keeps every other MANIFEST row byte-for-byte (its file was imported at its own commit).
@@ -31,7 +31,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 
 ## Column-name renames. Anchored on a token boundary so FASTG cannot become FASTGG and words like FASTER, gis_fast,
-## CUT_FASTDYN are untouched (the traps listed in the 2026-10-07 handoff, section 3F).
+## CUT_FASTDYN are untouched.
 RENAME = [(re.compile(r"(?<![A-Za-z0-9])SLOWP(?![A-Za-z0-9])"), "SLOWG"),
           (re.compile(r"(?<![A-Za-z0-9])FAST(?![A-Za-z0-9])"), "FASTG")]
 ## The same tokens as a column-name SUFFIX (gic_a_FAST, gsic_slowp is a Mimi variable, not data).
@@ -57,7 +57,8 @@ FILES = [
     ("forcing/fair_mean_ohc_ssp245harm.csv", "data/observations/fair_mean_ohc_ssp245harm.csv", "copy"),
     ("forcing/fair_cube_gmst_ssp585_spliced.csv", "data/observations/fair_cube_gmst_ssp585_spliced.csv", "copy"),
     ## BRICK 2.0 comparison arm: the post-PR#93 MimiBRICK v2.0.0 posterior subsample (10,000 draws; linear-units
-    ## antarctic_precip0, see brick20.jl). Redistribution to be confirmed with its author before the repo is public.
+    ## antarctic_precip0, see brick20.jl). Not shipped: tools/fetch_brick20_posterior.sh fetches it; its
+    ## redistribution terms are not established.
     ("brick20/parameters_subsample_brick.csv", "data/MimiBRICK/parameters_subsample_brick.csv", "copy"),
     ## Tables A1/A2 (python/tables/): the calibrator's own dump of the L27 priors (calibrate_mcmc_ext.jl --dump-priors,
     ## the production flags) and the DAIS paleo-ensemble joint prior of the seven geometry parameters

@@ -10,15 +10,17 @@ against inputs.sha256.
 Without --download nothing touches the network: the script prints what it
 would fetch, from where, and to which path.
 
-WHAT IT CANNOT FETCH. Two inputs are not public (forcing_inputs.INPUTS
-`public=False`):
-  * the IIASA scenariomip-2026-prerelease pull (gated database), which feeds the
-    2024-2100 block of every van Vuuren marker; and
-  * EDF / Lisa Rennels' AR6 SSP2-4.5 1750-2300 file, whose post-2100 RATIOS
-    shape the ssp245harm calibration forcing's 2101-2300 tail.
-The script names them and the path each must be placed at; it does not invent a
-source. Until they are placed, build_forcing.py refuses to run (its input check
-fails), rather than building something that is not the shipped forcing.
+WHAT IT CANNOT FETCH. One input is not public (forcing_inputs.INPUTS
+`public=False`): EDF / Lisa Rennels' AR6 SSP2-4.5 1750-2300 file, whose
+post-2100 RATIOS shape the ssp245harm calibration forcing's 2101-2300 tail. The
+script names it and the path it must be placed at; it does not invent a source.
+Without it, build_forcing.py skips the steps that read it and says which files
+it therefore did not build (the two ssp245harm files); it builds the rest. A
+file that is present but fails its checksum still stops the whole build.
+
+The van Vuuren forcing needs no gated input since 2026-10-08: its emissions come
+from the published Zenodo 20713982 v1.1.1 file (fetched here) and
+vv_template_skeleton.csv (names and units, in this directory).
 
 RCMIP v5.1.0 is fetched with fair's own pooch.retrieve(url, known_hash) call, so
 it lands in the cache fair.fill_from_rcmip() reads; a copy is kept under
@@ -112,7 +114,14 @@ def main():
             if not ok:
                 print(f"  {'':<22} ⚠ the fetched file is NOT the one the shipped "
                       f"forcing was built from; build_forcing.py will refuse it.")
-    print("\nNOT PUBLIC -- obtain these yourself and place them at the path shown:")
+    attrib = sorted({spec["attribution"] for spec in fi.INPUTS.values()
+                     if spec.get("attribution")})
+    if attrib:
+        print("\nATTRIBUTION REQUIRED (CC-BY-4.0) when redistributing or citing:")
+        for a in attrib:
+            print(f"  {a}")
+    print("\nNOT PUBLIC -- obtain these yourself and place them at the path shown "
+          "(without them build_forcing.py builds every file that does not need them):")
     for key, spec, dest in private:
         print(f"  {key:<22} {spec['source']}\n  {'':<22} -> {dest}\n"
               f"  {'':<22} sha256 {want[spec['rel']]}")

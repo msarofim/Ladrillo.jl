@@ -166,7 +166,7 @@ def main():
 
     (OUT_DIR / "README.md").write_text(f"""# calibration_v160
 
-Assembled by `scripts/setup_calibration_v160.py`. Do not hand-edit.
+Assembled by `tools/forcing/setup_calibration_v160.py`. Do not hand-edit.
 
 **Source:** {ZENODO_LABEL}
 

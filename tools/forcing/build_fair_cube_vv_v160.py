@@ -43,7 +43,7 @@ to drive an SLR model, that noise is not an uncertainty about the forced
 response: it inflates the joint band with a quantity that cannot be separated
 from parameter spread afterwards, and thermal expansion INTEGRATES it, so it
 accumulates rather than averaging out over 450 years. `--stochastic=on`
-reproduces the SSP convention; `scripts/diag_vv_stochastic_ab.py` is the
+reproduces the SSP convention; the research repo's `diag_vv_stochastic_ab.py` is the
 measurement that decides which is right, and its numbers belong in the
 CHANGELOG entry for whichever is chosen.
 
@@ -159,7 +159,7 @@ def resolve_marker(marker, emis_dir, emis_glob):
     if not csvs:
         sys.exit(f"ERROR: no emissions CSVs matching {emis_glob} in {emis_dir}. "
                  f"The CMIP7-basis van Vuuren files are built by "
-                 f"scripts/build_emissions_v160_cmip7harm_vv.py.")
+                 f"tools/forcing/build_emissions_v160_cmip7harm_vv.py.")
     scen_by_path = {p: pd.read_csv(p, nrows=1)["scenario"].iloc[0] for p in csvs}
 
     unknown = sorted(set(scen_by_path.values()) - set(SCENARIO_TO_MARKER))

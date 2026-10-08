@@ -1,5 +1,6 @@
 # PORT (Ladrillo tools/forcing/, 2026-10-08): copied VERBATIM from FaIRtoFrEDI
-# scripts/fair_units.py @ 8984a13. No change below this line.
+# scripts/fair_units.py @ 8984a13. No code change below this line; on 2026-10-08
+# comments naming private research branches were trimmed.
 """
 fair_units.py — write FaIR's OWN spelling of an emissions unit, never the source
 file's, and refuse any relabel that is not provably factor-1.0.
@@ -21,9 +22,9 @@ while v145-then-v160 is fine. An order-dependent KeyError in a shared global is
 what surfaces months later in somebody else's script.
 
 PROVENANCE OF THIS IMPLEMENTATION. The TWO-WARRANT check below is
-`build_emissions_v160_ssp245.py`'s, written independently on `heat-ed-morbidity`
-2026-09-24 and promoted here verbatim in logic 2026-10-02. It is kept in
-preference to the version on `claude/calib160-migration`, which required only
+`build_emissions_v160_ssp245.py`'s, written independently on one research
+branch 2026-09-24 and promoted here verbatim in logic 2026-10-02. It is kept in
+preference to the version on another research branch, which required only
 that the mass prefix and the time unit match and then relabelled. That is
 NECESSARY BUT NOT SUFFICIENT: `kt HFC32/yr` and `kt HFC125/yr` share prefix and
 time, so the weaker gate would have silently relabelled one gas as another.

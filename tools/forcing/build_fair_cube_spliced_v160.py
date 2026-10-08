@@ -16,8 +16,8 @@ that must share a vintage. After the calib 1.6.0 + CMIP7 migration moved the raw
 cubes, a stale 1.4.5 reference made it compare a Julia splice of v160 data
 against a Python splice of v145 data -- an ssp585 gap of ~0.38 K at 2100, some
 190,000x the tolerance. The gate would have failed correctly, for the wrong
-reason, and taken the ssp585 joint band with it. Flagged by the Ladrillo session
-(fairtofredi-76), which declined to weaken its own gate -- correctly.
+reason, and taken the ssp585 joint band with it. Flagged by Ladrillo's own
+gate, which was not weakened -- correctly.
 
 WHY THIS IS *NOT* PART OF THE COULON ARM, WHICH IS STILL STALE ON 1.4.5. In
 `run_fair_ssp_spread.py` the splice is computed for ALL configs first (line 242)

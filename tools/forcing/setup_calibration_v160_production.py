@@ -186,7 +186,7 @@ def main():
 
     (OUT_DIR / "README.md").write_text(f"""# calibration_v160_prod
 
-Assembled by `scripts/setup_calibration_v160_production.py`. Do not hand-edit.
+Assembled by `tools/forcing/setup_calibration_v160_production.py`. Do not hand-edit.
 
 **Source:** {SOURCE_LABEL}
 

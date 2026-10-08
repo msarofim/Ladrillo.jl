@@ -15,11 +15,11 @@ Every v160 van Vuuren driver -- `build_fair_cube_vv_v160.py`,
 **SMITH 2024 history**, because those files were built for calib 1.4.5 and were
 never rebased. So the 1.6.0 posterior was being paired with v1.4.5 history: the
 rung-R1 input mismatch the migration ladder exists to measure
-(`scripts/diag_calib160_igcc_ladder.py`, memory `calib160_rffsp_ladder`).
+(a research-repo diagnostic, `diag_calib160_igcc_ladder.py`).
 
 MEASURED on marker M and marker H, 841 configs, holding the posterior, the
 future and the marker's own prescribed forcing fixed and moving ONLY the history
-block (2026-10-02, `notes/handoff_2026-10-02_calib160_future_emissions.md`):
+block (2026-10-02, measured in the research repo):
 
     model 1850-1900 baseline GMST    -0.0619 K  ->  -0.1269 K  (0.065 K COOLER)
     GMST 2015-2024 bias vs IGCC      -0.1092 K  ->  -0.0608 K
@@ -65,8 +65,8 @@ only. Medium-to-Low was revised before publication: its CO2 at 2100 is -9.23
 GtCO2/yr in the prerelease and +1.26 published. So the `harmonized` ML tail sat
 10.49 GtCO2/yr low for 200 years: -2,098 GtCO2 of removal not in the scenario,
 CO2 below pre-industrial by 2300, and 0.73 K too cold at 2300 (L -167 and LN
--112 GtCO2; H, HL, M and VL within 27). Measured in SLR-RFF-BRICK
-`python/diag_vv_zenodo_ab/` (CHANGELOG 2026-10-08j). The continuity gate could
+-112 GtCO2; H, HL, M and VL within 27). Measured in the SLR-RFF-BRICK research
+repo (its CHANGELOG 2026-10-08j). The continuity gate could
 not see it: continuity at 2100 held BY CONSTRUCTION.
 `zenodo` takes the WHOLE scenario period 2024.5-2300.5 from the published file,
 so there is no 2100 join at all. Its history vintage differs from the 1.6.0
@@ -147,8 +147,8 @@ MAX_JOIN_STEP_RESIDUAL = 1e-9
 # of the same world. A species moving more than this is a unit or definition
 # mismatch, not a reconstruction difference -- stop rather than scale it.
 MAX_ABS_SCALE_DEVIATION = 0.25
-# MEASURED exceptions, not loosened tolerances (2026-10-08; memory
-# `zenodo_vv_history_vintage`). The Zenodo v1.1.1 file carries its OWN history
+# MEASURED exceptions, not loosened tolerances (2026-10-08). The Zenodo v1.1.1
+# file carries its OWN history
 # vintage, and for these gases the two reconstructions genuinely differ by more
 # than 25% at 2023 -- not a unit error (a unit error is x1000):
 #   CCl4        x1.257  Zenodo's history runs 10-22% below the 1.6.0 record in
@@ -359,8 +359,9 @@ def main():
         print(f"    wrote {dest.name}")
 
     print(f"\nNOTE: the '{BASIS_SLUG}' infix is the provenance marker. The van "
-          f"Vuuren files under data/vanvuuren/spliced_ext_*/ are the SMITH 2024 "
-          f"history basis and belong to the calib 1.4.5 lineage; pair these with "
+          f"Vuuren files under spliced_ext_*/ carry a NON-CMIP7 history (Smith "
+          f"2024 from the template, or Zenodo's own from the skeleton) and belong "
+          f"to the calib 1.4.5 lineage; pair these with "
           f"calib {CALIB_VERSION}, and pair each marker with its OWN "
           f"volcanic_solar_<MARKER>.csv.")
 

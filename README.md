@@ -79,8 +79,9 @@ Tables A1 and A2 (seconds, NumPy and pandas, to `outputs/tables/`): `python pyth
 `tools/forcing/` rebuilds every file in `data/forcing/` from its inputs, in about a minute, and checks them
 byte-for-byte against the shipped files (`check_forcing_identity.py`). `tools/forcing/README.md` covers the recipe,
 the inputs, their checksums and their sources.
-- ⚠ Two inputs are not public: the IIASA ScenarioMIP prerelease emissions, needed for the van Vuuren forcing, and an
-  AR6 SSP2-4.5 file, which shapes the calibration forcing after 2100 only.
+- The van Vuuren forcing is built from the published Zenodo 20713982 v1.1.1 emissions.
+- ⚠ One input is not public: an AR6 SSP2-4.5 file, which shapes the calibration forcing after 2100 only. Without it
+  the build makes the other 41 of the 43 files and says which two it skipped.
 
 *In progress: the calibration code and the figure scripts.*
 

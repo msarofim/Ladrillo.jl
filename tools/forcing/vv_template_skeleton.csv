@@ -1,0 +1,358 @@
+slug,scenario,region,variable,unit
+high_ssp3_marker,High - SSP3 (Marker),World,BC,Mt BC/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C2F6,kt C2F6/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C3F8,kt C3F8/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C4F10,kt C4F10/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C5F12,kt C5F12/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C6F14,kt C6F14/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C7F16,kt C7F16/yr
+high_ssp3_marker,High - SSP3 (Marker),World,C8F18,kt C8F18/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CCl4,kt CCl4/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CF4,kt CF4/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CFC-11,kt CFC11/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CFC-113,kt CFC113/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CFC-114,kt CFC114/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CFC-115,kt CFC115/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CFC-12,kt CFC12/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CH3Br,kt CH3Br/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CH3Cl,kt CH3Cl/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CH4,Mt CH4/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CHCl3,kt CHCl3/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CO,Mt CO/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CO2 AFOLU,Gt CO2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,CO2 FFI,Gt CO2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HCFC-141b,kt HCFC141b/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HCFC-142b,kt HCFC142b/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HCFC-22,kt HCFC22/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-125,kt HFC125/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-134a,kt HFC134a/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-143a,kt HFC143a/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-152a,kt HFC152a/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-227ea,kt HFC227ea/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-23,kt HFC23/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-236fa,kt HFC236fa/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-245fa,kt HFC245fa/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-32,kt HFC32/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+high_ssp3_marker,High - SSP3 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+high_ssp3_marker,High - SSP3 (Marker),World,Halon-1211,kt Halon1211/yr
+high_ssp3_marker,High - SSP3 (Marker),World,Halon-1301,kt Halon1301/yr
+high_ssp3_marker,High - SSP3 (Marker),World,Halon-2402,kt Halon2402/yr
+high_ssp3_marker,High - SSP3 (Marker),World,N2O,Mt N2O/yr
+high_ssp3_marker,High - SSP3 (Marker),World,NF3,kt NF3/yr
+high_ssp3_marker,High - SSP3 (Marker),World,NH3,Mt NH3/yr
+high_ssp3_marker,High - SSP3 (Marker),World,NOx,Mt NO2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,OC,Mt OC/yr
+high_ssp3_marker,High - SSP3 (Marker),World,SF6,kt SF6/yr
+high_ssp3_marker,High - SSP3 (Marker),World,SO2F2,kt SO2F2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,Sulfur,Mt SO2/yr
+high_ssp3_marker,High - SSP3 (Marker),World,VOC,Mt VOC/yr
+high_ssp3_marker,High - SSP3 (Marker),World,c-C4F8,kt cC4F8/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,BC,Mt BC/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C2F6,kt C2F6/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C3F8,kt C3F8/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C4F10,kt C4F10/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C5F12,kt C5F12/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C6F14,kt C6F14/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C7F16,kt C7F16/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,C8F18,kt C8F18/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CCl4,kt CCl4/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CF4,kt CF4/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CFC-11,kt CFC11/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CFC-113,kt CFC113/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CFC-114,kt CFC114/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CFC-115,kt CFC115/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CFC-12,kt CFC12/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CH3Br,kt CH3Br/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CH3Cl,kt CH3Cl/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CH4,Mt CH4/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CHCl3,kt CHCl3/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CO,Mt CO/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CO2 AFOLU,Gt CO2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,CO2 FFI,Gt CO2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HCFC-141b,kt HCFC141b/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HCFC-142b,kt HCFC142b/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HCFC-22,kt HCFC22/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-125,kt HFC125/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-134a,kt HFC134a/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-143a,kt HFC143a/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-152a,kt HFC152a/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-227ea,kt HFC227ea/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-23,kt HFC23/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-236fa,kt HFC236fa/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-245fa,kt HFC245fa/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-32,kt HFC32/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,Halon-1211,kt Halon1211/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,Halon-1301,kt Halon1301/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,Halon-2402,kt Halon2402/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,N2O,Mt N2O/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,NF3,kt NF3/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,NH3,Mt NH3/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,NOx,Mt NO2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,OC,Mt OC/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,SF6,kt SF6/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,SO2F2,kt SO2F2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,Sulfur,Mt SO2/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,VOC,Mt VOC/yr
+high_to_low_ssp5_marker,High-to-Low - SSP5 (Marker),World,c-C4F8,kt cC4F8/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,BC,Mt BC/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C2F6,kt C2F6/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C3F8,kt C3F8/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C4F10,kt C4F10/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C5F12,kt C5F12/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C6F14,kt C6F14/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C7F16,kt C7F16/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,C8F18,kt C8F18/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CCl4,kt CCl4/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CF4,kt CF4/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CFC-11,kt CFC11/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CFC-113,kt CFC113/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CFC-114,kt CFC114/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CFC-115,kt CFC115/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CFC-12,kt CFC12/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CH3Br,kt CH3Br/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CH3Cl,kt CH3Cl/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CH4,Mt CH4/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CHCl3,kt CHCl3/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CO,Mt CO/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CO2 AFOLU,Gt CO2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,CO2 FFI,Gt CO2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HCFC-141b,kt HCFC141b/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HCFC-142b,kt HCFC142b/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HCFC-22,kt HCFC22/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-125,kt HFC125/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-134a,kt HFC134a/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-143a,kt HFC143a/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-152a,kt HFC152a/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-227ea,kt HFC227ea/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-23,kt HFC23/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-236fa,kt HFC236fa/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-245fa,kt HFC245fa/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-32,kt HFC32/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,Halon-1211,kt Halon1211/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,Halon-1301,kt Halon1301/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,Halon-2402,kt Halon2402/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,N2O,Mt N2O/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,NF3,kt NF3/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,NH3,Mt NH3/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,NOx,Mt NO2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,OC,Mt OC/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,SF6,kt SF6/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,SO2F2,kt SO2F2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,Sulfur,Mt SO2/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,VOC,Mt VOC/yr
+medium_ssp2_marker,Medium - SSP2 (Marker),World,c-C4F8,kt cC4F8/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,BC,Mt BC/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C2F6,kt C2F6/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C3F8,kt C3F8/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C4F10,kt C4F10/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C5F12,kt C5F12/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C6F14,kt C6F14/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C7F16,kt C7F16/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,C8F18,kt C8F18/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CCl4,kt CCl4/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CF4,kt CF4/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CFC-11,kt CFC11/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CFC-113,kt CFC113/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CFC-114,kt CFC114/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CFC-115,kt CFC115/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CFC-12,kt CFC12/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CH3Br,kt CH3Br/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CH3Cl,kt CH3Cl/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CH4,Mt CH4/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CHCl3,kt CHCl3/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CO,Mt CO/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CO2 AFOLU,Gt CO2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,CO2 FFI,Gt CO2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HCFC-141b,kt HCFC141b/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HCFC-142b,kt HCFC142b/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HCFC-22,kt HCFC22/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-125,kt HFC125/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-134a,kt HFC134a/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-143a,kt HFC143a/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-152a,kt HFC152a/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-227ea,kt HFC227ea/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-23,kt HFC23/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-236fa,kt HFC236fa/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-245fa,kt HFC245fa/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-32,kt HFC32/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,Halon-1211,kt Halon1211/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,Halon-1301,kt Halon1301/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,Halon-2402,kt Halon2402/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,N2O,Mt N2O/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,NF3,kt NF3/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,NH3,Mt NH3/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,NOx,Mt NO2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,OC,Mt OC/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,SF6,kt SF6/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,SO2F2,kt SO2F2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,Sulfur,Mt SO2/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,VOC,Mt VOC/yr
+medium_to_low_ssp2_marker,Medium-to-Low - SSP2 (Marker),World,c-C4F8,kt cC4F8/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,BC,Mt BC/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C2F6,kt C2F6/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C3F8,kt C3F8/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C4F10,kt C4F10/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C5F12,kt C5F12/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C6F14,kt C6F14/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C7F16,kt C7F16/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,C8F18,kt C8F18/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CCl4,kt CCl4/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CF4,kt CF4/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CFC-11,kt CFC11/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CFC-113,kt CFC113/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CFC-114,kt CFC114/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CFC-115,kt CFC115/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CFC-12,kt CFC12/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CH3Br,kt CH3Br/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CH3Cl,kt CH3Cl/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CH4,Mt CH4/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CHCl3,kt CHCl3/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CO,Mt CO/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CO2 AFOLU,Gt CO2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,CO2 FFI,Gt CO2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HCFC-141b,kt HCFC141b/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HCFC-142b,kt HCFC142b/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HCFC-22,kt HCFC22/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-125,kt HFC125/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-134a,kt HFC134a/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-143a,kt HFC143a/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-152a,kt HFC152a/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-227ea,kt HFC227ea/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-23,kt HFC23/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-236fa,kt HFC236fa/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-245fa,kt HFC245fa/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-32,kt HFC32/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,Halon-1211,kt Halon1211/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,Halon-1301,kt Halon1301/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,Halon-2402,kt Halon2402/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,N2O,Mt N2O/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,NF3,kt NF3/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,NH3,Mt NH3/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,NOx,Mt NO2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,OC,Mt OC/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,SF6,kt SF6/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,SO2F2,kt SO2F2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,Sulfur,Mt SO2/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,VOC,Mt VOC/yr
+low_ssp2_marker,Low - SSP2 (Marker),World,c-C4F8,kt cC4F8/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,BC,Mt BC/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C2F6,kt C2F6/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C3F8,kt C3F8/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C4F10,kt C4F10/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C5F12,kt C5F12/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C6F14,kt C6F14/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C7F16,kt C7F16/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,C8F18,kt C8F18/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CCl4,kt CCl4/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CF4,kt CF4/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CFC-11,kt CFC11/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CFC-113,kt CFC113/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CFC-114,kt CFC114/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CFC-115,kt CFC115/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CFC-12,kt CFC12/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CH3Br,kt CH3Br/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CH3Cl,kt CH3Cl/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CH4,Mt CH4/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CHCl3,kt CHCl3/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CO,Mt CO/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CO2 AFOLU,Gt CO2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,CO2 FFI,Gt CO2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HCFC-141b,kt HCFC141b/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HCFC-142b,kt HCFC142b/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HCFC-22,kt HCFC22/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-125,kt HFC125/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-134a,kt HFC134a/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-143a,kt HFC143a/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-152a,kt HFC152a/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-227ea,kt HFC227ea/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-23,kt HFC23/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-236fa,kt HFC236fa/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-245fa,kt HFC245fa/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-32,kt HFC32/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,Halon-1211,kt Halon1211/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,Halon-1301,kt Halon1301/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,Halon-2402,kt Halon2402/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,N2O,Mt N2O/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,NF3,kt NF3/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,NH3,Mt NH3/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,NOx,Mt NO2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,OC,Mt OC/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,SF6,kt SF6/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,SO2F2,kt SO2F2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,Sulfur,Mt SO2/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,VOC,Mt VOC/yr
+low_to_negative_ssp2_marker,Low-to-Negative - SSP2 (Marker),World,c-C4F8,kt cC4F8/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,BC,Mt BC/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C2F6,kt C2F6/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C3F8,kt C3F8/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C4F10,kt C4F10/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C5F12,kt C5F12/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C6F14,kt C6F14/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C7F16,kt C7F16/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,C8F18,kt C8F18/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CCl4,kt CCl4/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CF4,kt CF4/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CFC-11,kt CFC11/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CFC-113,kt CFC113/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CFC-114,kt CFC114/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CFC-115,kt CFC115/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CFC-12,kt CFC12/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CH2Cl2,kt CH2Cl2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CH3Br,kt CH3Br/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CH3CCl3,kt CH3CCl3/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CH3Cl,kt CH3Cl/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CH4,Mt CH4/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CHCl3,kt CHCl3/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CO,Mt CO/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CO2 AFOLU,Gt CO2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,CO2 FFI,Gt CO2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HCFC-141b,kt HCFC141b/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HCFC-142b,kt HCFC142b/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HCFC-22,kt HCFC22/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-125,kt HFC125/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-134a,kt HFC134a/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-143a,kt HFC143a/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-152a,kt HFC152a/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-227ea,kt HFC227ea/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-23,kt HFC23/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-236fa,kt HFC236fa/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-245fa,kt HFC245fa/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-32,kt HFC32/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-365mfc,kt HFC365mfc/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,HFC-4310mee,kt HFC4310mee/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,Halon-1211,kt Halon1211/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,Halon-1301,kt Halon1301/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,Halon-2402,kt Halon2402/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,N2O,Mt N2O/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,NF3,kt NF3/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,NH3,Mt NH3/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,NOx,Mt NO2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,OC,Mt OC/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,SF6,kt SF6/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,SO2F2,kt SO2F2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,Sulfur,Mt SO2/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,VOC,Mt VOC/yr
+very_low_ssp1_marker,Very Low - SSP1 (Marker),World,c-C4F8,kt cC4F8/yr

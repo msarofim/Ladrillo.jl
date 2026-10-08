@@ -5,13 +5,14 @@ Each logical input has
   * `rel`       its path under an --inputs-dir, as fetch_inputs.py lays it out
                 (and as inputs.sha256 lists it);
   * `fairtofredi`  where the research repo keeps the same file, so a build can be
-                pointed at the copies already on Marcus's disk with
-                --fairtofredi-root instead of a fetched --inputs-dir;
+                pointed at the copies already in the maintainer's research
+                checkout with --fairtofredi-root instead of a fetched --inputs-dir;
   * `public`    True / False, and `source` / `url` / `licence` saying from where.
                 `public=False` means a reviewer CANNOT fetch it: it is gated,
                 private, or of unestablished provenance. Nothing is hidden behind
-                a tolerance here either -- the build needs these files and the
-                README says which ones nobody outside can get.
+                a tolerance here either. A build without such a file skips the
+                steps that read it (build_forcing.py says which files it then
+                cannot build); the README says which ones nobody outside can get.
 
 The three RCMIP files are special: fair's `fill_from_rcmip()` reads them through
 pooch's cache, not through a path we pass, so they always resolve to that cache
@@ -42,13 +43,22 @@ ZENODO_VV_ZIP_URL = ("https://zenodo.org/api/records/20713982/files/"
                      "chrisroadmap/cmip7-scenariomip-1.1.1.zip/content")
 ZENODO_VV_MEMBER_SUFFIX = "data/fair-inputs/emissions_1750-2500.csv"
 
-TEMPATTR_COMMIT = "4b6022a6a162398f8dd0b41e3910c2b4328d7a3b"
-TEMPATTR_URL = ("https://raw.githubusercontent.com/chrisroadmap/"
-                f"temperature-attribution/{TEMPATTR_COMMIT}/output/"
-                "emissions_extrapolated_1750-2025.csv")
-FAIRCAL_CHRIS_URL = ("https://raw.githubusercontent.com/chrisroadmap/"
-                     "fair-calibrate/main/data/emissions/"
-                     "CH4Pledge-rcmip-emissions-ssp245-CLE-MFR-filled.csv")
+# Licences, read from the Zenodo and GitHub APIs (metadata only) on 2026-10-08.
+ZENODO_CALIB_LICENCE = "CC-BY-4.0 (Zenodo API, 2026-10-08); attribution required"
+ZENODO_CALIB_ATTRIBUTION = ("Smith, C. (2026). fair calibration data (v1.6.0) "
+                            "[Data set]. Zenodo. https://doi.org/10.5281/zenodo.18828694")
+ZENODO_VV_LICENCE = "MIT (Zenodo API, 2026-10-08)"
+
+# chrisroadmap/fair-calibrate, pinned to the last commit that touched the file,
+# as reported by the GitHub API (commits?path=..., 2026-10-08; metadata only,
+# nothing downloaded). Whether that commit's bytes are the copy the shipped
+# forcing was built from is NOT yet verified: fetch_inputs.py --verify decides
+# on first use.
+FAIRCAL_CHRIS_COMMIT = "3f72545665f61c0416299412be68e4deab46ec61"
+FAIRCAL_CHRIS_PATH = "data/emissions/CH4Pledge-rcmip-emissions-ssp245-CLE-MFR-filled.csv"
+FAIRCAL_CHRIS_URL = ("https://raw.githubusercontent.com/chrisroadmap/fair-calibrate/"
+                     f"{FAIRCAL_CHRIS_COMMIT}/{FAIRCAL_CHRIS_PATH}")
+FAIRCAL_LICENCE = "MIT (GitHub API, chrisroadmap/fair-calibrate, 2026-10-08)"
 
 # fair 2.2.4's own RCMIP v5.1.0 retrievals (fair/io/fill_from.py), copied so the
 # offline guard checks EXACTLY what fill_from_rcmip() will ask pooch for.
@@ -68,7 +78,7 @@ def _z(name, what):
                 fairtofredi=f"v160_cache/{name}", public=True,
                 url=ZENODO_CALIB_URL.format(rec=ZENODO_CALIB_RECORD, name=name),
                 source=f"{ZENODO_CALIB_LABEL}, file {name}",
-                licence="as stated on the Zenodo record (not checked offline)",
+                licence=ZENODO_CALIB_LICENCE, attribution=ZENODO_CALIB_ATTRIBUTION,
                 what=what)
 
 
@@ -91,7 +101,7 @@ INPUTS = {
                url=RCMIP_BASE + fn, md5=md5,
                source="RCMIP v5.1.0 (Nicholls et al. 2020), fetched by fair 2.2.4 "
                       "fill_from_rcmip() via pooch",
-               licence="as stated by RCMIP (not checked offline)",
+               licence="RCMIP terms (NOT checked)",
                what="RCMIP SSP future emissions (only the emissions file's values "
                     "are used; fair retrieves all three)")
        for k, (fn, md5) in RCMIP_FILES.items()},
@@ -100,13 +110,12 @@ INPUTS = {
         rel="chrisroadmap_fair-calibrate/CH4Pledge-rcmip-emissions-ssp245-CLE-MFR-filled.csv",
         fairtofredi="calibration_v145/raw_chrisroadmap_ssp245/ssp245_chrisroadmap.csv",
         public=True, url=FAIRCAL_CHRIS_URL,
-        source="GitHub chrisroadmap/fair-calibrate data/emissions/"
-               "CH4Pledge-rcmip-emissions-ssp245-CLE-MFR-filled.csv (MESSAGE-GLOBIOM "
-               "SSP2-4.5 + CH4-pledge variants). Path from FaIRtoFrEDI notes "
-               "2026-05-27; the URL's BRANCH and the byte identity of the fetched "
-               "file are UNVERIFIED (no download was made) -- the sha256 check "
-               "decides.",
-        licence="fair-calibrate repository licence (not checked offline)",
+        source=f"GitHub chrisroadmap/fair-calibrate @ {FAIRCAL_CHRIS_COMMIT[:7]}, "
+               f"{FAIRCAL_CHRIS_PATH} (MESSAGE-GLOBIOM SSP2-4.5 + CH4-pledge "
+               "variants). Commit from GitHub API metadata; the byte identity of "
+               "the fetched file is UNVERIFIED (no download was made) -- the "
+               "sha256 check decides on first use.",
+        licence=FAIRCAL_LICENCE,
         what="SSP2-4.5 future 2024-2100"),
     "ar6_ssp245": dict(
         rel="edf_rennels/AR6_emissions_ssp245_1750_2300.csv",
@@ -117,28 +126,6 @@ INPUTS = {
         licence="NONE RECORDED",
         what="post-2100 r(t) SHAPE for the SSP2-4.5 extension (ratios only)"),
     # -- van Vuuren ScenarioMIP-CMIP7 markers --------------------------------
-    "smith2024_history": dict(
-        rel="chrisroadmap_temperature-attribution/emissions_extrapolated_1750-2025.csv",
-        fairtofredi="calibration_v145/smith2024_extended_1750-2025.csv",
-        public=True, url=TEMPATTR_URL,
-        source=f"GitHub chrisroadmap/temperature-attribution @ {TEMPATTR_COMMIT[:7]}, "
-               "output/emissions_extrapolated_1750-2025.csv (sha256 verified "
-               "against a local clone at that commit)",
-        licence="MIT (repository LICENSE)",
-        what="the vv template's species list and unit labels. No Smith VALUE "
-             "reaches a shipped file: the IIASA pull covers every species (0 held "
-             "from Smith) and the cmip7harm rebase replaces 1750.5-2023.5 with "
-             "CMIP7 history -- verified 2026-10-08 by perturbing every Smith value "
-             "and getting byte-identical vv emissions"),
-    "vv_iiasa_prerelease": dict(
-        rel="iiasa_scenariomip-2026-prerelease/emissions_harmonized_infilled_2023-2100.csv",
-        fairtofredi="data/vanvuuren/emissions_harmonized_infilled_2023-2100.csv",
-        public=False, url=None,
-        source="IIASA Scenario Explorer, scenariomip-2026-prerelease, 'Climate "
-               "Assessment|Harmonized and Infilled|Emissions|*', 7 markers, "
-               "2023-2100. GATED (login) prerelease database; not the final record.",
-        licence="IIASA prerelease terms (redistribution NOT established)",
-        what="van Vuuren marker emissions 2023-2100"),
     "vv_ext_zenodo": dict(
         rel=f"zenodo_{ZENODO_VV_RECORD}/emissions_1750-2500.csv",
         fairtofredi="data/vanvuuren/zenodo_v111_emissions_1750-2500.csv",
@@ -146,8 +133,9 @@ INPUTS = {
         source=f"{ZENODO_VV_LABEL}, member {ZENODO_VV_MEMBER_SUFFIX}. NOT the DOI "
                "printed in van Vuuren et al. 2026 (10.5281/zenodo.14382495 = "
                "stylized v1.0).",
-        licence="as stated on the Zenodo record (not checked offline)",
-        what="published post-2100 extensions (2101-2300 shape)"),
+        licence=ZENODO_VV_LICENCE,
+        what="every van Vuuren value from 2023.5 on (the 2023.5 anchor and the "
+             "2024.5-2300.5 scenario)"),
 }
 
 
@@ -215,6 +203,36 @@ def resolve(key, inputs_dir=None, fairtofredi_root=None):
     if inputs_dir is not None:
         return (Path(inputs_dir) / spec["rel"]).resolve()
     return (Path(fairtofredi_root).expanduser() / spec["fairtofredi"]).resolve()
+
+
+def check_inputs(inputs_dir=None, fairtofredi_root=None, keys=None, quiet=False):
+    """{key: (status, detail)} with status "ok", "absent" or "bad".
+
+    "absent" = the file is not there (for RCMIP: not in pooch's cache). "bad" =
+    it is there and fails inputs.sha256 (RCMIP: or fair's own md5), or the table
+    does not list it. build_forcing.py skips what needs an absent input and
+    ABORTS on any bad one: a wrong file is never built on.
+    """
+    want = expected_sha256()
+    out = {}
+    for key in keys or INPUTS:
+        rel = INPUTS[key]["rel"]
+        p = resolve(key, inputs_dir, fairtofredi_root)
+        if rel not in want:
+            out[key] = ("bad", "not listed in inputs.sha256")
+        elif not p.exists():
+            out[key] = ("absent", f"missing: {p}")
+        elif sha256(p) != want[rel]:
+            out[key] = ("bad", f"sha256 {sha256(p)} != {want[rel]}  ({p})")
+        elif key in RCMIP_FILES and "md5:" + md5(p) != RCMIP_FILES[key][1]:
+            out[key] = ("bad", f"cached copy fails fair's {RCMIP_FILES[key][1]}  ({p})")
+        else:
+            out[key] = ("ok", str(p))
+        if not quiet:
+            st, why = out[key]
+            print(f"  {st.upper():<6} {key:<22} {rel}"
+                  + ("" if st == "ok" else f"\n         {why}"))
+    return out
 
 
 def verify(inputs_dir=None, fairtofredi_root=None, keys=None, quiet=False):

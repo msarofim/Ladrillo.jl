@@ -73,7 +73,7 @@ CSVs, so a run against the constant-tail cube is a controlled A/B on the tail.
              writing those columns onto the old template appends them AFTER
              2300.5 and FaIR then raises NonMonotonicError.
 
-  "zenodo"   PUBLICATION basis (2026-09-17, for the NCC revision). The ENTIRE
+  "zenodo"   PUBLICATION basis (2026-09-17). The ENTIRE
              scenario period 2023.5-2300.5 -- 21st century AND extension -- is
              taken verbatim from the published Zenodo v1.1.1 file, with our
              Smith 2024 history kept for 1750.5-2020.5. One published, openly
@@ -86,8 +86,8 @@ CSVs, so a run against the constant-tail cube is a controlled A/B on the tail.
              the prerelease shows a superseded ML line. H/HL/M move <0.5%.
              The splice point is the SAME one every other variant uses
              (Smith -> scenario at 2023.5), and the column set matches the
-             template exactly, so the pre-2023 portion of any figure is
-             byte-identical to the submitted version.
+             template exactly, so the pre-2023 portion is identical to the
+             other variants'.
 
   "native"   SENSITIVITY. Tail = ext(t) verbatim, unadjusted. Leaves a small
              step at 2100->2101 wherever the two vintages differ (<=0.3% on
@@ -114,8 +114,30 @@ UNCHANGED; only the I/O plumbing differs:
   * --variants selects which of the four to write (default: all four, as
     before). Each variant re-reads its template, so the variants are
     independent and writing a subset changes no file.
-Normally driven by build_forcing.py, which writes only `harmonized` -- the
-variant the cmip7harm van Vuuren emissions are built from.
+
+--skeleton (Ladrillo, 2026-10-08): THE `zenodo` VARIANT WITHOUT THE TEMPLATE.
+For `zenodo` every value from 2023.5 on comes from Zenodo, and the one consumer,
+build_emissions_v160_cmip7harm_vv.py, reads only the 2023.5 anchor and the later
+columns (its history is the CMIP7 record). The template then contributes only
+its row order, the `scenario` / `region` / `variable` / `unit` strings and its
+column grid -- but building it needs the gated IIASA prerelease file. So
+`--skeleton vv_template_skeleton.csv` (names and units only, one row per marker
+x species in the template's row order; no numbers) replaces `--spliced-dir`, and
+is accepted only with `--variants zenodo`:
+  * the column grid is the template's, gap included: 1750.5-2020.5, then
+    2023.5-2300.5 (2021.5 and 2022.5 are ABSENT, as in the template --
+    build_vanvuuren_spliced.py keeps Smith 2024 only through 2020.5);
+  * EVERY column is filled from Zenodo x EXT_TO_SMITH_SCALE, so the history
+    columns (1750.5-2020.5) carry Zenodo's OWN history, not Smith 2024. They
+    are unused downstream: the cmip7harm rebase replaces 1750.5-2023.5 with the
+    CMIP7 record and reads only 2023.5 and later from this file;
+  * a species the skeleton names but Zenodo lacks is an ERROR (the template
+    path keeps the template's values instead; here there are none to keep).
+The columns from 2023.5 on are the same numbers the template path writes, so the
+cmip7harm van Vuuren emissions are byte-identical either way (checked on all 7
+markers, 2026-10-08).
+Normally driven by build_forcing.py, which writes only `zenodo`, from the
+skeleton -- the variant the cmip7harm van Vuuren emissions are built from.
 """
 
 from pathlib import Path
@@ -140,7 +162,57 @@ TAIL_END_YEAR = 2300      # RATIFIED end year for all this work (Marcus
 VARIANTS      = ("harmonized", "native", "fullnative", "zenodo")
 SCENARIO_FIRST_YEAR = 2023   # first scenario year in the template (Smith ends 2020.5)
 
+# --skeleton: the template's column grid, reproduced. The template keeps Smith
+# 2024 history 1750.5-2020.5 and starts the scenario at SCENARIO_FIRST_YEAR, so
+# 2021.5 and 2022.5 are ABSENT (fair interpolates across the gap).
+TEMPLATE_FIRST_YEAR = 1750
+TEMPLATE_HIST_LAST_YEAR = 2020
+META_COLS = ["scenario", "region", "variable", "unit"]
+SKELETON_COLS = ["slug", *META_COLS]
+SKELETON_VARIANT = "zenodo"  # the only variant whose values all come from Zenodo
+
 SPLICED_DIR = None      # set from --spliced-dir in main()
+
+
+def template_grid():
+    """The template's year columns: 1750.5-2020.5, then 2023.5-2300.5."""
+    return ([f"{y}.5" for y in range(TEMPLATE_FIRST_YEAR, TEMPLATE_HIST_LAST_YEAR + 1)]
+            + [f"{y}.5" for y in range(SCENARIO_FIRST_YEAR, TAIL_END_YEAR + 1)])
+
+
+def load_skeleton(path):
+    """Names and units only: one row per marker x species, in template row order."""
+    sk = pd.read_csv(path, dtype=str, keep_default_na=False)
+    if list(sk.columns) != SKELETON_COLS:
+        sys.exit(f"ERROR: {path} columns {list(sk.columns)} != {SKELETON_COLS}")
+    if (sk == "").any().any():
+        sys.exit(f"ERROR: {path} has empty cells")
+    if set(sk["slug"]) != set(EXT_SCEN_TO_SLUG.values()):
+        sys.exit(f"ERROR: {path} slugs {sorted(set(sk['slug']))} != "
+                 f"{sorted(EXT_SCEN_TO_SLUG.values())}")
+    if sk.duplicated(["slug", "variable"]).any():
+        sys.exit(f"ERROR: {path} repeats a species within a marker")
+    if (sk.groupby("slug")["scenario"].nunique() != 1).any():
+        sys.exit(f"ERROR: {path} gives one marker more than one scenario name")
+    return sk
+
+
+def from_skeleton(rows, sub, slug):
+    """One marker's wide CSV from skeleton rows + Zenodo values on the template grid."""
+    cols = template_grid()
+    absent = [c for c in cols if c not in sub.columns]
+    if absent:
+        sys.exit(f"ERROR: extension CSV lacks columns {absent[:5]}...")
+    missing = [v for v in rows["variable"] if v not in sub.index]
+    if missing:
+        sys.exit(f"ERROR: [{slug}] species {missing} absent from Zenodo; --skeleton has "
+                 f"no template values to keep -- use --spliced-dir")
+    vals = np.vstack([sub.loc[spc, cols].to_numpy(dtype=float)
+                      * EXT_TO_SMITH_SCALE.get(spc, 1.0) for spc in rows["variable"]])
+    if np.isnan(vals).any():
+        sys.exit(f"ERROR: [{slug}] NaN in the Zenodo values on the template grid")
+    return pd.concat([rows[META_COLS].reset_index(drop=True),
+                      pd.DataFrame(vals, columns=cols)], axis=1)
 
 # Extension-file scenario code -> our scenario slug (= existing spliced filename)
 EXT_SCEN_TO_SLUG = {
@@ -173,9 +245,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ext-csv", required=True,
                     help="path to emissions_1750-2500.csv from Zenodo 20713982 v1.1.1")
-    ap.add_argument("--spliced-dir", type=Path, required=True,
-                    help="the constant-tail template CSVs (research "
-                         "data/vanvuuren/spliced/)")
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--spliced-dir", type=Path,
+                     help="the constant-tail template CSVs (written by "
+                          "build_vanvuuren_spliced.py; needs the gated IIASA input)")
+    src.add_argument("--skeleton", type=Path,
+                     help=f"names-and-units CSV ({', '.join(SKELETON_COLS)}) in place "
+                          f"of the template; only with --variants {SKELETON_VARIANT}")
     ap.add_argument("--out-root", type=Path, required=True,
                     help="variants go to <out-root>/spliced_ext_<variant>/")
     ap.add_argument("--variants", nargs="+", default=list(VARIANTS),
@@ -184,6 +260,13 @@ def main():
     global SPLICED_DIR
     SPLICED_DIR = args.spliced_dir
     variants = [v for v in VARIANTS if v in args.variants]   # keep VARIANTS order
+    skel = None
+    if args.skeleton is not None:
+        if variants != [SKELETON_VARIANT]:
+            sys.exit(f"ERROR: --skeleton builds only --variants {SKELETON_VARIANT} "
+                     f"(every other variant takes values from the template); "
+                     f"got {variants}")
+        skel = load_skeleton(args.skeleton)
 
     ext = pd.read_csv(args.ext_csv)
     if "scenario" not in ext.columns:
@@ -195,8 +278,14 @@ def main():
 
     print("── van Vuuren PUBLISHED-EXTENSION splice ─────────────────────────────")
     print(f"  extension source : {EXT_SOURCE_LABEL}")
-    print(f"  21st-century src : {OUR_SOURCE_LABEL}")
-    print(f"  splice at        : {SPLICE_YEAR}.5   tail end: {TAIL_END_YEAR}.5")
+    if skel is None:
+        print(f"  21st-century src : {OUR_SOURCE_LABEL}")
+        print(f"  splice at        : {SPLICE_YEAR}.5   tail end: {TAIL_END_YEAR}.5")
+    else:
+        print(f"  names and units  : {args.skeleton} (no template; every value "
+              f"from Zenodo, history columns included)")
+        print(f"  grid             : {TEMPLATE_FIRST_YEAR}.5-{TEMPLATE_HIST_LAST_YEAR}.5, "
+              f"{SCENARIO_FIRST_YEAR}.5-{TAIL_END_YEAR}.5 (the template's)")
     print(f"  variants         : {', '.join(variants)}")
 
     tail_years = list(range(SPLICE_YEAR + 1, TAIL_END_YEAR + 1))
@@ -211,6 +300,15 @@ def main():
         print(f"\n=== variant '{variant}' -> {out_dir} ===")
 
         for code, slug in EXT_SCEN_TO_SLUG.items():
+            if skel is not None:
+                sub = ext[ext["scenario"] == code].set_index("variable")
+                built = from_skeleton(skel[skel["slug"] == slug], sub, slug)
+                out = out_dir / f"{slug}.csv"
+                built.to_csv(out, index=False)
+                print(f"    wrote {out.name}  [{len(built)} species; every column from "
+                      f"Zenodo v1.1.1; names/units from the skeleton]")
+                continue
+
             ours = pd.read_csv(SPLICED_DIR / f"{slug}.csv")
             sub  = ext[ext["scenario"] == code].set_index("variable")
 
@@ -300,15 +398,23 @@ def main():
                 note += f"  max 2100 step {max_step:.4g} ({max_step_sp})"
             print(f"    wrote {out.name}{note}")
 
+    if skel is not None:
+        print(f"\nDone. {SKELETON_VARIANT} from the skeleton: {SCENARIO_FIRST_YEAR}.5 "
+              f"onward is the published Zenodo series; the history columns are "
+              f"Zenodo's own (not Smith 2024) and are unused downstream.")
+        return
     tail_only = [v for v in variants if v in ("harmonized", "native")]
     scen_from_ext = [v for v in variants if v == "zenodo"]
-    print(f"\nDone. Sanity vs data/vanvuuren/spliced/:")
-    print(f"  {', '.join(tail_only)}: byte-identical through {SPLICE_YEAR}.5 "
-          f"(only the post-{SPLICE_YEAR} tail differs)")
-    print(f"  {', '.join(scen_from_ext)}: byte-identical through "
-          f"{SCENARIO_FIRST_YEAR - 1}.5 only; {SCENARIO_FIRST_YEAR}.5 onward is "
-          f"the published Zenodo series (<=0.3% from IIASA on headline species)")
-    print(f"  fullnative: deliberately replaces the history too -- nothing identical")
+    print(f"\nDone. Sanity vs the template (--spliced-dir):")
+    if tail_only:
+        print(f"  {', '.join(tail_only)}: byte-identical through {SPLICE_YEAR}.5 "
+              f"(only the post-{SPLICE_YEAR} tail differs)")
+    if scen_from_ext:
+        print(f"  {', '.join(scen_from_ext)}: byte-identical through "
+              f"{SCENARIO_FIRST_YEAR - 1}.5 only; {SCENARIO_FIRST_YEAR}.5 onward is "
+              f"the published Zenodo series")
+    if "fullnative" in variants:
+        print(f"  fullnative: deliberately replaces the history too -- nothing identical")
 
 
 if __name__ == "__main__":

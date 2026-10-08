@@ -31,7 +31,7 @@ only to SELECT arms from (line 242 splices every config, line 246 selects) and
 says so at its own cube block: "The SPLICE convention is applied in Julia ... not
 baked in here." And the splice is separable from the selection: it is a pure
 function of the raw cube and the ensemble-mean path, with no posterior and no
-targets in it. `scripts/build_fair_cube_spliced_v160.py` emits it, gated by
+targets in it. `tools/forcing/build_fair_cube_spliced_v160.py` emits it, gated by
 reproducing the shipped v145 reference from v145 inputs first. Leaving it stale
 would have failed a hard `@assert` in
 `julia/scope_slr_fair_uncertainty.jl` ([SPLICE-MATCH], tol 2e-6) against a

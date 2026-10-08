@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-10-08j — The vv forcing rebuilds from public inputs (a names-only skeleton replaces the IIASA template); an absent input no longer blocks the build
+
+Follows 696a603 (the vv files re-imported on the published Zenodo emissions). Closes items 1, 2, 5 and 6 of the
+10-08h pre-public list for `tools/`, and item 4 except the first fetch.
+- **Skeleton instead of the IIASA template.** On the `zenodo` variant every value from 2023.5 on comes from Zenodo
+  20713982 v1.1.1, and the cmip7harm builder reads only the 2023.5 anchor and later columns. The template contributed
+  only names, units and its column grid.
+  - New `tools/forcing/vv_template_skeleton.csv`: 357 rows (7 markers × 51 species, template row order), columns
+    `slug, scenario, region, variable, unit`, no numbers.
+  - `build_vanvuuren_extended_splice.py --skeleton` (only with `--variants zenodo`) reproduces the template grid,
+    including its gap (2021.5 and 2022.5 absent), and fills every column from Zenodo × `EXT_TO_SMITH_SCALE`. Its
+    history columns are therefore Zenodo's own history, not Smith 2024; nothing downstream reads them. A species
+    absent from Zenodo is an error. `--spliced-dir` is unchanged for the other variants.
+  - `build_forcing.py`: `VV_TAIL_VARIANT = "zenodo"`; step 05 (`build_vanvuuren_spliced.py`) removed from the plan;
+    step 06 uses the skeleton and depends on nothing. The script stays for the template-based variants.
+- **Inputs 15 → 13.** `vv_iiasa_prerelease` and `smith2024_history` removed from `forcing_inputs.INPUTS`,
+  `inputs.sha256` and the fetch notes (grep: step 05 was their only reader). The AR6 entry stays; step 03 needs it.
+- **An absent input no longer blocks the build.** Each step declares its inputs. Argv inputs are recorded as the
+  plan is assembled. The calib steps' raw files come from the setup scripts' own constants (`NEED` etc.). Step 04
+  declares the three RCMIP files that `fill_from_rcmip` reads.
+  - ABSENT input: the steps that read it and everything downstream are dropped, and the build prints which steps
+    and which of the 43 files are skipped, then builds the rest.
+  - PRESENT but failing sha256 (RCMIP: or fair's md5): the build aborts before any step.
+  - `--install` refuses unless no step was dropped and all 43 exist.
+  - `check_forcing_identity.py --allow-missing` gates only what exists and lists the absent files; without the flag
+    nothing changes.
+  - A plan self-check: the declared outputs must equal the 43 expected files, and every INPUTS key must have a reader.
+  - `--intermediates` now compares `spliced_ext_zenodo` on its names and its 2023.5+ columns.
+- **Provenance text.** README rewritten for the chain without step 5, the 13 inputs and the skip behaviour. Licences
+  were re-read from the APIs (metadata only): Zenodo 18828694 CC-BY-4.0 (attribution added to the README,
+  `forcing_inputs.py` and the `fetch_inputs.py` printout), Zenodo 20713982 MIT, chrisroadmap/fair-calibrate MIT;
+  RCMIP not checked. The fair-calibrate URL is pinned to `3f72545` (the last commit touching the file, from
+  `gh api .../commits?path=`); nothing was downloaded, so its bytes are first checked by `fetch_inputs.py --verify`.
+  The root README's "two inputs are not public" line is corrected.
+- **Internal references trimmed** in `tools/` comments, docstrings and printed strings (no code change): memory and
+  skill names, two research branch names, a session id, handoff paths, the NCC-revision lines, "Marcus's machine",
+  personal paths in usage text, and stale `scripts/` paths. The BRICK 2.0 posterior lines no longer describe a
+  pending arrangement. Two generated calibration READMEs (intermediates, not `data/forcing/`) now name
+  `tools/forcing/`.
+
+**Gates (2026-10-08, load average ~35, `--jobs 2`):**
+
+| gate | result |
+|---|---|
+| (a) full rebuild, `--fairtofredi-root`, all inputs (179 s) | **43 / 43 sha256-identical** to `data/forcing/` (identity gate and a separate `cmp`); 7 / 7 `emissions_v160_cmip7harm_vv<M>.csv` (and their `.variant`) byte-identical to the research copies; `--intermediates` 0 FAIL (23 CSVs byte-identical, 7 splices equal from 2023.5 on) |
+| (b) `--inputs-dir` copies of every input except the AR6 file (147 s) | steps 03 and 08 dropped and named; **41 built, 41 / 41 sha256-identical** (`--allow-missing`: 41 PASS, 2 ABSENT); not built: `fair_mean_{gmst,ohc}_ssp245harm.csv`; the default mode still FAILs the 2 missing; `--install` refuses |
+| (c) mutation | one digit changed in a copy of the Zenodo vv input: abort before any step (exit 1, no logs), both with all inputs and with AR6 absent. One digit in a built `fair_cube_ohc_vvML_raw.csv`: FAIL (max \|diff\| 5.0e-4), with or without `--allow-missing`. +1 ulp in a 2150.5 splice cell: `--intermediates` FAIL (2.8e-17). Gate self-test PASS |
+| (d) `git grep` for the five private strings under `tools/` | no match |
+
+**What a reviewer can rebuild from public inputs alone: 41 of the 43 forcing files**, all 28 vv files included.
+The two ssp245harm files need the non-public AR6 file.
+- Still open: the BRICK 2.0 posterior has no public URL. The AR6 file has no recorded origin or licence. The
+  fair-calibrate URL's bytes are unverified until first fetched. The package's vv certification (gate 2, per the
+  696a603 note) was not re-run here.
+
 ## 2026-10-08i — The suite FAILED from a fresh GitHub clone (90 / 1 fail); the BRICK 2.0 posterior's MANIFEST row now skips when absent
 
 **Found** by the fresh-clone test FROM GITHUB (README's literal `git clone`, empty `JULIA_DEPOT_PATH`):

@@ -13,7 +13,7 @@ Both are the MEAN over the 841 configs of each config's own 1850-1900-rebased
 trajectory -- rebase first, then average, exactly as the v145 driver does.
 `stochastic_run` is left at whatever the posterior sets (both 1.4.5 and 1.6.0
 set it True with per-config seeds), again matching v145, so the before/after
-comparison the Ladrillo session will make is like-for-like.
+comparison Ladrillo makes is like-for-like.
 
 WHAT DIFFERS FROM THE v145 DRIVER, AND WHY
   1. `--calib-dir` defaults to `calibration_v160_prod/`, the production stack:

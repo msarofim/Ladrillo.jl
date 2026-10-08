@@ -24,9 +24,15 @@ Ladrillo's forcing reads them. Only the I/O plumbing differs: --vv-file,
 `emissions_v145_utils` is the vendored subset in this directory.
 
 ⚠ THE INPUT IS NOT PUBLIC. emissions_harmonized_infilled_2023-2100.csv is a pull
-from the GATED IIASA scenariomip-2026-prerelease database. Its 2024.5-2100.5
-values reach every shipped vv forcing file (through the cmip7harm rebase), so
-those files cannot be rebuilt from public inputs alone. See README.md.
+from the GATED IIASA scenariomip-2026-prerelease database.
+
+NO LONGER IN THE BUILD (2026-10-08). build_forcing.py does not run this script:
+the shipped vv files are on the `zenodo` variant, which
+build_vanvuuren_extended_splice.py builds from the published Zenodo file and
+vv_template_skeleton.csv alone, so no IIASA value reaches a shipped file. This
+script is kept for the template-based variants (`harmonized`, `native`,
+`fullnative`; `--spliced-dir`), which do need the IIASA file. Neither of its two
+inputs is listed in forcing_inputs.py / inputs.sha256 any more; pass them by path.
 """
 
 from pathlib import Path

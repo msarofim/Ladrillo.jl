@@ -20,12 +20,18 @@ says by how much; that number is the diagnosis, not a reason to pass it.
 
     python check_forcing_identity.py --candidate-dir WORK/forcing
     python check_forcing_identity.py --candidate-dir WORK/forcing --files fair_mean_gmst_ssp245harm.csv
+    python check_forcing_identity.py --candidate-dir WORK/forcing --allow-missing
     python check_forcing_identity.py --self-test       # mutation-test the gate itself
 
-Secondary mode, for diagnosis on Marcus's machine: compare the INTERMEDIATES a
-build wrote (calibration dirs, emissions files, van Vuuren splices) with the
-research repo's copies:
-    python check_forcing_identity.py --intermediates WORK --fairtofredi-root ~/.../FaIRtoFrEDI
+--allow-missing gates a PARTIAL build (build_forcing.py skips what needs an
+absent input): every candidate file that EXISTS must pass exactly as above; the
+expected files that do not exist are listed as ABSENT and do not fail the gate.
+At least one file must exist. Without the flag a missing file is a FAIL.
+
+Secondary mode, for diagnosis in the maintainer's research checkout: compare the
+INTERMEDIATES a build wrote (calibration dirs, emissions files, van Vuuren
+splices) with the research repo's copies:
+    python check_forcing_identity.py --intermediates WORK --fairtofredi-root <research-checkout>
 """
 
 from __future__ import annotations
@@ -52,15 +58,21 @@ MANIFEST_PREFIX = "forcing/"
 READ_KW = dict(float_precision="round_trip")
 SELF_TEST_FILE = "fair_mean_gmst_ssp245harm.csv"
 
-# research-repo intermediate dir  <->  build_forcing.py work-dir subdir
+# build_forcing.py work-dir subdir  <->  research-repo intermediate dir, files
+# (None = every csv built), and the first year column compared (None = the whole
+# file). The van Vuuren splice is built from vv_template_skeleton.csv, so its
+# history columns hold Zenodo's own history where the research copy holds Smith
+# 2024; nothing downstream reads them, so only the 2023.5+ columns (and the
+# names) are compared there.
+VV_SCENARIO_FIRST_COL = 2023.5
 INTERMEDIATE_MAP = [
     ("calibration_v160", "calibration_v160",
      ["calibrated_constrained_parameters_1.6.0.csv",
       "species_configs_properties_1.6.0.csv", "volcanic_solar.csv",
-      "emissions_v160_cmip7_ssp245_harmonized.csv"]),
-    ("calibration_v160_prod", "calibration_v160_prod", None),   # None = every csv built
-    ("vanvuuren/spliced", "data/vanvuuren/spliced", None),
-    ("vanvuuren/spliced_ext_harmonized", "data/vanvuuren/spliced_ext_harmonized", None),
+      "emissions_v160_cmip7_ssp245_harmonized.csv"], None),
+    ("calibration_v160_prod", "calibration_v160_prod", None, None),
+    ("vanvuuren/spliced_ext_zenodo", "data/vanvuuren/spliced_ext_zenodo", None,
+     VV_SCENARIO_FIRST_COL),
 ]
 
 
@@ -73,8 +85,12 @@ def compare(cand: Path, ref: Path):
     if sha256(cand) == sha256(ref):
         r.update(sha=True, values=True, max_abs=0.0)
         return r
-    a = pd.read_csv(cand, **READ_KW)
-    b = pd.read_csv(ref, **READ_KW)
+    return compare_frames(pd.read_csv(cand, **READ_KW), pd.read_csv(ref, **READ_KW), r)
+
+
+def compare_frames(a, b, r=None):
+    """Cell-by-cell comparison of two parsed tables (no tolerance)."""
+    r = r or {"sha": False, "values": False, "max_abs": None, "where": "", "note": ""}
     if list(a.columns) != list(b.columns):
         r["note"] = (f"columns differ ({len(a.columns)} vs {len(b.columns)}; "
                      f"first mismatch "
@@ -113,15 +129,21 @@ def expected_files(manifest=MANIFEST):
             for row in rows if row["file"].startswith(MANIFEST_PREFIX)}
 
 
-def gate(cand_dir: Path, ref_dir: Path, files=None, report=None):
+def gate(cand_dir: Path, ref_dir: Path, files=None, report=None, allow_missing=False):
     exp = expected_files()
     names = files or sorted(exp)
     unknown = [n for n in names if n not in exp]
     if unknown:
         sys.exit(f"ERROR: not shipped forcing files (absent from MANIFEST): {unknown}")
+    absent = [n for n in names if not (cand_dir / n).exists()] if allow_missing else []
+    if allow_missing and len(absent) == len(names):
+        sys.exit(f"ERROR: --allow-missing, but none of the {len(names)} expected "
+                 f"files is in {cand_dir}; nothing to gate.")
     print(f"IDENTITY GATE: {cand_dir}  vs  {ref_dir}")
     print(f"  {len(names)} file(s); reference sha256 checked against "
-          f"{MANIFEST.relative_to(LADRILLO_ROOT)} first\n")
+          f"{MANIFEST.relative_to(LADRILLO_ROOT)} first"
+          + (f"; --allow-missing: {len(absent)} ABSENT, not gated" if allow_missing else "")
+          + "\n")
     hdr = f"{'file':<38} {'sha256':<7} {'values':<7} {'max|diff|':>11}  verdict"
     print(hdr)
     print("-" * len(hdr))
@@ -131,6 +153,12 @@ def gate(cand_dir: Path, ref_dir: Path, files=None, report=None):
         if sha256(ref) != exp[n]:
             sys.exit(f"ERROR: reference {ref} does not match MANIFEST.csv's sha256 "
                      f"-- the reference itself has changed; refusing to gate.")
+        if n in absent:
+            print(f"{n:<38} {'-':<7} {'-':<7} {'':>11}  ABSENT (not built)")
+            rows.append({"file": n, "sha256_match": None, "value_match": None,
+                         "max_abs_diff": None, "where": "", "note": "not built",
+                         "verdict": "ABSENT"})
+            continue
         r = compare(cand_dir / n, ref)
         ok = r["sha"] or r["values"]
         n_fail += not ok
@@ -143,7 +171,10 @@ def gate(cand_dir: Path, ref_dir: Path, files=None, report=None):
                      "max_abs_diff": r["max_abs"], "where": r["where"],
                      "note": r["note"], "verdict": verdict})
     print("-" * len(hdr))
-    print(f"{len(names) - n_fail} PASS, {n_fail} FAIL")
+    print(f"{len(names) - len(absent) - n_fail} PASS, {n_fail} FAIL"
+          + (f", {len(absent)} ABSENT (not built; --allow-missing)" if absent else ""))
+    if absent:
+        print("ABSENT: " + " ".join(absent))
     if report:
         pd.DataFrame(rows).to_csv(report, index=False)
         print(f"report: {report}")
@@ -193,7 +224,7 @@ def self_test():
 def intermediates(work: Path, root: Path):
     print(f"INTERMEDIATES: {work}  vs  {root}\n")
     n_fail = 0
-    for wsub, rsub, names in INTERMEDIATE_MAP:
+    for wsub, rsub, names, first_col in INTERMEDIATE_MAP:
         wd, rd = work / wsub, root / rsub
         if not wd.exists():
             print(f"  (not built) {wsub}")
@@ -202,7 +233,17 @@ def intermediates(work: Path, root: Path):
             if not (rd / n).exists():
                 print(f"  ----  {wsub}/{n}: no research copy to compare")
                 continue
-            r = compare(wd / n, rd / n)
+            if first_col is None:
+                r = compare(wd / n, rd / n)
+            else:
+                a, b = (pd.read_csv(x, **READ_KW) for x in (wd / n, rd / n))
+                keep = lambda d: [c for c in d.columns  # noqa: E731
+                                  if not c.replace(".", "").isdigit()
+                                  or float(c) >= first_col]
+                r = compare_frames(a[keep(a)], b[keep(b)])
+                r["note"] = (f"names + columns >= {first_col} only: "
+                             + ("every value identical" if r["values"]
+                                else r["note"] or r["where"]))
             ok = r["sha"] or r["values"]
             n_fail += not ok
             md = "" if r["max_abs"] is None else f"{r['max_abs']:.3e}"
@@ -218,6 +259,9 @@ def main():
     ap.add_argument("--reference-dir", type=Path, default=REFERENCE_DIR)
     ap.add_argument("--files", nargs="+", default=None)
     ap.add_argument("--report", type=Path, default=None, help="write the table as CSV")
+    ap.add_argument("--allow-missing", action="store_true",
+                    help="gate only the expected files that exist (a partial build); "
+                         "list the rest as ABSENT")
     ap.add_argument("--self-test", action="store_true")
     ap.add_argument("--intermediates", type=Path, default=None,
                     help="a build_forcing.py --work-dir")
@@ -233,7 +277,7 @@ def main():
     if not args.candidate_dir:
         sys.exit("ERROR: --candidate-dir is required")
     sys.exit(1 if gate(args.candidate_dir, args.reference_dir, args.files,
-                       args.report) else 0)
+                       args.report, args.allow_missing) else 0)
 
 
 if __name__ == "__main__":

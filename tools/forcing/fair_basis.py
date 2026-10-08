@@ -1,5 +1,6 @@
 # PORT (Ladrillo tools/forcing/, 2026-10-08): copied VERBATIM from FaIRtoFrEDI
-# scripts/fair_basis.py @ 8984a13. No change below this line.
+# scripts/fair_basis.py @ 8984a13. No code change below this line; on 2026-10-08
+# comments and one printed path naming private notes / research paths were trimmed.
 """
 fair_basis.py — declare, in ONE place, the two input choices a FaIR run makes
 that cannot be read off its output: which EMISSIONS BASIS it is on, and which
@@ -7,7 +8,7 @@ part of its history is PRESCRIBED FORCING rather than raw emissions.
 
 WHY. Two failure modes, both of which have already happened in this tree.
 
-1. THE BASIS SWAP IS SILENT (memory `harmonized_vs_rcmip_native`). The v1.6.0
+1. THE BASIS SWAP IS SILENT. The v1.6.0
    posterior is conditioned on CMIP7 historical emissions; pairing it with
    RCMIP-native or Smith-2024 history puts a -0.05 to -0.12 K cold bias in and
    raises no error. It cost a retracted result in Aug 2026 and, measured on the
@@ -145,7 +146,7 @@ def require_basis(emis_path, calib_version, allow_legacy=False) -> Basis:
                 f"  That pair is the measured input mismatch (-0.05 to -0.12 K of "
                 f"historical GMST fit; it does NOT move an absolute-threshold "
                 f"statistic), not a variant.\n"
-                f"  Build a CMIP7-basis file -- scripts/build_emissions_v160_*.py "
+                f"  Build a CMIP7-basis file -- tools/forcing/build_emissions_v160_*.py "
                 f"write an '{CMIP7_BASIS_SLUG}' infix -- or pass the driver's "
                 f"explicit legacy-basis flag and say so wherever the number is used."
             )
@@ -167,7 +168,7 @@ def declare(species, properties, forcing_file=None, df_configs=None,
     `df_configs` is supplied, a prescribed specie with no `forcing_scale[...]`
     column is an error: FaIR applies forcing_scale internally to CALCULATED
     species only, so an unscaled prescribed term is indistinguishable from a
-    cooler posterior (see the fair-quirks skill, item 1).
+    cooler posterior.
     """
     def by_mode(m):
         return [s for s in species if properties[s]["input_mode"] == m]
