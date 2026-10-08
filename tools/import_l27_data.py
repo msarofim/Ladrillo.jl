@@ -7,15 +7,21 @@ regenerates an input.
 TRANSFORMS ARE LABEL-ONLY. The only edits are the glacier block renames
     SLOWP -> SLOWG   (slow-responding glacier regions: RGI 03, 09, 07, 06)
     FAST  -> FASTG   (the remaining 13 RGI regions)
-applied to (a) column NAMES in a header line and (b) the `block` LABEL in glacier_block_constants.csv. Every numeric
-field is copied byte-for-byte; data/MANIFEST.csv records the sha256 of source and destination and the transform, and
-`verify()` re-checks that a renamed file differs from its source ONLY in the renamed tokens.
+applied to (a) column NAMES in a header line, (b) the `block` LABEL in glacier_block_constants.csv and (c) for
+transform "labels", every token in the file (ladrillo_priors_L27.csv carries the names in its `name` column and inside
+its `prior_form` text). Every numeric field is copied byte-for-byte; data/MANIFEST.csv records the sha256 of source and
+destination and the transform, and `verify()` re-checks that a renamed file differs from its source ONLY in the renamed
+tokens.
 
 Usage:  python tools/import_l27_data.py --src ~/Documents/2026/CodeProjects/SLR-RFF-BRICK
+        python tools/import_l27_data.py --src ... --only constants/ladrillo_priors_L27.csv constants/paleo_geo_prior_ton.csv
+--only imports just the named destinations: it refuses a source with uncommitted changes, rewrites (or appends) only
+those files' MANIFEST rows, and keeps every other MANIFEST row byte-for-byte (its file was imported at its own commit).
 """
 import argparse
 import csv
 import hashlib
+import io
 import os
 import re
 import subprocess
@@ -53,6 +59,10 @@ FILES = [
     ## BRICK 2.0 comparison arm: the post-PR#93 MimiBRICK v2.0.0 posterior subsample (10,000 draws; linear-units
     ## antarctic_precip0, see brick20.jl). Redistribution to be confirmed with its author before the repo is public.
     ("brick20/parameters_subsample_brick.csv", "data/MimiBRICK/parameters_subsample_brick.csv", "copy"),
+    ## Tables A1/A2 (python/tables/): the calibrator's own dump of the L27 priors (calibrate_mcmc_ext.jl --dump-priors,
+    ## the production flags) and the DAIS paleo-ensemble joint prior of the seven geometry parameters
+    ("constants/ladrillo_priors_L27.csv", "outputs/ladrillo_priors_L27.csv", "labels"),
+    ("constants/paleo_geo_prior_ton.csv", "outputs/paleo_geo_prior_ton.csv", "copy"),
 ] + [("forcing/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else
       "forcing/fair_%s_%s_%s_raw.csv" % (kind, var, k),
       "data/observations/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else
@@ -89,6 +99,8 @@ def transform(src, dst, how):
                 head, sep, rest = lines[i].partition(b",")
                 lines[i] = rename_tokens(head.decode("utf-8")).encode("utf-8") + sep + rest
         out = b"\n".join(lines)
+    elif how == "labels":
+        out = rename_tokens(raw.decode("utf-8")).encode("utf-8")
     else:
         raise SystemExit("unknown transform %s" % how)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -107,15 +119,45 @@ def verify(src, dst, how):
     return back.encode("utf-8") == a and b"FASTGG" not in b
 
 
+## every token that carries a renamed block name, for checking the renames by eye
+TOKEN = re.compile(r"[A-Za-z0-9_]*(?:SLOWP|SLOWG|FAST|FASTG)[A-Za-z0-9_]*")
+
+
+def renamed_tokens(src, dst):
+    """(source token, destination token, count) for every token the transform changed, in order of appearance."""
+    a = TOKEN.findall(open(src, encoding="utf-8").read())
+    b = TOKEN.findall(open(dst, encoding="utf-8").read())
+    if len(a) != len(b):
+        return [("<token count %d>" % len(a), "<token count %d>" % len(b), 1)]
+    seen = {}
+    for x, y in zip(a, b):
+        if x != y:
+            seen[(x, y)] = seen.get((x, y), 0) + 1
+    return [(x, y, n) for (x, y), n in seen.items()]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--src", required=True)
+    ap.add_argument("--only", nargs="+", metavar="DEST",
+                    help="import only these destinations (paths under data/); keep every other MANIFEST row as is")
     a = ap.parse_args()
     src_root = os.path.expanduser(a.src)
     commit = subprocess.run(["git", "-C", src_root, "rev-parse", "--short", "HEAD"],
                             capture_output=True, text=True).stdout.strip()
+    todo = FILES
+    if a.only:
+        unknown = sorted(set(a.only) - {d for d, _, _ in FILES})
+        if unknown:
+            sys.exit("--only: not in FILES: %s" % unknown)
+        todo = [f for f in FILES if f[0] in a.only]
+        ## the row records the source commit, so the source must BE that commit's file
+        dirty = subprocess.run(["git", "-C", src_root, "status", "--porcelain", "--"] + [s for _, s, _ in todo],
+                               capture_output=True, text=True).stdout.strip()
+        if dirty:
+            sys.exit("sources have uncommitted changes, refusing:\n%s" % dirty)
     rows, bad = [], 0
-    for dst_rel, src_rel, how in FILES:
+    for dst_rel, src_rel, how in todo:
         s, d = os.path.join(src_root, src_rel), os.path.join(DATA, dst_rel)
         if not os.path.exists(s):
             sys.exit("missing source %s" % s)
@@ -125,13 +167,41 @@ def main():
         rows.append(dict(file=dst_rel, source=src_rel, source_commit=commit, transform=how,
                          source_sha256=sha(s), sha256=sha(d), label_only_check="PASS" if ok else "FAIL"))
         print("%-55s <- %-60s %-11s %s" % (dst_rel, src_rel, how, "PASS" if ok else "FAIL"))
-    with open(os.path.join(DATA, "MANIFEST.csv"), "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-        w.writeheader()
-        w.writerows(rows)
+        if a.only and how != "copy":
+            for x, y, n in renamed_tokens(s, d):
+                print("      renamed %-28s -> %-28s x%d" % (x, y, n))
+    man = os.path.join(DATA, "MANIFEST.csv")
+    if not a.only:
+        with open(man, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+            w.writeheader()
+            w.writerows(rows)
+    else:
+        ## keep every other row's bytes; replace an imported file's row in place, append a new one at the end
+        raw = open(man, "rb").read()
+        eol = b"\r\n" if b"\r\n" in raw else b"\n"
+        lines = raw.split(eol)
+        assert lines[-1] == b"", "MANIFEST.csv does not end in a line break"
+        lines = lines[:-1]
+        fields = next(csv.reader([lines[0].decode("utf-8")]))
+        assert fields == list(rows[0].keys()), "MANIFEST.csv columns changed: %s" % fields
+
+        def enc(r):
+            buf = io.StringIO()
+            csv.DictWriter(buf, fieldnames=fields, lineterminator="").writerow(r)
+            return buf.getvalue().encode("utf-8")
+        where = {next(csv.reader([ln.decode("utf-8")]))[0]: i for i, ln in enumerate(lines) if i > 0}
+        for r in rows:
+            if r["file"] in where:
+                lines[where[r["file"]]] = enc(r)
+            else:
+                lines.append(enc(r))
+        with open(man, "wb") as f:
+            f.write(eol.join(lines) + eol)
     if bad:
         sys.exit("%d file(s) failed the label-only check" % bad)
-    print("imported %d files from SLR-RFF-BRICK @ %s; data/MANIFEST.csv written" % (len(rows), commit))
+    print("imported %d files from SLR-RFF-BRICK @ %s; data/MANIFEST.csv %s" %
+          (len(rows), commit, "updated (those rows only)" if a.only else "written"))
 
 
 if __name__ == "__main__":

@@ -72,7 +72,17 @@ The Python step needs `pip install -r requirements.txt` (NumPy, pandas, SciPy). 
 Outputs go to `outputs/hindcast/` and `outputs/tables/`. Runtimes were measured on an Apple M4 that was busy with other
 jobs; expect them to be shorter.
 
-*In progress: the calibration, the FaIR forcing builders and the figure scripts.*
+Tables A1 and A2 (seconds, NumPy and pandas, to `outputs/tables/`): `python python/tables/ladrillo_prior_posterior_table.py` for A1; `python python/tables/diag_ais_block_pca.py` then `python python/tables/ladrillo_table_a2.py` for A2.
+
+## Rebuilding the FaIR forcing
+
+`tools/forcing/` rebuilds every file in `data/forcing/` from its inputs, in about a minute, and checks them
+byte-for-byte against the shipped files (`check_forcing_identity.py`). `tools/forcing/README.md` covers the recipe,
+the inputs, their checksums and their sources.
+- ⚠ Two inputs are not public: the IIASA ScenarioMIP prerelease emissions, needed for the van Vuuren forcing, and an
+  AR6 SSP2-4.5 file, which shapes the calibration forcing after 2100 only.
+
+*In progress: the calibration code and the figure scripts.*
 
 ## Validation
 
@@ -86,7 +96,8 @@ That takes about 2 minutes on an Apple M4, and `julia --project=. -e 'using Pkg;
 Pkg's sandbox. The suite re-runs 33 posterior draws in both projection arms (SSP2-4.5, SSP5-8.5), the full posterior
 predictive and a BRICK 2.0 sample. It compares them with values the RESEARCH code wrote (`test/reference/`, sources and
 sha256 in `test/reference/SOURCES.csv`). It also checks every data file against `data/MANIFEST.csv`, the component-sum
-and splice identities, the v1.0 options, and the record-crossing test.
+and splice identities, the v1.0 options, the record-crossing test, and Tables A1 / A2 (when Python with
+NumPy and pandas is available).
 - **On the reference runtime** (macOS arm64, Julia 1.12.6, default bounds checking) every comparison is exact (`==`).
   A one-ulp change to a live parameter fails it.
 - **Elsewhere, including `Pkg.test()`, which forces `--check-bounds=yes`,** values must agree to a relative 1e-12. The
@@ -128,9 +139,9 @@ data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
 data/brick20/        the BRICK 2.0 comparison posterior
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
-python/              the Table 5 information-criterion test
+python/              the Table 5 information-criterion test; tables/ (Tables A1, A2)
 test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo)
-tools/               data import, test-reference builder, BRICK 2.0 fetch
+tools/               data import, test-reference builder, BRICK 2.0 fetch; forcing/ (the FaIR builders)
 ```
 
 ## Versions

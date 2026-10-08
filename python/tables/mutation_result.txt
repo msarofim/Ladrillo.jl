@@ -1,0 +1,51 @@
+# python/tables/mutation_test_tables.py 2026-10-08 11:03 | Ladrillo 3bf4992 + uncommitted python/tables | research SLR-RFF-BRICK 6d262ac | python 3.14.3 numpy 2.4.2 pandas 2.3.3
+control (unmutated copy)   expected PASS  gate PASS (  0 DIFF lines)  outputs changed: none  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+posterior_1ulp             expected PASS  gate PASS (  0 DIFF lines)  outputs changed: none  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+posterior_1e-12            expected FAIL  gate FAIL (239 DIFF lines)  outputs changed: diag_ais_block_pca.csv, ladrillo_prior_posterior.csv  OK
+                              266 numbers, 28 bit-identical, 238 not, max rel diff 7.940e-13
+                              FAIL (238 differences)
+                              IDENTICAL
+                              473 numbers, 472 bit-identical, 1 not, max rel diff 1.779e-16
+                              FAIL (1 differences)
+                              IDENTICAL
+geoprior_sd_1ulp           expected FAIL  gate FAIL (235 DIFF lines)  outputs changed: diag_ais_block_pca.csv  OK
+                              266 numbers, 31 bit-identical, 235 not, max rel diff 5.485e-13
+                              FAIL (235 differences)
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+prop_min_0.78              expected FAIL  gate FAIL (  1 DIFF lines)  outputs changed: ladrillo_table_a2.md  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              FAIL (1 differences)
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+prop_min_0.85              expected FAIL  gate FAIL (  1 DIFF lines)  outputs changed: ladrillo_table_a2.md  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              FAIL (1 differences)
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+double_rename              expected FAIL  gate FAIL (  4 DIFF lines)  outputs changed: ladrillo_prior_posterior.csv, ladrillo_prior_posterior.md  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              FAIL (2 differences)
+                              FAIL (2 differences)
+[TABLES-MUTATION] PASS: every mutant behaved as expected

@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-10-08g — Tables A1 and A2 ported (`python/tables/`); the test suite gains them (92 checks)
+
+Ported by a delegated agent and verified here.
+- **Data:**
+  - `data/constants/ladrillo_priors_L27.csv`, the calibrator's prior dump with the glacier labels renamed.
+  - `data/constants/paleo_geo_prior_ton.csv`, a byte copy.
+  - Both come through `tools/import_l27_data.py --only`, with a new `labels` transform under the existing
+    reversibility check. Two MANIFEST rows are appended; the 55 existing rows are byte-identical.
+- **Code:** the three research scripts (`diag_ais_block_pca.py`, `ladrillo_table_a2.py`,
+  `ladrillo_prior_posterior_table.py`), numerical code copied.
+  - The research script's own `_FAST → _FASTG` label map is DROPPED: the names arrive renamed, and mapping them again
+    would print `_FASTGG`. The gate checks for `FASTGG`.
+- **Gate** (`check_tables_identity.py`, its rename regex written independently of the import tool):
+  - the PCA CSV: 266 / 266 numbers bit-identical;
+  - Table A2 `.md` and Table A1 `.md`: text identical, apart from the provenance comment;
+  - Table A1 CSV: 473 / 473 numbers bit-identical, and 12 text cells equal after the rename.
+- **References:** test/reference gains all four research outputs (SOURCES rows appended, sha-checked copies).
+  - **Tried and fixed:** the agent's version copied only Table A2's `.md` and Table A1's CSV. Table A2 prints 3
+    significant figures, so the self-contained suite could not see a 1-ulp input change. Adding the PCA CSV closes
+    that.
+  - Checked: a 1-ulp change to one paleo-prior sd (`ais_slope`) now FAILS the reference-only gate (235 PCA values),
+    while the Table A2 markdown stays identical.
+  - ⚠ Its largest move is 5.5e-13 relative, inside the portable rtol, so only the EXACT run sees it.
+- **The agent's mutation run** (`python/tables/mutation_result.txt`, against the research repo):
+  - a 1e-12 posterior perturbation, a 1-ulp prior sd, PROP_MIN either way and a doubled rename all FAIL;
+  - a 1-ulp posterior perturbation correctly survives, because pandas' default float parser never delivers it to the
+    calculation.
+- **`test/runtests.jl`: 92 / 92** in 2 min, exact.
+
+**For Marcus:**
+1. The research table scripts read the posterior with pandas' DEFAULT float parser, which is not exact, and the ports
+   keep that, so the tables reproduce. A re-implementation with an exact parser will differ in the last bits.
+   Invisible at the tables' precision. Same family as the Table 5 comparator fix of 10-07e.
+2. Table A1's heading still says "SLOWG = SLOWP and FASTG = FAST in the code". It is kept word for word so the table
+   matches the paper. It no longer describes this package's code; the wording is Marcus's.
+
 ## 2026-10-08f — The FaIR forcing builders ported (`tools/forcing/`): all 43 shipped forcing files rebuild byte-for-byte
 
 **Item 3** (Marcus: "3, 5, and 6 should be done first"). Ported from the private FaIRtoFrEDI @ 8984a13 by a delegated

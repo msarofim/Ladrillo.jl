@@ -17,6 +17,11 @@
 # difference into a large one; that FAILS, as it should. Portable mode cannot see a 1-ulp mutation; only the exact run can.
 #
 # The BRICK 2.0 comparison runs only if its posterior has been fetched (tools/fetch_brick20_posterior.sh).
+#
+# Tables A1/A2 (python/tables/) run only if a Python with NumPy and pandas is found: LADRILLO_PYTHON, else
+# ~/climate-env/bin/python, else python3 on the PATH. Their numbers are compared exactly on the PINNED runtime
+# (requirements.txt's NumPy and pandas, on macOS arm64) and to RTOL_PORTABLE elsewhere, with the count of values that
+# are not bit-identical printed.
 
 using Ladrillo, CSV, DataFrames, Printf, Random, SHA, Statistics, Test
 
@@ -41,6 +46,29 @@ agree(a::Real, b::Real) = isequal(a, b) || (!REFERENCE_RUNTIME && abs(a - b) <= 
 pairing(n, ncfg) = (rng = MersenneTwister(PAIR_SEED); a = Int[];
                     while length(a) < n; append!(a, randperm(rng, ncfg)); end; a[1:n])
 runscript(args...) = success(pipeline(`$JULIA --project=$ROOT $(args)`; stdout = stdout, stderr = stderr))
+
+## Tables A1/A2: the ported research scripts (python/tables/), run in this order, and their research references
+const TABLE_DIR = joinpath(ROOT, "python", "tables")
+const TABLE_SCRIPTS = ("diag_ais_block_pca.py", "ladrillo_table_a2.py", "ladrillo_prior_posterior_table.py")
+const TABLE_GATE = "check_tables_identity.py"
+const TABLE_A2_REF, TABLE_A2_OUT = "research_ladrillo_table_a2_L27_sub10k.md", "ladrillo_table_a2.md"
+const TABLE_A1_REF, TABLE_A1_OUT = "research_ladrillo_prior_posterior_L27.csv", "ladrillo_prior_posterior.csv"
+const TABLE_RENAME = ("SLOWP" => "SLOWG", "FAST" => "FASTG")   # the package's glacier-block rename, as whole tokens
+const PY_PINNED = ("numpy", "pandas")                           # pinned in requirements.txt
+"""A research label in the package's names (gic_a_FAST -> gic_a_FASTG; CUT_FASTDYN, gis_fast untouched)."""
+maplabel(s::AbstractString) = foldl((t, p) -> replace(t, Regex("(?<![A-Za-z0-9])$(p.first)(?![A-Za-z0-9])") => p.second),
+                                    TABLE_RENAME; init = String(s))
+maplabel(x) = x
+"""A Python that imports NumPy and pandas, or nothing."""
+function table_python()
+    for c in (get(ENV, "LADRILLO_PYTHON", ""), joinpath(homedir(), "climate-env", "bin", "python"),
+              something(Sys.which("python3"), ""))
+        (isempty(c) || !(isfile(c) || Sys.which(c) !== nothing)) && continue
+        success(pipeline(`$c -c "import numpy, pandas"`; stdout = devnull, stderr = devnull)) && return c
+    end
+    nothing
+end
+drop_provenance_comment(s) = join(filter(l -> !occursin(r"^<!--.*-->$", l), split(s, '\n')), '\n')
 println("Ladrillo $(pkgversion(Ladrillo)) | julia $VERSION | $(Sys.MACHINE) | comparisons ",
         REFERENCE_RUNTIME ? "EXACT (reference runtime)" :
         "PORTABLE, to rtol $RTOL_PORTABLE (not the reference runtime: platform, Julia version or --check-bounds)")
@@ -142,6 +170,51 @@ end
 
 @testset "record-crossing test (v1.2 opt-in conditioning)" begin
     @test runscript(joinpath(@__DIR__, "conditioning", "check_record_crossing.jl"))
+end
+
+@testset "Tables A1/A2 (python/tables) == research" begin
+    py = table_python()
+    if py === nothing
+        @info "No Python with NumPy and pandas found (set LADRILLO_PYTHON, or `pip install -r requirements.txt`): " *
+              "skipping the Table A1/A2 comparison"
+        @test_skip false
+    else
+        vcode = "import " * join(PY_PINNED, ", ") * "; print(" * join(("$m.__version__" for m in PY_PINNED), ", ") * ")"
+        got = split(readchomp(`$py -c $vcode`))
+        req = Dict(Tuple(split(strip(l), "==")) for l in eachline(joinpath(ROOT, "requirements.txt"))
+                   if occursin("==", l) && !startswith(strip(l), "#"))
+        pins = [get(req, m, "?") for m in PY_PINNED]
+        exact = Sys.isapple() && Sys.ARCH === :aarch64 && got == pins
+        rtol = exact ? 0.0 : RTOL_PORTABLE
+        println("  python $py ($(join(("$m $v" for (m, v) in zip(PY_PINNED, got)), ", "))): numbers ",
+                exact ? "EXACT (pinned runtime)" :
+                "to rtol $rtol (not the pinned runtime: requirements.txt $(join(("$m $v" for (m, v) in zip(PY_PINNED, pins)), ", ")) on macOS arm64)")
+        out = mktempdir()
+        for s in TABLE_SCRIPTS
+            @test success(pipeline(`$py $(joinpath(TABLE_DIR, s)) --outdir=$out`; stdout = devnull, stderr = stderr))
+        end
+        ## the identity gate itself, against the research references
+        @test success(pipeline(`$py $(joinpath(TABLE_DIR, TABLE_GATE)) --refdir=$REF --pkgdir=$out --rtol=$rtol`;
+                               stdout = stdout, stderr = stderr))
+        ## and an independent reader (CSV.jl, not pandas) of the same two comparisons
+        @test drop_provenance_comment(read(joinpath(REF, TABLE_A2_REF), String)) ==
+              drop_provenance_comment(read(joinpath(out, TABLE_A2_OUT), String))
+        a = select(CSV.read(joinpath(REF, TABLE_A1_REF), DataFrame), Not(:provenance))
+        b = select(CSV.read(joinpath(out, TABLE_A1_OUT), DataFrame), Not(:provenance))
+        @test names(a) == names(b) && nrow(a) == nrow(b)
+        n = nexact = nbad = 0
+        for c in names(a), (x, y) in zip(a[!, c], b[!, c])
+            if x isa AbstractFloat && y isa AbstractFloat
+                n += 1; nexact += isequal(x, y)
+                nbad += !(isequal(x, y) || abs(x - y) <= rtol * max(abs(x), abs(y)))
+            else
+                nbad += !isequal(maplabel(x), y)
+            end
+        end
+        @printf("  Table A1 (CSV.jl): %d rows x %d cols, %d floats, %d bit-identical, %d outside tolerance or not equal\n",
+                nrow(a), ncol(a), n, nexact, nbad)
+        @test nbad == 0
+    end
 end
 
 @testset "BRICK 2.0 == research draws (ssp245)" begin
