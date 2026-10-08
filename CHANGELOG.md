@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-10-08b — v1.1 re-certified against the research v1.1 outputs: gates 2–4 PASS, plus a new panel gate
+
+The research rerun is SLR-RFF-BRICK `run_ladrillo_v11_rerun_20261008.sh`, 0 failures. It passed three gates of its own:
+- [V1-REGRESSION]: 16 shipped v1.0 files reproduced exactly;
+- [CONTROL-EXACT]: on 15 SSP arms;
+- Table 5 inputs: byte-identical.
+
+New `test/identity/run_products.sh` produces every compared product with this package's defaults in three streams
+(24 runs, about 9 min). New `compare_all.sh` runs the gates.
+
+| gate | compared | result |
+|---|---|---|
+| 2 products | joint draws, Ladrillo + BRICK 2.0, 3 SSPs + 7 van Vuuren markers | PASS |
+| 2b panel (new, `compare_panel.jl`) | `project_fixed.jl` vs the research fixed panel, 5,598 rows × 7 columns | PASS |
+| 3 postpred | posterior predictive (moves under v1.1 only in 2021–2026, through the threshold-crossing draws) | PASS |
+| 4 hindcast | BRICK 2.0 hindcast + IC residuals | PASS (the residuals did not move) |
+
+- **Gate 5 (Table 5) is not re-run:** its inputs are byte-identical to v1.0 on the research side, and gate 4 ties this
+  package's residuals to them.
+- **Panel-gate power:** against the v1.0 panel it fails on 2,736 cells.
+  - Antarctica and the total differ in every row.
+  - Land water differs by at most 2.8e-14 cm, from re-referencing a shifted series.
+  - Glaciers, Greenland and TE differ nowhere, which is the ordering again.
+- **Tried and fixed:** the first `run_products.sh` used `$BASHPID`, which does not exist in macOS's bash 3.2. Every
+  step failed instantly under `set -u`. Each stream now names its log explicitly.
+
 ## 2026-10-08 — v1.1: paleo single assignment and land-water frame fix (defaults); v1.0 tagged and kept reachable
 
 **Rulings (Marcus 10-08):**
