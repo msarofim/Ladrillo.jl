@@ -15,10 +15,14 @@ The model is driven by prescribed global mean surface temperature and ocean heat
 FaIR 2.2.4 (calib 1.6.0) forcing for SSP1-2.6, SSP2-4.5, SSP5-8.5 and the seven van Vuuren et al. (2025) scenario
 markers, as both the 841-config ensemble mean and the full ensemble.
 
-**This is version 1.1, on the posterior of the model-description paper (calibration L27).** The posterior is
-`data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. Version 1.1 changes no parameter; it
-fixes two things in how projections use the posterior (see *Versions* below). Version 1.0, the code as submitted with
-the paper, is the git tag `v1.0.0`, and both of its behaviours remain reachable as options.
+**This is version 1.2, on the posterior of the model-description paper (calibration L27); the paper reports v1.2.**
+The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. Neither 1.1 nor 1.2
+changes a parameter.
+- Version 1.1 fixes two things in how projections use the posterior.
+- Version 1.2 moves the van Vuuren forcing to the published emissions and conditions the joint-climate arm on the
+  Antarctic record.
+- See *Versions* below. Version 1.0, the code as submitted with the paper, is the git tag `v1.0.0`; version 1.1 is
+  `v1.1.0`. The behaviours of both remain reachable as options.
 
 ## Install
 
@@ -168,7 +172,7 @@ tools/               data import, test-reference builder, BRICK 2.0 fetch; forci
   and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
 - `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
 
-**v1.2** (in development, `1.2.0-DEV`). Two changes since `v1.1.0` (tagged), both made in the research code first and
+**v1.2** (2026-10-08; the version the GMD paper reports). Two changes since `v1.1.0`, both made in the research code first and
 certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
 - **The van Vuuren forcing** (`data/forcing/*vv*`) is built from the PUBLISHED Zenodo v1.1.1 scenario. v1.1's files put
   the published post-2100 extension on the 2100 level of an earlier, gated prerelease; for Medium-to-Low that left the
@@ -200,8 +204,8 @@ certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
     climate, none.
   - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
   - v1.1 does not condition on the record. v1.2 conditions the joint-climate arm by default and offers the
-    calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper's label for the
-    conditioned numbers is still to be decided.
+    calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper reports the
+    conditioned numbers as Ladrillo v1.2 (Marcus 2026-10-08).
 
 ## License
 

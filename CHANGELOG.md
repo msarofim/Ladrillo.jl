@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-08l — v1.2.0 released: the version the GMD paper reports
+
+**Marcus 10-08: the conditioned numbers are "Ladrillo v1.2".** v1.1 cannot reproduce them: the same inputs give the
+unconditioned joint arm and the harmonized-tail vv forcing.
+- `Project.toml` and the Manifest's self-entry: `1.2.0-DEV` → `1.2.0`.
+- `CITATION.cff`: version 1.2.0. Its note now names v1.2.0 as the paper's tag and v1.1.0 as the unconditioned
+  predecessor.
+- README: the intro states v1.2 and what each version changed. *Versions* drops "in development". *Known issues* no
+  longer says the label is undecided.
+- No code change since 2a1a34b, which certified the conditioned products bit for bit (10-08k).
+- `test/runtests.jl` at 1.2.0: **92 / 92, EXACT** (reference runtime; it prints `Ladrillo 1.2.0`). 4 min 18 s at load ~48: a CCX job
+  shared the machine.
+- Tagged `v1.2.0`; `main` and the tag pushed. The repo stays PRIVATE: making it public is Marcus's step.
+
 ## 2026-10-08k — Joint arm conditioned on the record by default; the vv re-import and the conditioning certified bit-for-bit
 
 Marcus 10-08: "go with b and any pending fixes that can be done simultaneously". His rulings:

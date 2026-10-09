@@ -698,7 +698,7 @@ version = "1.4.0"
 deps = ["CSV", "DataFrames", "Mimi", "MimiBRICK", "Random", "Statistics"]
 path = "."
 uuid = "a7357428-476d-4570-8bf3-97ba83aac5dd"
-version = "1.2.0-DEV"
+version = "1.2.0"
 
 [[deps.Latexify]]
 deps = ["Format", "Ghostscript_jll", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
