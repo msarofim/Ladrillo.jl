@@ -129,7 +129,9 @@ The paper's products are gated the same way, against the research drivers' own o
 ## BRICK 2.0 posterior
 
 The BRICK 2.0 comparison uses Tony Wong's post-PR#93 MimiBRICK posterior subsample (10,000 draws, sha256 `78247db8…`).
-It is not redistributed here, and `tools/fetch_brick20_posterior.sh` still needs its public URL.
+It is not redistributed here, and `tools/fetch_brick20_posterior.sh` still needs its public URL. If you have the
+file, place it at `data/brick20/parameters_subsample_brick.csv`; the tests check its sha256 and then run the BRICK 2.0
+comparison.
 - ⚠ The public MimiBRICK v2.0.0 Zenodo record (10.5281/zenodo.20592337) ships a different calibration under the same
   file name. On this package's forcing its thermal-expansion hindcast is 4× worse.
 - It is therefore not a substitute: the paper's BRICK 2.0 numbers rest on the sha256 above.
@@ -138,12 +140,12 @@ It is not redistributed here, and `tools/fetch_brick20_posterior.sh` still needs
 
 ```
 src/                 the model: components/, land water, posterior, forcing helpers
-data/posterior/      the v1.0 posterior
+data/posterior/      the L27 posterior (unchanged since v1.0)
 data/drivers/        observed glacier-region and Greenland temperature drivers (HadCRUT5-based)
 data/constants/      fixed constants, the Greenland amplification shape, paleo draws
 data/observations/   the calibration targets (and the glacier target with the RGI-19 seam removed)
 data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
-data/brick20/        the BRICK 2.0 comparison posterior
+data/brick20/        the BRICK 2.0 comparison posterior: fetched, not shipped (see *BRICK 2.0 posterior*)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
 python/              the Table 5 information-criterion test; tables/ (Tables A1, A2)

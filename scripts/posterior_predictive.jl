@@ -67,8 +67,8 @@ gmst, ohc = mean_forcing(FORCING; years = Y0:Y1)
 lm = LadrilloModel(gmst, ohc; years = Y0:Y1, lws = :central, tap = false, ref = FIT_REF)
 imy = [findfirst(==(y), lm.years) for y in FY]
 ny = length(FY)
-@printf("Ladrillo posterior predictive | v1.0 (L27) | %d draws | %d-%d | base %d-%d | forcing %s\n",
-        nrow(post), FIT_START, Y1, FIT_REF[1], FIT_REF[2], FORCING)
+@printf("Ladrillo posterior predictive | %s (posterior L27) | %d draws | %d-%d | base %d-%d | forcing %s\n",
+        string(pkgversion(Ladrillo)), nrow(post), FIT_START, Y1, FIT_REF[1], FIT_REF[2], FORCING)
 
 model = Dict(k => Array{Float64}(undef, nrow(post), ny) for (k, _, _) in SERIES)
 pred  = Dict(k => Array{Float64}(undef, nrow(post), ny) for (k, _, _) in SERIES)

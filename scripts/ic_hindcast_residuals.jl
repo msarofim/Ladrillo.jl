@@ -75,8 +75,8 @@ post = posterior(rows = ldraws)
 gmst, ohc = mean_forcing(FORCING; years = Y0:Y1)
 lm = LadrilloModel(gmst, ohc; years = Y0:Y1, lws = :central, tap = false, ref = FIT_REF)
 imy = [findfirst(==(y), lm.years) for y in FY]
-@printf("Ladrillo v1.0 (L27) | %d of %d draws | %d-%d scored, base %d-%d | forcing %s\n",
-        nrow(post), NPOST, first(FY), last(FY), FIT_REF[1], FIT_REF[2], FORCING)
+@printf("Ladrillo %s (posterior L27) | %d of %d draws | %d-%d scored, base %d-%d | forcing %s\n",
+        string(pkgversion(Ladrillo)), nrow(post), NPOST, first(FY), last(FY), FIT_REF[1], FIT_REF[2], FORCING)
 resL = Dict(k => Array{Float64}(undef, nrow(post), ny) for (k, _) in SERIES)
 t0 = time()
 for (i, r) in enumerate(eachrow(post))

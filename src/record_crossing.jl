@@ -5,7 +5,8 @@
 # that fast dynamics fires before the Antarctic record ends, at a rate the record does not show (2.5-8x the same draws
 # without it; SLR-RFF-BRICK CHANGELOG 2026-10-08 finding 2). `posterior(; drop_record_crossings=true)` drops them. That
 # is rejection sampling, i.e. exact conditioning of the joint (posterior x paleo) draws on "no fast dynamics through
-# `record_end()`". It is OFF by default: the paper (v1.1) does not condition (Marcus 2026-10-08, decision 2).
+# `record_end()`". It is OFF by default here. The paper's joint-climate arm (v1.2) conditions each draw on its own
+# paired climate instead, in scripts/project_joint.jl (see WHOSE CLIMATE below).
 #
 # The test is the model's own trigger (MimiBRICK antarctic_icesheet: T_ant(t) = (GMST(t-1) - intercept) / coefficient,
 # fast dynamics while T_ant > T_crit, never in the first year), evaluated with the arithmetic apply_draw! sets up, so it

@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-10-09 — Readiness review for sharing with Tony; v1.2.0 re-tested from a GitHub clone; stale labels fixed
+
+**Asked (Marcus 10-09):** is the GitHub repo ready to share with Tony?
+- **Fresh clone of `v1.2.0` FROM GITHUB** (`gh repo clone`, default depot; the empty-depot `Pkg.instantiate()` of
+  10-08i still holds, because the Manifest changed only in its self-entry since): `test/runtests.jl` **90 pass + 2
+  broken, exit 0, every comparison EXACT**, 7 min 07 s at load ~35. The 2 broken checks are the BRICK 2.0 posterior's
+  MANIFEST row and comparison; that file is not shipped. The README quick start runs (10,000 draws, 451 years; the
+  components sum to the total: 51.83 cm at 2100 on draw 1, SSP2-4.5).
+- **Tony's 10-07 request had two parts.** "Obtain Ladrillo from GitHub and run an example" is met. "Rerun the full
+  workflow" is not yet: the calibration code (target prep, the MCMC, the postprocess) and the figure scripts are not
+  ported, and neither are the static FACTS / MAGICC-SLR comparison data the figures read.
+- **Fixed (labels and comments only; no code path changes):**
+  - `scripts/posterior_predictive.jl` and `scripts/ic_hindcast_residuals.jl` printed a hard-coded "v1.0 (L27)"
+    console banner at v1.2.0. It now comes from `pkgversion(Ladrillo)`, like the files' provenance columns, which were
+    already right.
+  - `src/record_crossing.jl` said "the paper (v1.1) does not condition", which contradicts the v1.2 release. It now
+    says the paper's joint arm conditions each draw on its own climate, in `scripts/project_joint.jl`.
+  - README layout: `data/posterior/` holds the L27 posterior, unchanged since v1.0 (it had said "the v1.0 posterior");
+    `data/brick20/` is fetched, not shipped. The *BRICK 2.0 posterior* section says where to put the file if you
+    already have it.
+  - `test/identity/fix_effects.jl`: dropped a reference to a private configuration file.
+- `test/runtests.jl` after the fixes, in the working checkout (BRICK 2.0 posterior present): **92 / 92, EXACT**, 5 min 45 s;
+  the posterior-predictive banner prints `1.2.0 (posterior L27)`. The `ic_hindcast_residuals.jl` banner is not in the
+  suite; it was checked on its own (it prints `Ladrillo 1.2.0 (posterior L27) | 2000 of 10000 draws | ...`).
+- **Still open before PUBLIC** (10-08h/j list, re-checked): the BRICK 2.0 posterior URL (Tony); the AR6 / Rennels
+  file's origin and licence (2 of 43 forcing files); the calibration and figure ports; a data-licence and attribution
+  section (the README states only the code licence); `~/climate-env` as the tests' Python default; this CHANGELOG is a
+  development log full of internal rulings; a Zenodo archive of the release for GMD.
+
 ## 2026-10-08l — v1.2.0 released: the version the GMD paper reports
 
 **Marcus 10-08: the conditioned numbers are "Ladrillo v1.2".** v1.1 cannot reproduce them: the same inputs give the

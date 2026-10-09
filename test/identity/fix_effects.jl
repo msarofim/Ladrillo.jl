@@ -22,7 +22,7 @@ include(joinpath(@__DIR__, "cases.jl"))
 const GAMMA_PALEO = 2.83                    # DAIS ice-flow exponent, the paleo median the posterior holds (Table A3)
 const GL_DEPTH_M = 355.0                    # grounding-line water depth of the analytic pre-check (CHANGELOG 10-01f)
 const ANALYTIC_PER_M = (1 + GAMMA_PALEO) / GL_DEPTH_M   # d ln(flux) / d(sea level), per metre
-const ANALYTIC_TOL = 3                      # "empirical differs from analytic by > 2-3x: dig" (~/.claude/CLAUDE.md)
+const ANALYTIC_TOL = 3                      # empirical differing from analytic by > 2-3x is investigated, not accepted
 const AIS_FLOOR_CM = 10.0                   # ratios only where Antarctica has contributed something
 const FLOAT_CM = 1e-9                       # re-referencing noise on a ~1e2 cm series
 const UNMOVED = (:glaciers, :gsic_r19, :gsic_slowg, :gsic_fastg, :gsic_hind, :gis, :te)
