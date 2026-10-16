@@ -38,6 +38,9 @@ published Zenodo posterior (2026-10-15 below).
 - README: the intro and *Versions* state v1.3 and what it changed.
 - No code change since ac1ccf0, which certified the products bit for bit.
 - Tagged `v1.3.0`; `main` and the tag pushed. The repo stays PRIVATE.
+- **Clean clone of the tag from GitHub** (`git clone --branch v1.3.0`, then `tools/fetch_brick20_posterior.sh`, which downloaded
+  the posterior from Zenodo and verified its sha256): **92 / 92, nothing skipped**, BRICK 2.0 612 / 612 bit-identical. The
+  v1.2.0 clone test skipped 2, because the posterior could not be fetched.
 
 ## 2026-10-15 — The BRICK 2.0 arm reads the published MimiBRICK v2.0.0 joint posterior from Zenodo
 
