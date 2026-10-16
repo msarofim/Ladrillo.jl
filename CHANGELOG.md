@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-15c — Table 5's .md: computed reading sentences and a versioned label
+
+- `python/ic_ladrillo_vs_brick20.py` (6674807, c964ccb):
+  - The steric-row and ρ-at-bound sentences are computed, as in SLR-RFF-BRICK (its CHANGELOG 2026-10-15h). "A tie by
+    construction" was false on the published BRICK 2.0 posterior: Δln L (steric) is +7.2 / −0.8 / −2.3 at
+    ρ ≤ 0.99 / 0.95 / 0.90.
+  - The label was a literal "Ladrillo v1.0" through v1.3.0. It now reads the version from `Project.toml`, as the 10-09
+    banner fix does.
+- Re-run at all three ρ bounds. Every CSV and perdraw CSV is byte-identical to its pre-run copy, and identity gate 5
+  passes. Only the .md files change. `outputs/tables/` is not tracked, so the v1.3.0 tag is unaffected.
+
 ## 2026-10-09 — Readiness review for sharing with Tony; v1.2.0 re-tested from a GitHub clone; stale labels fixed
 
 **Asked (Marcus 10-09):** is the GitHub repo ready to share with Tony?
