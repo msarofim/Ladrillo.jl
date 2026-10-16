@@ -29,6 +29,16 @@
   section (the README states only the code licence); `~/climate-env` as the tests' Python default; this CHANGELOG is a
   development log full of internal rulings; a Zenodo archive of the release for GMD.
 
+## 2026-10-15b — v1.3.0 released: the version the GMD paper reports
+
+**Marcus 10-15:** "update the version # for Ladrillo." v1.3.0 = v1.2's model and numbers + the BRICK 2.0 arm on the
+published Zenodo posterior (2026-10-15 below).
+- `Project.toml` and the Manifest's self-entry: 1.2.0 → 1.3.0.
+- `CITATION.cff`: version 1.3.0, date 2026-10-15; its note names v1.3.0 as the paper's tag.
+- README: the intro and *Versions* state v1.3 and what it changed.
+- No code change since ac1ccf0, which certified the products bit for bit.
+- Tagged `v1.3.0`; `main` and the tag pushed. The repo stays PRIVATE.
+
 ## 2026-10-15 — The BRICK 2.0 arm reads the published MimiBRICK v2.0.0 joint posterior from Zenodo
 
 **Ruled (Marcus 2026-10-15):** "move the BRICK 2.0 arm to the Zenodo joint file." The arm now reads the 35 BRICK

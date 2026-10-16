@@ -15,14 +15,16 @@ The model is driven by prescribed global mean surface temperature and ocean heat
 FaIR 2.2.4 (calib 1.6.0) forcing for SSP1-2.6, SSP2-4.5, SSP5-8.5 and the seven van Vuuren et al. (2025) scenario
 markers, as both the 841-config ensemble mean and the full ensemble.
 
-**This is version 1.2, on the posterior of the model-description paper (calibration L27); the paper reports v1.2.**
-The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. Neither 1.1 nor 1.2
-changes a parameter.
+**This is version 1.3, on the posterior of the model-description paper (calibration L27); the paper reports v1.3.**
+The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. No version since
+1.0 changes a parameter.
 - Version 1.1 fixes two things in how projections use the posterior.
 - Version 1.2 moves the van Vuuren forcing to the published emissions and conditions the joint-climate arm on the
   Antarctic record.
-- See *Versions* below. Version 1.0, the code as submitted with the paper, is the git tag `v1.0.0`; version 1.1 is
-  `v1.1.0`. The behaviours of both remain reachable as options.
+- Version 1.3 moves the BRICK 2.0 comparison arm to the published MimiBRICK v2.0.0 posterior; Ladrillo's own numbers
+  are unchanged.
+- See *Versions* below. Version 1.0, the code as submitted with the paper, is the git tag `v1.0.0`; versions 1.1 and
+  1.2 are `v1.1.0` and `v1.2.0`. The behaviours of 1.0 and 1.1 remain reachable as options.
 
 ## Install
 
@@ -175,7 +177,7 @@ tools/               data import, test-reference builder, BRICK 2.0 fetch; forci
   and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
 - `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
 
-**v1.2** (2026-10-08; the version the GMD paper reports). Two changes since `v1.1.0`, both made in the research code first and
+**v1.2** (2026-10-08). Two changes since `v1.1.0`, both made in the research code first and
 certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
 - **The van Vuuren forcing** (`data/forcing/*vv*`) is built from the PUBLISHED Zenodo v1.1.1 scenario. v1.1's files put
   the published post-2100 extension on the 2100 level of an earlier, gated prerelease; for Medium-to-Low that left the
@@ -196,6 +198,13 @@ certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
   checks it against model runs (10,000 draws on the record climate, 2,000 joint draws) and at the threshold to 1 ulp,
   and is mutation-tested. `scripts/record_crossings.jl` lists the onset year of every projection draw in each climate.
 
+**v1.3** (2026-10-15; the version the GMD paper reports). The BRICK 2.0 comparison arm reads the BRICK parameters of the
+joint SNEASY-BRICK posterior published with MimiBRICK v2.0.0 (Zenodo 10.5281/zenodo.20592337), which
+`tools/fetch_brick20_posterior.sh` downloads; v1.2 used an earlier subsample with no public URL (*BRICK 2.0 posterior*).
+- Every Ladrillo product is bit-identical to v1.2. Only BRICK 2.0 numbers move: its SSP2-4.5 total is about 4 % lower
+  at 2100 and 2300, and Table 5's profiled-AR(1) ΔAIC goes from 88.9 to 95.5.
+- Certified bit-for-bit against the research re-run (identity gates 2-5; CHANGELOG 2026-10-15).
+
 ## Known issues
 
 - **The fast-dynamics threshold is crossed inside the hindcast by a few propagated draws.**
@@ -208,7 +217,7 @@ certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
   - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
   - v1.1 does not condition on the record. v1.2 conditions the joint-climate arm by default and offers the
     calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper reports the
-    conditioned numbers as Ladrillo v1.2 (Marcus 2026-10-08).
+    conditioned numbers (v1.2 and later).
 
 ## License
 

@@ -2,10 +2,12 @@ cff-version: 1.2.0
 message: "If you use Ladrillo, please cite it as below."
 title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea-level rise"
 type: software
-## The version the GMD paper reports is the git tag v1.2.0 ("Ladrillo v1.2", Marcus 2026-10-08); main may carry a -DEV
-## version ahead of it. v1.0.0 is the code as first submitted; v1.1.0 is the unconditioned predecessor. Update this field and date-released at each tagged release.
-version: 1.2.0
-date-released: 2026-10-08
+## The version the GMD paper reports is the git tag v1.3.0 (Marcus 2026-10-15): v1.2's model and numbers, with the BRICK
+## 2.0 comparison arm on the published MimiBRICK v2.0.0 joint posterior. main may carry a -DEV version ahead of it.
+## v1.0.0 is the code as first submitted; v1.1.0 is the unconditioned predecessor; v1.2.0 used the May-22 BRICK 2.0
+## posterior. Update this field and date-released at each tagged release.
+version: 1.3.0
+date-released: 2026-10-15
 license: MIT
 repository-code: "https://github.com/msarofim/Ladrillo.jl"
 authors:
