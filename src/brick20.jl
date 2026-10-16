@@ -1,23 +1,30 @@
-# The BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with its post-PR#93 posterior subsample (10,000 draws).
+# The BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with the BRICK parameters of its published joint SNEASY-BRICK
+# posterior subsample (Zenodo 10.5281/zenodo.20592337, `parameters_subsample_sneasybrick.csv`, 10,000 draws; Marcus
+# 2026-10-15). The 16 SNEASY columns are present in the file and not read: the arm is driven by FaIR.
 #
 # The posterior is NOT redistributed with this package: tools/fetch_brick20_posterior.sh fetches it into
 # data/brick20/ and checks its sha256.
 #
-# MimiBRICK v2.0.0 moved `ais_precipitation₀` to log space; the posterior stores it in linear units, so it is
-# log-transformed on the way in.
+# The file stores `antarctic_precip0` in log space, which is what MimiBRICK v2.0.0's `ais_precipitation₀` expects, so
+# it is passed through unchanged. (The May-22 file used through v1.2.0 stored it linearly and was log-transformed here.)
 #
 # get_model draws from the global RNG (its land-water realisation), so every BRICK 2.0 model is built with
 # `Random.seed!(BRICK20_SEED)` immediately before get_model. The hindcast drivers never read BRICK's own land water
 # (it is zero before 2019 by calibration design); they add the observed series instead.
 
-const BRICK20_FILE = ("brick20", "parameters_subsample_brick.csv")
+const BRICK20_FILE = ("brick20", "parameters_subsample_sneasybrick.csv")
+const BRICK20_LABEL = "MimiBRICK v2.0.0, Zenodo 20592337 joint SNEASY-BRICK posterior"
 const BRICK20_SEED = 2026
 
-"""The BRICK 2.0 posterior subsample (10,000 rows). Errors with the fetch instruction if it is absent."""
+"""The BRICK 2.0 posterior subsample (10,000 rows). Errors with the fetch instruction if it is absent, and if
+`antarctic_precip0` is positive in every row: that is a linear-units file (the May-22 one), not log space."""
 function brick20_posterior()
     p = datapath(BRICK20_FILE...)
     isfile(p) || error("BRICK 2.0 posterior not found at $p; run tools/fetch_brick20_posterior.sh")
-    return CSV.read(p, DataFrame)
+    df = CSV.read(p, DataFrame)
+    all(>(0), df.antarctic_precip0) && error("$p: antarctic_precip0 is positive in every row, so it looks linear; " *
+                                             "this arm expects log space (see the header of brick20.jl)")
+    return df
 end
 
 """
@@ -37,7 +44,7 @@ function set_brick20_forcing!(m, gmst, ohc)
     return m
 end
 
-"""Apply one BRICK 2.0 posterior row (MimiBRICK's own parameter names; precip log-transformed for v2.0.0)."""
+"""Apply one BRICK 2.0 posterior row (MimiBRICK's own parameter names; precip already in log space)."""
 function apply_brick20!(m, r)
     update_param!(m, :antarctic_ocean, :anto_α, r.anto_alpha)
     update_param!(m, :antarctic_ocean, :anto_β, r.anto_beta)
@@ -49,7 +56,7 @@ function apply_brick20!(m, r)
                        (:antarctic_temp_threshold, :temperature_threshold), (:antarctic_lambda, :λ))
         update_param!(m, :antarctic_icesheet, sym, r[col])
     end
-    update_param!(m, :antarctic_icesheet, :ais_precipitation₀, log(r.antarctic_precip0))
+    update_param!(m, :antarctic_icesheet, :ais_precipitation₀, r.antarctic_precip0)
     update_param!(m, :glaciers_small_icecaps, :gsic_β₀, r.glaciers_beta0)
     update_param!(m, :glaciers_small_icecaps, :gsic_v₀, r.glaciers_v0)
     update_param!(m, :glaciers_small_icecaps, :gsic_s₀, r.glaciers_s0)

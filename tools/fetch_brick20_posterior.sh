@@ -1,21 +1,21 @@
 #!/bin/bash
-## Fetch the BRICK 2.0 comparison posterior (MimiBRICK v2.0.0, post-PR#93 posterior subsample, 10,000 draws) into
-## data/brick20/. It is NOT redistributed in this repository (Marcus 2026-10-07); scripts/brick20_joint.jl needs it.
-## The checksum is the file every published BRICK 2.0 number in the v1.0 paper was computed from.
+## Fetch the BRICK 2.0 comparison posterior into data/brick20/ and check its sha256. It is NOT redistributed in this
+## repository (Marcus 2026-10-07); scripts/brick20_joint.jl needs it.
+##
+## The file is the joint SNEASY-BRICK posterior subsample published with MimiBRICK v2.0.0: Zenodo
+## 10.5281/zenodo.20592337 (2026-06-08, CC-BY-4.0), parameters_subsample_sneasybrick.csv, 10,077,052 B, md5
+## 2ac199193ae2139f22d253ba557878e7. The arm reads its 35 BRICK columns (Marcus 2026-10-15).
+##
+## ⚠ The same record also ships parameters_subsample_brick.csv (sha256 fecabef3...). That is the STANDALONE BRICK
+## calibration, driven by one SNEASY trajectory, and it is NOT this arm's file: on this package's FaIR forcing its
+## thermal expansion is about 3x too small. Through v1.2.0 the arm used Tony Wong's May-22 subsample (sha256
+## 78247db8...), the BRICK columns of an earlier joint posterior; the Zenodo joint file gives an SSP2-4.5 total about
+## 4 % lower at 2100 and 2300 (SLR-RFF-BRICK CHANGELOG 2026-10-15c).
 set -euo pipefail
 cd "$(dirname "$0")/.."
-##
-## ⚠ NOT the public MimiBRICK v2.0.0 Zenodo file (checked 2026-10-08). Zenodo 10.5281/zenodo.20592337 (2026-06-08)
-## ships a parameters_subsample_brick.csv (7,011,352 B, md5 6487623e..., sha256 fecabef3...) that is a DIFFERENT
-## calibration: 0 of 350,000 cells match this file, antarctic_precip0 is stored in log space, and thermal_alpha's median
-## is 0.054 against 0.158 here. On this package's FaIR forcing it gives a thermal-expansion hindcast RMSE of 1.97 cm
-## (this file: 0.52) and an SSP2-4.5 2100 TE of 6.6 cm (19.4). Earlier versions of that record (17966962, 6626335,
-## 6461560) do not match either. This file is Tony Wong's post-PR#93 subsample of 2026-05-22. It has no public URL
-## yet.
-URL="${BRICK20_POSTERIOR_URL:-}"          # TODO: a public URL for THIS file (sha256 below); none exists yet
-SHA256=78247db8babf611151c58149956e3ddd5f6f5f94ce460b0a6bf50c07e9158b35
-DEST=data/brick20/parameters_subsample_brick.csv
-[[ -n "$URL" ]] || { echo "no public URL yet: set BRICK20_POSTERIOR_URL, or place the file at $DEST"; exit 1; }
+URL="${BRICK20_POSTERIOR_URL:-https://zenodo.org/records/20592337/files/parameters_subsample_sneasybrick.csv?download=1}"
+SHA256=d74577f603602b222c829a152cb4dbcb60753af34ce4d1fba4cd0dfea52c203c
+DEST=data/brick20/parameters_subsample_sneasybrick.csv
 mkdir -p data/brick20
 curl -fsSL "$URL" -o "$DEST"
 echo "$SHA256  $DEST" | shasum -a 256 -c -

@@ -1,4 +1,4 @@
-# BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with its post-PR#93 posterior, on the SAME climate as Ladrillo.
+# BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with Ladrillo.BRICK20_LABEL's posterior, on the SAME climate as Ladrillo.
 #
 #   julia --project=. scripts/brick20_joint.jl --scenario=ssp245 [--outdir=outputs/projections]
 #        [--lws-anchor=zero_at_first_year|v1_step] [--v1.0]
@@ -7,8 +7,8 @@
 # same land-water series (:observed), same 1995-2014 reference. Two arms: `fixed` (ensemble-mean climate) and `joint`
 # (one FaIR config per draw). 1,000 posterior draws (every 10th row of the 10,000-draw subsample).
 #
-# MimiBRICK v2.0.0 changed `ais_precipitation₀` to log space; the posterior stores it in linear units, so it is
-# log-transformed on the way in (the "precip_log" shim). Total = glaciers + Greenland + Antarctica + TE + land water.
+# The posterior stores `antarctic_precip0` in log space, as MimiBRICK v2.0.0 expects (src/brick20.jl).
+# Total = glaciers + Greenland + Antarctica + TE + land water.
 #
 # Land water: v1.1 starts the observed series at 0 (the default); `--v1.0` (= `--lws-anchor=v1_step`) reproduces the
 # v1.0 1900 frame step, which BRICK 2.0's Antarctic sea-level feedback also sees (src/landwater.jl).
@@ -33,7 +33,7 @@ mkpath(OUTDIR)
 const POST = Ladrillo.brick20_posterior()
 const STEP = max(1, nrow(POST) ÷ NDRAW)
 const ROWS = collect(1:STEP:nrow(POST))
-const PROVENANCE = "BRICK 2.0 (MimiBRICK v2.0.0, post-PR#93 posterior) | scripts/brick20_joint.jl | Ladrillo " *
+const PROVENANCE = "BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) | scripts/brick20_joint.jl | Ladrillo " *
     "$(pkgversion(Ladrillo)) forcing helpers | scenario $SCENARIO | FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, " *
     "spliced at $(Ladrillo.SPLICE_YEAR) | rows 1:$(STEP):$(nrow(POST)) | Random.seed!($(Ladrillo.BRICK20_SEED)) before get_model | pairing seed $PAIR_SEED | land water " *
     ":observed ($ANCHOR) | cm rel 1995-2014 | julia $(VERSION)"

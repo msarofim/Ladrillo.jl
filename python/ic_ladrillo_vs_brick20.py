@@ -47,6 +47,7 @@ Writes (a _rho<val> suffix when --rho-max is not 0.99):
   outputs/tables/ic_ladrillo_vs_brick20_perdraw.csv  ln L per draw, per arm, per series
   outputs/tables/ic_ladrillo_vs_brick20.md           the table with its reading
 """
+import csv
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
@@ -76,16 +77,30 @@ WINDOWS = {"1900-2025": (1900, 2025), "1900-1919": (1900, 1919), "1920-1949": (1
 # Every SAMPLED parameter of each posterior, counted from the posterior file headers and split by role. Ladrillo's
 # physical count includes ledger and discrepancy coefficients that do not move the series scored here; they are
 # CHARGED anyway -- the conservative direction.
+# The BRICK 2.0 file is the joint SNEASY-BRICK posterior published with MimiBRICK v2.0.0 (Zenodo 20592337; Marcus
+# 2026-10-15). Its 16 SNEASY columns are not parameters of the arm scored here, which is driven by FaIR, so they are
+# not charged. Its header quotes the names, so it is parsed as CSV.
+SNEASY_COLS = ("sd_temp", "sd_ocean_heat", "sigma_whitenoise_co2", "rho_temperature", "rho_ocean_heat", "alpha0_CO2",
+               "CO2_0", "N2O_0", "temperature_0", "ocean_heat_0", "Q10", "CO2_fertilization", "CO2_diffusivity",
+               "heat_diffusivity", "rf_scale_aerosol", "climate_sensitivity")
+DERIVED_COLS = ("log_post", "gis_alpha_s", "gis_beta_s")   # Ladrillo: a log-posterior and the loader's native pair
+
+
 def _count_sampled(path):
     """(physical, total) sampled parameters from a posterior file's header: every column that is not an
     AR(1) noise pair, a log-posterior, or a column the loader DERIVES (native Greenland pair). Read from
     the file, never typed."""
-    cols = open(path).readline().rstrip("\n").split(",")
-    cols = [c for c in cols if c not in ("log_post", "gis_alpha_s", "gis_beta_s") or path.endswith("parameters_subsample_brick.csv")]
+    with open(path, newline="") as f:
+        cols = next(csv.reader(f))
+    if "climate_sensitivity" in cols:                          # the joint SNEASY-BRICK file: count its BRICK columns
+        assert set(SNEASY_COLS) <= set(cols), sorted(set(SNEASY_COLS) - set(cols))
+        cols = [c for c in cols if c not in SNEASY_COLS]
+    else:
+        cols = [c for c in cols if c not in DERIVED_COLS]
     noise = [c for c in cols if c.startswith("sd_") or c.startswith("rho_")]
     return len(cols) - len(noise), len(cols)
 _LAD = os.path.join(REPO, "data", "posterior", "ladrillo_L27_posterior.csv")
-_BRK = os.path.join(REPO, "data", "brick20", "parameters_subsample_brick.csv")
+_BRK = os.path.join(REPO, "data", "brick20", "parameters_subsample_sneasybrick.csv")
 K_PHYS = {"ladrillo": _count_sampled(_LAD)[0], "brick20": _count_sampled(_BRK)[0]}
 K_NOISE_PROF = 2 * len(FIT_SERIES)                # sd, rho per scored series, profiled in ar1_prof
 K = {"obs_iid": K_PHYS,

@@ -128,13 +128,14 @@ The paper's products are gated the same way, against the research drivers' own o
 
 ## BRICK 2.0 posterior
 
-The BRICK 2.0 comparison uses Tony Wong's post-PR#93 MimiBRICK posterior subsample (10,000 draws, sha256 `78247db8…`).
-It is not redistributed here, and `tools/fetch_brick20_posterior.sh` still needs its public URL. If you have the
-file, place it at `data/brick20/parameters_subsample_brick.csv`; the tests check its sha256 and then run the BRICK 2.0
-comparison.
-- ⚠ The public MimiBRICK v2.0.0 Zenodo record (10.5281/zenodo.20592337) ships a different calibration under the same
-  file name. On this package's forcing its thermal-expansion hindcast is 4× worse.
-- It is therefore not a substitute: the paper's BRICK 2.0 numbers rest on the sha256 above.
+The BRICK 2.0 comparison uses the BRICK parameters of the joint SNEASY-BRICK posterior subsample published with
+MimiBRICK v2.0.0 (Zenodo 10.5281/zenodo.20592337, `parameters_subsample_sneasybrick.csv`, 10,000 draws, CC-BY-4.0).
+`tools/fetch_brick20_posterior.sh` downloads it to `data/brick20/` and checks its sha256 (`d74577f6…`); the tests then
+run the BRICK 2.0 comparison.
+- The same record also ships `parameters_subsample_brick.csv`, the standalone BRICK calibration. It is not this arm's
+  file: on this package's FaIR forcing its thermal expansion is about 3× too small.
+- Through v1.2.0 the arm used an earlier joint subsample from Tony Wong (sha256 `78247db8…`). The published file gives
+  an SSP2-4.5 BRICK 2.0 total about 4 % lower at 2100 and 2300.
 
 ## Repository layout
 
@@ -145,7 +146,7 @@ data/drivers/        observed glacier-region and Greenland temperature drivers (
 data/constants/      fixed constants, the Greenland amplification shape, paleo draws
 data/observations/   the calibration targets (and the glacier target with the RGI-19 seam removed)
 data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
-data/brick20/        the BRICK 2.0 comparison posterior: fetched, not shipped (see *BRICK 2.0 posterior*)
+data/brick20/        the BRICK 2.0 comparison posterior: fetched from Zenodo, not shipped (see *BRICK 2.0 posterior*)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
 python/              the Table 5 information-criterion test; tables/ (Tables A1, A2)

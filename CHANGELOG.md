@@ -29,6 +29,41 @@
   section (the README states only the code licence); `~/climate-env` as the tests' Python default; this CHANGELOG is a
   development log full of internal rulings; a Zenodo archive of the release for GMD.
 
+## 2026-10-15 — The BRICK 2.0 arm reads the published MimiBRICK v2.0.0 joint posterior from Zenodo
+
+**Ruled (Marcus 2026-10-15):** "move the BRICK 2.0 arm to the Zenodo joint file." The arm now reads the 35 BRICK
+columns of `parameters_subsample_sneasybrick.csv` from Zenodo 10.5281/zenodo.20592337 (CC-BY-4.0, sha256 `d74577f6…`).
+Through v1.2.0 it read Tony Wong's May-22 subsample (sha256 `78247db8…`), which had no public URL.
+- `tools/fetch_brick20_posterior.sh` downloads it and checks the sha256. The blocker in 10-08h and i is gone: a fresh
+  clone can now fetch the BRICK 2.0 posterior.
+- `src/brick20.jl`:
+  - `BRICK20_FILE` names the new file, and `BRICK20_LABEL` is the provenance label the three scripts now use.
+  - The file stores `antarctic_precip0` in log space, so `apply_brick20!` no longer logs it.
+  - `brick20_posterior()` refuses a file whose precip is positive in every row (a linear-units file).
+- `data/MANIFEST.csv` swaps the row; `tools/import_l27_data.py` points at the new source.
+- `python/ic_ladrillo_vs_brick20.py` (Table 5) parses the header as CSV and does not charge the 16 SNEASY columns.
+  K stays 27 physical + 8 noise, and the assertion is unchanged.
+- `test/reference/research_brick20_joint_draws_ssp245.csv` was rebuilt from the re-run research output
+  (`tools/build_test_reference.py --only`, SLR-RFF-BRICK 96da010). 510 of its 612 values moved; the rest are land water.
+
+**Before the reference was rebuilt,** the suite gave 91 pass / 1 fail, and the fail was the BRICK 2.0 comparison
+(510 values outside tolerance). After: 92 / 92, BRICK 2.0 612 / 612 bit-identical.
+
+**Identity gates 2-5 PASS, bit-identical against the research re-run** (SLR-RFF-BRICK CHANGELOG 2026-10-15d):
+products for all 10 scenarios (Ladrillo and BRICK 2.0), panel, posterior predictive, hindcast (`postpred_brick20`, both
+residual files, obs sigma), and Table 5 at rho 0.99 / 0.95 / 0.9. Ladrillo's residuals and obs sigma differ from the
+v1.2.0 outputs only in the provenance version string ("1.2.0-DEV" → "1.2.0").
+
+**What moved:** BRICK 2.0 numbers only. SSP2-4.5 fixed arm, BRICK 2.0 total 70.66 / 317.72 → 67.75 / 304.18 cm at
+2100 / 2300. Table 5 ar1_prof ΔAIC 88.9 → 95.5. The full list of paper numbers is in SLR-RFF-BRICK
+`outputs/brick20_swap_paper_number_diff_20261015.csv`.
+
+**Quarantine:** the v1.2.0 BRICK 2.0 products are in `outputs/quarantine/20261015_brick20_may22_posterior/` (local;
+`outputs/` is not tracked).
+
+**Version:** `Project.toml` still says 1.2.0, but `main` now differs from tag `v1.2.0` in the BRICK 2.0 posterior. The
+next tag is Marcus's call.
+
 ## 2026-10-08l — v1.2.0 released: the version the GMD paper reports
 
 **Marcus 10-08: the conditioned numbers are "Ladrillo v1.2".** v1.1 cannot reproduce them: the same inputs give the

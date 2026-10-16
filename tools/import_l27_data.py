@@ -56,10 +56,11 @@ FILES = [
     ("forcing/fair_mean_gmst_ssp245harm.csv", "data/observations/fair_mean_gmst_ssp245harm.csv", "copy"),
     ("forcing/fair_mean_ohc_ssp245harm.csv", "data/observations/fair_mean_ohc_ssp245harm.csv", "copy"),
     ("forcing/fair_cube_gmst_ssp585_spliced.csv", "data/observations/fair_cube_gmst_ssp585_spliced.csv", "copy"),
-    ## BRICK 2.0 comparison arm: the post-PR#93 MimiBRICK v2.0.0 posterior subsample (10,000 draws; linear-units
-    ## antarctic_precip0, see brick20.jl). Not shipped: tools/fetch_brick20_posterior.sh fetches it; its
-    ## redistribution terms are not established.
-    ("brick20/parameters_subsample_brick.csv", "data/MimiBRICK/parameters_subsample_brick.csv", "copy"),
+    ## BRICK 2.0 comparison arm: the MimiBRICK v2.0.0 joint SNEASY-BRICK posterior subsample (Zenodo 20592337,
+    ## 10,000 draws; log-space antarctic_precip0, see brick20.jl). Not shipped: tools/fetch_brick20_posterior.sh
+    ## fetches it from Zenodo.
+    ("brick20/parameters_subsample_sneasybrick.csv", "data/MimiBRICK/parameters_subsample_sneasybrick_zenodo20592337.csv",
+     "copy"),
     ## Tables A1/A2 (python/tables/): the calibrator's own dump of the L27 priors (calibrate_mcmc_ext.jl --dump-priors,
     ## the production flags) and the DAIS paleo-ensemble joint prior of the seven geometry parameters
     ("constants/ladrillo_priors_L27.csv", "outputs/ladrillo_priors_L27.csv", "labels"),

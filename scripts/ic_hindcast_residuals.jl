@@ -133,7 +133,7 @@ end
 bnoise = [(c, Float64.(bpost[!, c])) for c in ("sd_glaciers", "rho_glaciers", "sd_greenland", "rho_greenland",
                                                "sd_antarctic", "rho_antarctic", "sd_gmsl", "rho_gmsl")]
 write_residuals(OUT_B, bdraws, bnoise, resB,
-    "$PKG | BRICK 2.0 (MimiBRICK v2.0.0, post-PR#93 posterior) rows $(nrow(bpost)) evenly thinned of " *
+    "$PKG | BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) rows $(nrow(bpost)) evenly thinned of " *
     "$(nrow(bpost_full)) | Random.seed!($(Ladrillo.BRICK20_SEED)) immediately before get_model | FaIR 2.2.4 " *
     "(calib 1.6.0) forcing $FORCING | run $Y0-$Y1 scored $(first(FY))-$(last(FY)) | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | " *
     "gsic = gsic_sea_level vs the RGI-19-adjusted target | total = ais+gsic+gis+te+OBSERVED lws | residual = model - obs")

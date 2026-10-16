@@ -60,7 +60,7 @@ for c in comps
     band[!, "$(c)_p50"] = [quantile(store[c][:, j], 0.50) for j in 1:ny]
     band[!, "$(c)_p95"] = [quantile(store[c][:, j], 0.95) for j in 1:ny]
 end
-band[!, "provenance"] = fill("BRICK 2.0 (MimiBRICK v2.0.0, post-PR#93 posterior) | Ladrillo $(pkgversion(Ladrillo)) " *
+band[!, "provenance"] = fill("BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) | Ladrillo $(pkgversion(Ladrillo)) " *
     "scripts/posterior_predictive_brick20.jl | Random.seed!($(Ladrillo.BRICK20_SEED)) immediately before get_model | " *
     "rows 1:$ND | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING | land water = OBSERVED series | run $Y0-$Y1, saved " *
     "$(first(FY))-$(last(FY)), cm rel $(FIT_REF[1])-$(FIT_REF[2]) | julia $(VERSION)", ny)
