@@ -49,6 +49,7 @@ Writes (a _rho<val> suffix when --rho-max is not 0.99):
 """
 import csv
 import os
+import re
 import sys
 from concurrent.futures import ProcessPoolExecutor
 
@@ -65,7 +66,9 @@ IN_B = os.path.join(HIND, "ic_hindcast_residuals_brick20.csv")
 IN_S = os.path.join(HIND, "ic_hindcast_obs_sigma.csv")
 
 MODELS = ("ladrillo", "brick20")
-LABEL = {"ladrillo": "Ladrillo v1.0", "brick20": "BRICK 2.0"}
+## The table's label comes from Project.toml, as the 10-09 banner fix does (it was a literal "Ladrillo v1.0" through v1.3.0).
+PKG_VERSION = re.search(r'^version\s*=\s*"([^"]+)"', open(os.path.join(REPO, "Project.toml")).read(), re.M).group(1)
+LABEL = {"ladrillo": f"Ladrillo {PKG_VERSION}", "brick20": "BRICK 2.0"}
 FIT_SERIES = ("ais", "gsic", "gis", "steric")     # the common in-likelihood set
 OOS_SERIES = ("total",)                           # out-of-sample for both
 SERIES = FIT_SERIES + OOS_SERIES
@@ -411,7 +414,7 @@ def main():
     for arm in ("obs_iid", "ar1_prof"):
         lines.append(f"| {arm} | " + " | ".join(f"{g(arm, m, 'total', 'll_max'):.1f} | {g(arm, m, 'total', 'll_at_fit4_maxdraw'):.1f}"
                                                 for m in MODELS) + " |")
-    # The two reading sentences below are computed (2026-10-16): the hard-coded versions said the steric row was "a tie by
+    # The two reading sentences below are computed (2026-10-15): the hard-coded versions said the steric row was "a tie by
     # construction" (+7.2 on the Zenodo BRICK 2.0 posterior) and that every BRICK 2.0 series sat at the rho bound (its ais
     # did not, at rho <= 0.99, on either posterior).
     at_bound = [f"{LABEL[m]} {s}" for m in MODELS for s in FIT_SERIES
