@@ -1,0 +1,6 @@
+calibration gate mutation test, 20000 rows, 2026-11-11 15:42, julia 1.12.6
+M1: gate FAILED -- mutant KILLED  ([GATE] (2) log_post first differs at row 460: 791.4765288224895 vs production 791.4518101470748 [GATE] FAIL )
+M2: gate FAILED -- mutant KILLED  ([GATE] (2) log_post first differs at row 460: 791.4379662492418 vs production 791.4518101470748 [GATE] FAIL )
+M3: gate FAILED -- mutant KILLED  ([GATE] (1) seed 2026  logposterior(start) 792.9197589982025  production 792.9208399273703  FAIL [GATE] (1) seed 2027  logposterior(start) 795.1126656616311  production 795.1108373997718  FAIL )
+M4: gate FAILED -- mutant KILLED  ([GATE] (2) log_post first differs at row 796: 790.7403031011207 vs production 790.7403031011211 [GATE] FAIL )
+M5: gate PASSED -- mutant SURVIVED

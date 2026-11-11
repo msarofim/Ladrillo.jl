@@ -23,6 +23,12 @@ calibrator and its gate. Pooling the chains and the target builders are still to
   production in the log_post of every row and in all 50 parameters at 44 reference rows. The window holds 4,603 accepted
   moves; the research gate's 300 rows held none (the first move is row 460). 20,000 iterations take 103 s here
   (production ran at ~140/s).
+- **Mutation test** (`test/calibration/mutation_test.sh`, result in `test/calibration/mutation_result.txt`). Three
+  mutants leave the log-posterior at all four start rows unchanged and are killed by the chain alone: the sampler's
+  target acceptance 0.234 -> 0.235 (row 460), the AR(1) rho bound 0.99 -> 0.98 (row 460; the start rows' largest rho is
+  0.976) and the active-basin share targets written as 0.799 / 0.816 (row 796, a 4e-13 difference in log_post). The
+  research gate's 300 rows would miss all three. The GlaMBIE partition sd 0.05 -> 0.0501 is killed at the start rows. The
+  no-power control (the geometry block's diagonal proposal scale, which the L26 covariance seed overwrites) survives.
 - `test/runtests.jl` gains the start-row check and a check of the parameter table against the research calibrator's own
   `--dump-priors` output (`data/constants/ladrillo_priors_L27.csv`): all 50 names, components, means, sds and bounds equal.
 - **The production chain held gamma at 2.038, not at its paleo median.** The first port, which held lambda, T_crit and
