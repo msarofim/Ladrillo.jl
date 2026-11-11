@@ -1,0 +1,28 @@
+  seed2026: sd_gis median 0.0254  sd_ais 0.0216  log_post 791.5  OK
+  seed2027: sd_gis median 0.0255  sd_ais 0.0215  log_post 791.3  OK
+  seed2028: sd_gis median 0.0254  sd_ais 0.0216  log_post 790.3  OK
+  seed2029: sd_gis median 0.0255  sd_ais 0.0216  log_post 791.2  OK
+  seed2026      43.31    54.08    93.60    60.83    18.27
+  seed2027      43.10    55.09    91.68    60.46    17.08
+  seed2028      43.20    51.78    96.88    60.81    18.56
+  seed2029      43.57    56.88    94.37    61.30    17.61
+  POOLED        43.28    54.45    94.89    60.85    17.87
+  seed2026      66.06   115.62   175.53   113.08    38.06
+  seed2027      65.91   113.06   176.55   113.20    37.12
+  seed2028      65.99   111.55   180.68   111.67    39.41
+  seed2029      66.19   116.73   176.64   114.02    37.62
+  POOLED        66.04   114.24   177.73   112.99    38.04
+  SLR@2100          1.001     1238.5        2.129       17.879      0.119
+  SLR@2150          1.002     1249.4        2.361       38.052      0.062
+4 chains × 1000000 draws. Convergence (target R̂<1.05, ESS>400):
+  antarctic_alpha          R̂=1.047 ESS=84.9 τ=47112  <-- check
+  anto_alpha               R̂=1.013 ESS=189.7 τ=21083  <-- check
+  anto_beta                R̂=1.016 ESS=243.8 τ=16405  <-- check
+  ais_slope                R̂=1.063 ESS=78.6 τ=50868  <-- check
+  ais_iceflow0             R̂=1.031 ESS=141.5 τ=28259  <-- check
+  ais_precip_u             R̂=1.043 ESS=91.9 τ=43521  <-- check
+  ais_runoff_Ton           R̂=1.313 ESS=19.5 τ=205075  <-- check
+  ais_c                    R̂=1.079 ESS=64.2 τ=62344  <-- check
+  8 params NOT converged.
+  SLR@2100  R̂=1.001  ESS=1238.5
+  SLR@2150  R̂=1.002  ESS=1249.4

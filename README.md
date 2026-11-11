@@ -112,7 +112,27 @@ writes a ~2 GB chain to `outputs/calibration/`, with the adapted proposal covari
   bound on the AR(1) rho and two changed likelihood constants.
 - Bit-identity holds on the reference runtime only (Apple M4, Julia 1.12.6, the Manifest's versions, one BLAS thread).
   Elsewhere a single changed accept decision separates the chains, and the agreement is statistical.
-- Still to port: pooling the four chains into `data/posterior/`, and the scripts that build the calibration targets.
+
+`scripts/postprocess_calibration.jl` turns the four chains into the posterior:
+
+```bash
+julia --project=. --threads=1 scripts/postprocess_calibration.jl --accept-slr
+```
+
+It keeps the second half of each chain and checks that no chain is in the Greenland noise mode. It then computes R-hat
+and ESS for every parameter, and for projected SSP2-4.5 sea level at 2100 and 2150 (400 draws per chain). The posterior
+is every 400th pooled draw (10,000 draws, no random numbers), with the format of `data/posterior/`. L27 was accepted on
+projected sea level (R-hat 1.001 and 1.002). Eight Antarctic parameters did not pass the parameter test (R-hat up to
+1.31, ESS 20-244): five of the seven geometry parameters, antarctic_alpha, anto_alpha and anto_beta. `--accept-slr`
+accepts on the projection in that case.
+Without the flag the script writes nothing unless every parameter passes; `--force` writes with a `_NOTCONVERGED`
+suffix. The production run takes about 25 minutes on an Apple M4 (21 of them the parameter ESS), 3.3 GB peak memory.
+- `test/calibration/gate_postprocess.jl <SLR-RFF-BRICK repo>` runs it on the production chains (sha256 checked) and
+  requires the posterior to equal `data/posterior/ladrillo_L27_posterior.csv` byte for byte. The sea-level R-hat table,
+  the pooled covariance and the logged diagnostics (noise check, per-chain projected quantiles, the eight parameters'
+  R-hat and ESS) must equal the research run of 2026-09-20. `test/calibration/mutation_test_postprocess.sh` checks that
+  each of the four comparisons catches a one-line change to its own step.
+- Still to port: the scripts that build the calibration targets.
 
 ## Reproducing the figures (Figs. 1–6)
 
@@ -198,10 +218,10 @@ data/brick20/        the BRICK 2.0 comparison posterior: fetched from Zenodo, no
 data/comparison/     FACTS and MAGICC-SLR outputs for Figs. 2, 3 and 6 (static; see its README)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 data/calibration/    the calibration's start rows, proposal-covariance seed and Greenland amplification prior
-scripts/             Julia drivers that produce the paper's products, and the calibration sampler
+scripts/             Julia drivers that produce the paper's products, the calibration sampler and post-processing
 python/              the Table 5 information-criterion test; tables/ (Tables 4, A1, A2); figures/ (Figs. 1-6)
 test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo),
-                     calibration/ (the calibration gate)
+                     calibration/ (the sampler and post-processing gates)
 tools/               data import, test-reference builder, BRICK 2.0 fetch; forcing/ (the FaIR builders)
 ```
 

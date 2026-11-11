@@ -40,5 +40,6 @@ include("targets.jl")
 include("brick20.jl")
 include("record_crossing.jl")
 include("calibration.jl")
+include("postprocess.jl")
 
 end # module

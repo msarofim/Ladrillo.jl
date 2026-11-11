@@ -4,8 +4,8 @@
 #
 # Production: n_iter = 2,000,000 and seeds 2026, 2027, 2028, 2029, one process per seed (about 4 h each on an Apple M4,
 # ~2 GB of memory and ~2 GB of output each). Seed i starts from row i of data/calibration/overdispersed_starts_L27.csv;
-# seeds 3026-3029 run the same start rows on other RNG streams. scripts/postprocess_calibration.jl (not yet ported)
-# pools the four chains into the posterior.
+# seeds 3026-3029 run the same start rows on other RNG streams. scripts/postprocess_calibration.jl pools the four
+# canonical chains into the posterior.
 #
 # Writes to <outdir>:
 #   chain_L27_seed<seed>_n<n_iter>.csv              the parameters in sampling order, log_post, accept_rate (one row per

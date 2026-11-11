@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-11-11f — Post-processing: the four production chains give the shipped posterior, byte for byte
+
+The second of the four calibration-port pieces (SLR-RFF-BRICK `notes/handoff_2026-11-11c_table4_seeds_calibration_scope.md`
+§5). The target builders and the Code availability text are still to come.
+- New `src/postprocess.jl` (module `Ladrillo.Postprocess`) and `scripts/postprocess_calibration.jl [--chains=] [--outdir=]
+  [--accept-slr] [--force]`. They port the research post-processing of 2026-09-20 (`run_l27_postprocess.sh`): its
+  noise-mode check (second-half median sd_gis < 0.10 cm in every chain), `diag_slr_convergence_by_chain_ladrillo.jl`
+  (R-hat and ESS of projected SSP2-4.5 total sea level at 2100 and 2150, 400 draws per chain) and
+  `postprocess_mcmc_ext.jl --tag=L27 --accept-slr` (R-hat and ESS of every parameter with the ESS maxlag capped at
+  200,000; acceptance; every 400th pooled draw; the pooled covariance). The research ran these as three programs that
+  passed the sea-level table through a file guarded by a freshness check; here they run in one process.
+- The sea-level test runs on the projection model as it stood when L27 was accepted: land water `:central`, Greenland tap
+  off, (lambda, T_crit) attached in one block of 400 per chain (seed 20260920, so the four chains get the same rows) and
+  gamma at its paleo median. These are named constants in `Postprocess`. The shipped projections use `:observed` land
+  water and the `:single` paleo assignment.
+- Outputs: the posterior in the format of `data/posterior/`, `slr_convergence_L27.csv`, `parameter_convergence_L27.csv`
+  (every parameter; the research log printed only the failures), `adapted_cov_L27.csv` with the parameter names as
+  header (the research file had x1..x50), and a provenance file with the seed and where it is applied.
+- Not ported: the research script's six-median comparison against the 2018 BRICK baseline subsample (a file the package
+  does not ship), and the check of each chain's log banner (replaced by checking the chain header against the parameter
+  list; the research SLOWP/FAST names are read as SLOWG/FASTG).
+- New direct dependency MCMCDiagnosticTools 0.3.18, the version both Manifests already held. `Project.toml` was edited by
+  hand and `Pkg.resolve()` changed only the Manifest's project hash and the package's dependency list.
+- **Gate** (`test/calibration/gate_postprocess.jl <SLR-RFF-BRICK repo>`). PASS on the reference runtime. It checks the
+  four production chains' sha256, runs the script on them with `--accept-slr` (25 min, 21 of them the parameter ESS;
+  3.3 GB peak) and requires (1) the posterior byte-identical to `data/posterior/ladrillo_L27_posterior.csv`, (2)
+  `slr_convergence_L27.csv` byte-identical to the research file (R-hat 1.0007869032040153 at 2100, 1.0016940768436582 at
+  2150), (3) the covariance equal to the research file at all 2,500 entries, and (4) 28 log lines equal to the research
+  log: the noise check, the per-chain projected quantiles, the eight Antarctic parameters that fail (R-hat up to 1.313,
+  ESS 19.5-243.8) and the acceptance lines.
+- `tools/build_test_reference.py`: new kind `log_lines` (the research log's lines matching the patterns the gate
+  repeats). A research source that is not under version control is now accepted and recorded as `untracked` in
+  `SOURCES.csv`, where its sha256 pins it. Three new references: `research_slr_convergence_L27.csv`,
+  `research_adapted_cov_L27.csv`, `research_postprocess_L27_log_lines.txt`.
+- `test/runtests.jl`: 118/118 pass, unchanged. The gate stays outside the suite because it needs the 8 GB of production
+  chains.
+
 ## 2026-11-11e — The calibration sampler; it reproduces the production L27 chain
 
 **Marcus 11-11 (session 2):** port the calibration drivers and target builders before the release. This entry is the

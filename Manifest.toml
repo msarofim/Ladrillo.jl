@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "bd95eb6d2d3c5edfb997bd5729893b50e8c68d31"
+project_hash = "def990020f6459996f54cb179f1f42589ef3bbc3"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -695,7 +695,7 @@ uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.4.0"
 
 [[deps.Ladrillo]]
-deps = ["CSV", "DataFrames", "Mimi", "MimiBRICK", "Random", "Statistics"]
+deps = ["CSV", "DataFrames", "Distributions", "LinearAlgebra", "MCMCDiagnosticTools", "Mimi", "MimiBRICK", "Random", "RobustAdaptiveMetropolisSampler", "Statistics"]
 path = "."
 uuid = "a7357428-476d-4570-8bf3-97ba83aac5dd"
 version = "1.0.0"

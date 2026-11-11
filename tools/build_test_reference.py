@@ -14,7 +14,7 @@ Writes test/reference/*.csv (and the Table A2 *.md) and test/reference/SOURCES.c
 source sha256). --only copies just the named reference files and rewrites (or appends) only their SOURCES.csv rows; every
 other row is kept byte-for-byte, because its file was copied at its own research commit.
 """
-import argparse, hashlib, os, subprocess, sys
+import argparse, hashlib, os, re, subprocess, sys
 
 ap = argparse.ArgumentParser()
 ap.add_argument("research", help="the SLR-RFF-BRICK repository")
@@ -50,6 +50,15 @@ FILES = [(f"research_joint_draws_{s}.csv", f"outputs/scope_slr_fairunc_draws_{s}
         [("research_chain_L27_seed2026_prefix_logpost.csv", "outputs/mcmc/chain_L27_seed2026_n2000000.csv",
           "chain_logpost"),
          ("research_chain_L27_seed2026_prefix_rows.csv", "outputs/mcmc/chain_L27_seed2026_n2000000.csv", "chain_rows")]
+## The post-processing gate (test/calibration/gate_postprocess.jl): the 2026-09-20 run that wrote the posterior. "log_lines"
+## keeps the lines of its log that scripts/postprocess_calibration.jl prints in the same format: those matching
+## LOG_PATTERNS between LOG_FROM and LOG_TO (the gate repeats the patterns).
+FILES += [("research_slr_convergence_L27.csv", "outputs/mcmc/slr_convergence_L27.csv", "copy"),
+          ("research_adapted_cov_L27.csv", "outputs/mcmc/adapted_cov_L27.csv", "copy"),
+          ("research_postprocess_L27_log_lines.txt", "outputs/log_l27_postprocess_driver.txt", "log_lines")]
+LOG_PATTERNS = [r"^  seed\d+: sd_gis median ", r"^  (seed\d+|POOLED) +-?\d", r"^  SLR@\d+ ", r"<-- check$",
+                r"^  (\d+ params NOT converged\.|all params converged)", r"^\d+ chains × \d+ draws\. Convergence"]
+LOG_FROM, LOG_TO = "=== NOISE-MODE GATE", "OK     postprocess"
 ## The calibration gate (test/calibration/): the production L27 chains (4 x ~2 GB, not tracked in either repository).
 ## chain_row1: the header and the first row (the start, its log-posterior). chain_logpost: the log_post field of the first
 ## CHAIN_PREFIX rows. chain_rows: the header and full rows at CHAIN_ROWS (the first accepted move is row 460).
@@ -72,10 +81,14 @@ if ARGS.only:
 TODO = [f for f in FILES if not ARGS.only or f[0] in ARGS.only]
 os.makedirs(OUT, exist_ok=True)
 commit = subprocess.run(["git", "-C", RES, "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip()
-dirty = subprocess.run(["git", "-C", RES, "status", "--porcelain", "--"] + [s for _, s, _ in TODO],
-                       capture_output=True, text=True).stdout.strip()
+status = subprocess.run(["git", "-C", RES, "status", "--porcelain", "--"] + [s for _, s, _ in TODO],
+                        capture_output=True, text=True).stdout.splitlines()
+dirty = [ln for ln in status if not ln.startswith("??")]
 if dirty:
-    sys.exit(f"research sources have uncommitted changes, refusing:\n{dirty}")
+    sys.exit("research sources have uncommitted changes, refusing:\n" + "\n".join(dirty))
+## An untracked source (a run's output that was never committed) is recorded as "untracked": no commit describes it, and
+## its sha256 is what pins it.
+UNTRACKED = {ln[3:] for ln in status if ln.startswith("??")}
 HEADER = "file,source,research_commit,source_sha256,lines_kept,regression_draws"
 rows = [HEADER]
 for name, src, kind in TODO:
@@ -95,6 +108,12 @@ for name, src, kind in TODO:
                 keep = [lines[i - 1] for i in CHAIN_ROWS]
             else:
                 keep = lines
+        elif kind == "log_lines":
+            lines = [header] + f.readlines()
+            i0 = next(i for i, ln in enumerate(lines) if LOG_FROM in ln)
+            i1 = next(i for i, ln in enumerate(lines) if LOG_TO in ln)
+            header = ""
+            keep = [ln for ln in lines[i0:i1] if any(re.search(p, ln.rstrip("\n")) for p in LOG_PATTERNS)]
         elif kind == "draws":
             cols = header.rstrip("\n").split(",")
             assert cols[0] == "draw", (src, cols[:3])
@@ -108,7 +127,7 @@ for name, src, kind in TODO:
     kept = (' '.join(map(str, REGRESSION_DRAWS)) if kind == 'draws' else
             ' '.join(map(str, CHAIN_ROWS)) if kind == 'chain_rows' else
             f"1-{CHAIN_PREFIX}" if kind == 'chain_logpost' else '')
-    rows.append(f"{name},{src},{commit},{sha256(sp)},{len(keep)},{kept}")
+    rows.append(f"{name},{src},{'untracked' if src in UNTRACKED else commit},{sha256(sp)},{len(keep)},{kept}")
     print(f"  {name}: {len(keep)} lines from {src}")
 if ARGS.only:
     ## keep every other row as it is; replace a copied file's row in place, append a new one at the end
