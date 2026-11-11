@@ -1,7 +1,7 @@
 # Sea-level projections with and without FaIR climate uncertainty, on one scenario.
 #
 #   julia --project=. scripts/project_joint.jl --scenario=ssp245 [--no-tap] [--outdir=outputs/projections]
-#        [--paleo=single|v1] [--lws-anchor=zero_at_first_year|v1_step] [--v1.0]
+#        [--paleo=single|per_selection] [--lws-anchor=zero_at_first_year|obs_at_first_year] [--v0.1]
 #
 # Two arms on the SAME 2,000 posterior draws:
 #   fixed  every draw on the FaIR ensemble-MEAN GMST and ocean heat content
@@ -9,7 +9,7 @@
 #          config's own path spliced to the mean at 2014 (forcing.jl)
 # The joint arm is the paper's reported projection band.
 #
-# Writes outputs/projections/joint_{cells,draws,paths,gates}_<scenario>[_notap][_paleov1][_lwsv1_step].csv:
+# Writes outputs/projections/joint_{cells,draws,paths,gates}_<scenario>[_notap][_paleoper_selection][_lwsobs_at_first_year].csv:
 #   cells  median / mean / p05 / p95 per component, horizon and arm
 #   draws  every draw's value at each horizon (any statistic can be recomputed without a re-run)
 #   paths  median / p05 / p95 per year from 1990
@@ -17,8 +17,8 @@
 # Every file carries a `provenance` column.
 #
 # DRAWS: posterior rows 1:5:10000 (= every 2,000th iteration of each chain's second half, 500 per chain).
-# v1.1 (the defaults): paleo (lambda, T_crit) rows from ONE assignment over all 10,000 draws; land water starts at 0.
-# v1.0 (`--v1.0` = `--paleo=v1 --lws-anchor=v1_step`): paleo rows assigned per chain (paleo_block = 500), so the four
+# v0.2 (the defaults): paleo (lambda, T_crit) rows from ONE assignment over all 10,000 draws; land water starts at 0.
+# v0.1 (`--v0.1` = `--paleo=per_selection --lws-anchor=obs_at_first_year`): paleo rows assigned per chain (paleo_block = 500), so the four
 # chains reused the same 500 rows; land water carried the 1900 frame step (src/landwater.jl). Non-default settings are
 # carried in the output names.
 
@@ -37,31 +37,33 @@ const COMPONENTS = [:glaciers, :gis, :ais, :te, :lws, :total]
 const SUM_PARTS = [:glaciers, :gis, :ais, :te, :lws]
 const SUM_TOL_CM = 1e-6                  # an identity in BRICK; float noise only
 const REPORT0 = 1990
-const V10 = "--v1.0" in ARGS
-const PALEO = Symbol(arg("--paleo=", V10 ? "v1" : String(Ladrillo.PALEO_ASSIGNMENT)))
+"--v1.0" in ARGS && error("--v1.0 was renamed --v0.1 in Ladrillo 1.0.0: it reproduces the first internal build "
+                             * "(tag v0.1.0). The defaults are the release settings.")
+const V01 = "--v0.1" in ARGS
+const PALEO = Symbol(arg("--paleo=", V01 ? "per_selection" : String(Ladrillo.PALEO_ASSIGNMENT)))
 PALEO in Ladrillo.PALEO_ASSIGNMENTS || error("--paleo must be one of $(Ladrillo.PALEO_ASSIGNMENTS)")
-const ANCHOR = Symbol(arg("--lws-anchor=", V10 ? "v1_step" : String(Ladrillo.LWS_OBS_ANCHOR)))
+const ANCHOR = Symbol(arg("--lws-anchor=", V01 ? "obs_at_first_year" : String(Ladrillo.LWS_OBS_ANCHOR)))
 ANCHOR in Ladrillo.LWS_OBS_ANCHORS || error("--lws-anchor must be one of $(Ladrillo.LWS_OBS_ANCHORS)")
-## RECORD CONDITIONING (v1.2; Marcus 2026-10-08 "own-config, drop", the research driver's rule): the joint arm drops
+## RECORD CONDITIONING (v0.3; Marcus 2026-10-08 "own-config, drop", the research driver's rule): the joint arm drops
 ## every draw whose Antarctic fast dynamics fire by record_end() on the GMST it actually runs with (its own spliced
 ## config). That is exact rejection = the calibration likelihood's own weighting (CHANGELOG 2026-10-08d). The fixed arm
-## (mean climate, on which no projection row crosses) keeps every draw. OFF under --v1.0 (v1.0 did not condition) and
-## with --no-record-conditioning (the v1.1 joint arm), which writes "_uncond" names.
-const RECORD_CONDITION = !V10 && !("--no-record-conditioning" in ARGS)
+## (mean climate, on which no projection row crosses) keeps every draw. OFF under --v0.1 (v0.1 did not condition) and
+## with --no-record-conditioning (the v0.2 joint arm), which writes "_uncond" names.
+const RECORD_CONDITION = !V01 && !("--no-record-conditioning" in ARGS)
 const SFX = (TAP ? "" : "_notap") * (PALEO === Ladrillo.PALEO_ASSIGNMENT ? "" : "_paleo$(PALEO)") *
             (ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)") *
-            (RECORD_CONDITION || V10 ? "" : "_uncond")
+            (RECORD_CONDITION || V01 ? "" : "_uncond")
 
 SCENARIO in Ladrillo.SCENARIOS || error("no shipped forcing for '$SCENARIO'; have $(Ladrillo.SCENARIOS)")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_joint.jl | scenario $SCENARIO | " *
     "FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, spliced at $(Ladrillo.SPLICE_YEAR) | draws rows $(ROWS) " *
-    "(paleo $(PALEO === :v1 ? "v1, blocks of $PALEO_BLOCK" : "single assignment over 10000"), seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
+    "(paleo $(PALEO === :per_selection ? "per_selection, blocks of $PALEO_BLOCK" : "single assignment over 10000"), seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
     ":observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-$(Ladrillo.REF_PERIOD[2]) | record conditioning " *
     "$(RECORD_CONDITION ? "ON (joint draws firing by $(Ladrillo.record_end()) on their own config dropped)" : "OFF") | " *
     "julia $(VERSION)"
 
-post = PALEO === :v1 ? posterior(rows = ROWS, paleo = :v1, paleo_block = PALEO_BLOCK) : posterior(rows = ROWS)
+post = PALEO === :per_selection ? posterior(rows = ROWS, paleo = :per_selection, paleo_block = PALEO_BLOCK) : posterior(rows = ROWS)
 const NDRAW = nrow(post)
 mg, mo = mean_forcing(SCENARIO; years = YEARS)
 yrs, cfg, G, O = forcing_cube(SCENARIO)

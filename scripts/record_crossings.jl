@@ -2,7 +2,7 @@
 #
 #   julia --project=. scripts/record_crossings.jl [--outdir=outputs/conditioning]
 #
-# For the 2,000 projection draws (posterior rows 1:5:10000, v1.1 paleo single assignment) and every shipped scenario,
+# For the 2,000 projection draws (posterior rows 1:5:10000, v0.2 paleo single assignment) and every shipped scenario,
 # the first year fast dynamics is on (src/record_crossing.jl; the model's own trigger, checked against it draw for draw
 # by test/conditioning/check_record_crossing.jl) in three climates:
 #   onset_record  the calibration's hindcast climate (RECORD_FORCING): what posterior(; drop_record_crossings=true) tests

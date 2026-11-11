@@ -1,11 +1,11 @@
-# Conditioning the propagated paleo draws on the observed record (opt-in; v1.2).
+# Conditioning the propagated paleo draws on the observed record (opt-in; v0.3).
 #
 # L27 calibrates with lambda / T_crit at their paleo medians, which never reach the fast-dynamics threshold over the
 # record. Propagation attaches a JOINT paleo draw to every posterior draw, and a few of those have a threshold low enough
 # that fast dynamics fires before the Antarctic record ends, at a rate the record does not show (2.5-8x the same draws
 # without it; SLR-RFF-BRICK CHANGELOG 2026-10-08 finding 2). `posterior(; drop_record_crossings=true)` drops them. That
 # is rejection sampling, i.e. exact conditioning of the joint (posterior x paleo) draws on "no fast dynamics through
-# `record_end()`". It is OFF by default here. The paper's joint-climate arm (v1.2) conditions each draw on its own
+# `record_end()`". It is OFF by default here. The paper's joint-climate arm (v0.3) conditions each draw on its own
 # paired climate instead, in scripts/project_joint.jl (see WHOSE CLIMATE below).
 #
 # The test is the model's own trigger (MimiBRICK antarctic_icesheet: T_ant(t) = (GMST(t-1) - intercept) / coefficient,

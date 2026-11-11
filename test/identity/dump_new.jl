@@ -6,7 +6,7 @@ include(joinpath(@__DIR__, "cases.jl"))
 mkpath(OUTDIR)
 
 function run_case(name, c)
-    post = c.paleo === :v1 ? posterior(rows = c.rows, paleo = :v1, paleo_block = c.block) :
+    post = c.paleo === :per_selection ? posterior(rows = c.rows, paleo = :per_selection, paleo_block = c.block) :
                              posterior(rows = c.rows, paleo = c.paleo)
     n, ny = nrow(post), length(c.years)
     out = Dict(new => Matrix{Float64}(undef, n, ny) for (_, new) in COMPONENT_MAP)

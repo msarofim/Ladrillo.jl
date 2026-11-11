@@ -153,19 +153,19 @@ end
     end
 end
 
-@testset "v1.0 options stay reachable and differ only where documented" begin
-    ## paleo: the v1.0 joint-arm assignment changes lambda / T_crit and nothing else
-    a, b = posterior(rows = PROJ_ROWS), posterior(rows = PROJ_ROWS, paleo = :v1, paleo_block = 500)
+@testset "v0.1 options stay reachable and differ only where documented" begin
+    ## paleo: the v0.1 joint-arm assignment changes lambda / T_crit and nothing else
+    a, b = posterior(rows = PROJ_ROWS), posterior(rows = PROJ_ROWS, paleo = :per_selection, paleo_block = 500)
     moved = (:antarctic_lambda, :antarctic_temp_threshold)
     @test all(isequal(a[!, c], b[!, c]) for c in names(a) if Symbol(c) ∉ moved)
     @test any(a.antarctic_temp_threshold .!= b.antarctic_temp_threshold)
-    ## land water: the v1.0 frame step moves land water by exactly the step before the observed record, Antarctica
+    ## land water: the v0.1 frame step moves land water by exactly the step before the observed record, Antarctica
     ## through its sea-level feedback, and glaciers / Greenland / thermal expansion not at all
     tg = CSV.read(Ladrillo.datapath("observations", "calibration_targets.csv"), DataFrame)
     obs = Dict(Int(r.year) => Float64(r[Ladrillo.LWS_OBS_COL]) for r in eachrow(tg) if !ismissing(r[Ladrillo.LWS_OBS_COL]))
     fy = minimum(keys(obs)); step = obs[fy]
     mg, mo = mean_forcing("ssp585"; years = YEARS)
-    l11, l10 = LadrilloModel(mg, mo; years = YEARS), LadrilloModel(mg, mo; years = YEARS, lws_anchor = :v1_step)
+    l11, l10 = LadrilloModel(mg, mo; years = YEARS), LadrilloModel(mg, mo; years = YEARS, lws_anchor = :obs_at_first_year)
     for d in (1, 1000, 2000)
         run_draw!(l11, a[d, :]); x = Dict(c => sea_level(l11, c) for c in COMPS)
         run_draw!(l10, a[d, :]); y = Dict(c => sea_level(l10, c) for c in COMPS)
@@ -176,7 +176,7 @@ end
     end
 end
 
-@testset "record-crossing test (v1.2 opt-in conditioning)" begin
+@testset "record-crossing test (v0.3 opt-in conditioning)" begin
     @test runscript(joinpath(@__DIR__, "conditioning", "check_record_crossing.jl"))
 end
 

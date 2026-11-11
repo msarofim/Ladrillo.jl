@@ -1,5 +1,5 @@
 #!/bin/bash
-# Produce every product the identity gates 2-4 compare, with this package's DEFAULTS (v1.1), in three streams.
+# Produce every product the identity gates 2-4 compare, with this package's DEFAULTS (v0.2), in three streams.
 #   test/identity/run_products.sh            then   test/identity/compare_all.sh <SLR-RFF-BRICK outputs dir>
 # Writes outputs/projections/{joint,brick20}_*_<scenario>.csv, fixed_components_ssp126_ssp245_ssp585.csv and
 # outputs/hindcast/. Log: outputs/log_run_products.txt.

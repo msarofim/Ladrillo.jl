@@ -1,10 +1,10 @@
-# The observational component targets Ladrillo v1.0 was calibrated against, and their per-year sigma, on the
+# The observational component targets Ladrillo was calibrated against, and their per-year sigma, on the
 # hindcast comparison grid. Shared by the posterior predictive check and the information-criterion residuals so that
 # both score against the same numbers.
 #
 #   ais / gis / steric   Frederikse 2020, extended with GRACE-FO (ice) and NOAA (steric)
 #   gsic                 Frederikse 2020 (Marzeion 2015 early segment) spliced to GlaMBIE 2019+, RGI-19 seam removed
-#   dang (total)         Frederikse 2020 spliced to NOAA STAR altimetry; NOT fitted by v1.0 (out-of-sample)
+#   dang (total)         Frederikse 2020 spliced to NOAA STAR altimetry; NOT fitted (out-of-sample)
 #   lws                  the observed land-water budget, ADDED to the modelled total (both models are fitted to
 #                        GMSL with land water removed, so the total is only comparable once it is added back)
 # Every series is in cm relative to FIT_REF (1995-2005) and starts in FIT_START.

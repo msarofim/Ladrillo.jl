@@ -15,16 +15,14 @@ The model is driven by prescribed global mean surface temperature and ocean heat
 FaIR 2.2.4 (calib 1.6.0) forcing for SSP1-2.6, SSP2-4.5, SSP5-8.5 and the seven van Vuuren et al. (2025) scenario
 markers, as both the 841-config ensemble mean and the full ensemble.
 
-**This is version 1.3, on the posterior of the model-description paper (calibration L27); the paper reports v1.3.**
-The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. No version since
-1.0 changes a parameter.
-- Version 1.1 fixes two things in how projections use the posterior.
-- Version 1.2 moves the van Vuuren forcing to the published emissions and conditions the joint-climate arm on the
-  Antarctic record.
-- Version 1.3 moves the BRICK 2.0 comparison arm to the published MimiBRICK v2.0.0 posterior; Ladrillo's own numbers
-  are unchanged.
-- See *Versions* below. Version 1.0, the code as submitted with the paper, is the git tag `v1.0.0`; versions 1.1 and
-  1.2 are `v1.1.0` and `v1.2.0`. The behaviours of 1.0 and 1.1 remain reachable as options.
+**This is version 1.0, the release the model-description paper reports, on its posterior (calibration L27).**
+The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. No version changes a
+parameter.
+- Versions 0.1 to 0.4 were internal builds, git tags `v0.1.0` to `v0.4.0` (tagged `v1.0.0` to `v1.3.0` before the
+  release). See *Versions* below.
+- Version 1.0 has v0.4's model and numbers. It adds the scripts for the paper's figures and renames the options that
+  reproduce v0.1 (`--v0.1`, `paleo=:per_selection`, `lws_anchor=:obs_at_first_year`). The behaviours of v0.1 and v0.2
+  remain reachable as options.
 
 ## Install
 
@@ -126,7 +124,7 @@ That takes about 2 minutes on an Apple M4, and `julia --project=. -e 'using Pkg;
 Pkg's sandbox. The suite re-runs 33 posterior draws in both projection arms (SSP2-4.5, SSP5-8.5), the full posterior
 predictive and a BRICK 2.0 sample. It compares them with values the RESEARCH code wrote (`test/reference/`, sources and
 sha256 in `test/reference/SOURCES.csv`). It also checks every data file against `data/MANIFEST.csv`, the component-sum
-and splice identities, the v1.0 options, the record-crossing test, and Tables A1 / A2 (when Python with
+and splice identities, the v0.1 options, the record-crossing test, and Tables A1 / A2 (when Python with
 NumPy and pandas is available).
 - **On the reference runtime** (macOS arm64, Julia 1.12.6, default bounds checking) every comparison is exact (`==`).
   A one-ulp change to a live parameter fails it.
@@ -138,9 +136,9 @@ NumPy and pandas is available).
 
 `test/identity/` holds the gate that certified this package against the research code that produced the paper:
 every component, every year and every draw must be bit-identical (`==`), on the full 10,000-draw posterior and on
-the joint-climate arm, for both the v1.0 settings and the v1.1 defaults (`cases.jl`). The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
+the joint-climate arm, for both the v0.1 settings and the v0.2 defaults (`cases.jl`). The gate is mutation-tested (`test/identity/mutation_test.sh`, result in
 `test/identity/mutation_result_K4.txt`): a one-ulp change to a Greenland volume share, a re-associated glacier sum,
-and a different paleo-draw assignment are each caught; two mutants on paths that never bind in v1.0 (the glacier
+and a different paleo-draw assignment are each caught; two mutants on paths that never bind in v0.1 (the glacier
 floor, the Greenland whole-sheet clamp) survive, as they should.
 
 The paper's products are gated the same way, against the research drivers' own output files:
@@ -149,7 +147,7 @@ The paper's products are gated the same way, against the research drivers' own o
 - `compare_hindcast.jl`: the BRICK 2.0 hindcast and the residuals behind Table 5.
 - `compare_ic_table.py`: Table 5 itself.
 
-`test/conditioning/check_record_crossing.jl` checks the v1.2 record-crossing test (*Versions*).
+`test/conditioning/check_record_crossing.jl` checks the v0.3 record-crossing test (*Versions*).
 
 ## BRICK 2.0 posterior
 
@@ -159,14 +157,14 @@ MimiBRICK v2.0.0 (Zenodo 10.5281/zenodo.20592337, `parameters_subsample_sneasybr
 run the BRICK 2.0 comparison.
 - The same record also ships `parameters_subsample_brick.csv`, the standalone BRICK calibration. It is not this arm's
   file: on this package's FaIR forcing its thermal expansion is about 3× too small.
-- Through v1.2.0 the arm used an earlier joint subsample from Tony Wong (sha256 `78247db8…`). The published file gives
+- Through v0.3.0 the arm used an earlier joint subsample from Tony Wong (sha256 `78247db8…`). The published file gives
   an SSP2-4.5 BRICK 2.0 total about 4 % lower at 2100 and 2300.
 
 ## Repository layout
 
 ```
 src/                 the model: components/, land water, posterior, forcing helpers
-data/posterior/      the L27 posterior (unchanged since v1.0)
+data/posterior/      the L27 posterior (unchanged since v0.1)
 data/drivers/        observed glacier-region and Greenland temperature drivers (HadCRUT5-based)
 data/constants/      fixed constants, the Greenland amplification shape, paleo draws
 data/observations/   the calibration targets (and the glacier target with the RGI-19 seam removed)
@@ -182,34 +180,34 @@ tools/               data import, test-reference builder, BRICK 2.0 fetch; forci
 
 ## Versions
 
-**v1.1** (2026-10-08). Same posterior; two projection-side fixes.
+**v0.2** (2026-10-08). Same posterior; two projection-side fixes.
 - **Paleo assignment** (`Ladrillo.PALEO_ASSIGNMENT = :single`). The Antarctic fast-dynamics pair (lambda, T_crit) is
   attached to each posterior draw as a joint draw from the paleo ensemble.
-  - v1.0 made that assignment after selecting draws, so its joint-climate arm, which assigned chain by chain, gave all
+  - v0.1 made that assignment after selecting draws, so its joint-climate arm, which assigned chain by chain, gave all
     four chains the same 500 paleo rows.
-  - v1.1 assigns once over all 10,000 draws, and any subset keeps the rows its draws have in the full table.
+  - v0.2 assigns once over all 10,000 draws, and any subset keeps the rows its draws have in the full table.
   - Measured on SSP5-8.5 (joint arm, 2026-10-07): medians move by at most 1.3 bootstrap standard errors; the 2100 95th percentile moves
     -3.6 cm (total) and -5.0 cm (Antarctica).
 - **Land-water frame step** (`Ladrillo.LWS_OBS_ANCHOR = :zero_at_first_year`).
   - The observed land-water series is in the calibration target's 1995-2005 frame, while the other components start
-    at 0 in 1850. v1.0 started the land-water component at the series' 1900 value, +1.565 cm, and Antarctica's
-    sea-level feedback saw that step. v1.1 starts it at 0.
+    at 0 in 1850. v0.1 started the land-water component at the series' 1900 value, +1.565 cm, and Antarctica's
+    sea-level feedback saw that step. v0.2 starts it at 0.
   - Glaciers, Greenland and thermal expansion are bit-identical.
   - Antarctica moves by about -1e-4 of its own contribution: at most 0.014 cm at 2100 and 0.049 cm at 2300 under
     SSP5-8.5.
-- `--v1.0` on `scripts/project_joint.jl`, `project_fixed.jl` and `brick20_joint.jl` (or `posterior(paleo=:v1, ...)`
-  and `LadrilloModel(...; lws_anchor=:v1_step)`) reproduces v1.0 bit for bit. The identity gate checks this.
+- `--v0.1` on `scripts/project_joint.jl`, `project_fixed.jl` and `brick20_joint.jl` (or `posterior(paleo=:per_selection, ...)`
+  and `LadrilloModel(...; lws_anchor=:obs_at_first_year)`) reproduces v0.1 bit for bit. The identity gate checks this.
 - `test/identity/fix_effects.jl` separates the two fixes and checks each against what it should and should not move.
 
-**v1.2** (2026-10-08). Two changes since `v1.1.0`, both made in the research code first and
+**v0.3** (2026-10-08). Two changes since `v0.2.0`, both made in the research code first and
 certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
-- **The van Vuuren forcing** (`data/forcing/*vv*`) is built from the PUBLISHED Zenodo v1.1.1 scenario. v1.1's files put
+- **The van Vuuren forcing** (`data/forcing/*vv*`) is built from the PUBLISHED Zenodo v1.1.1 scenario. v0.2's files put
   the published post-2100 extension on the 2100 level of an earlier, gated prerelease; for Medium-to-Low that left the
   CO2 tail 10.5 GtCO2/yr low for two centuries. The SSP forcing is unchanged.
 - **The joint-climate arm is conditioned on the record by default**: `scripts/project_joint.jl` drops every draw whose
   Antarctic fast dynamics fires by `record_end()` on its OWN paired FaIR config (3 of the 2,000 SSP draws, 2 of the
   van Vuuren). That is exact rejection, the same as the calibration likelihood's own weighting.
-  `--no-record-conditioning` restores the v1.1 joint arm (outputs suffixed `_uncond`); `--v1.0` does not condition.
+  `--no-record-conditioning` restores the v0.2 joint arm (outputs suffixed `_uncond`); `--v0.1` does not condition.
   The fixed-climate products are unchanged: on the mean climate no projection row crosses.
 - `posterior(; drop_record_crossings=true)` drops the draws whose Antarctic fast dynamics fires by the end of the
   Antarctic record (`record_end()`, 2025) on the calibration's own climate. That is rejection sampling, i.e. exact
@@ -222,12 +220,18 @@ certified bit-for-bit against it (CHANGELOG 2026-10-08i-k):
   checks it against model runs (10,000 draws on the record climate, 2,000 joint draws) and at the threshold to 1 ulp,
   and is mutation-tested. `scripts/record_crossings.jl` lists the onset year of every projection draw in each climate.
 
-**v1.3** (2026-10-15; the version the GMD paper reports). The BRICK 2.0 comparison arm reads the BRICK parameters of the
+**v0.4** (2026-10-15). The BRICK 2.0 comparison arm reads the BRICK parameters of the
 joint SNEASY-BRICK posterior published with MimiBRICK v2.0.0 (Zenodo 10.5281/zenodo.20592337), which
-`tools/fetch_brick20_posterior.sh` downloads; v1.2 used an earlier subsample with no public URL (*BRICK 2.0 posterior*).
-- Every Ladrillo product is bit-identical to v1.2. Only BRICK 2.0 numbers move: its SSP2-4.5 total is about 4 % lower
+`tools/fetch_brick20_posterior.sh` downloads; v0.3 used an earlier subsample with no public URL (*BRICK 2.0 posterior*).
+- Every Ladrillo product is bit-identical to v0.3. Only BRICK 2.0 numbers move: its SSP2-4.5 total is about 4 % lower
   at 2100 and 2300, and Table 5's profiled-AR(1) ΔAIC goes from 88.9 to 95.5.
 - Certified bit-for-bit against the research re-run (identity gates 2-5; CHANGELOG 2026-10-15).
+
+**v1.0** (the release the GMD paper reports). v0.4's model, posterior and numbers. Adds `python/figures/`, which
+regenerates Figs. 1–6 byte-identical to the paper's renders, and `data/comparison/`, the FACTS and MAGICC-SLR
+outputs those figures show. The options that reproduce v0.1 are renamed (`--v1.0` → `--v0.1`, `paleo=:v1` →
+`paleo=:per_selection`, `lws_anchor=:v1_step` → `lws_anchor=:obs_at_first_year`); the old names stop with an error.
+The internal tags `v1.0.0` to `v1.3.0` are renamed `v0.1.0` to `v0.4.0`.
 
 ## Known issues
 
@@ -239,9 +243,9 @@ joint SNEASY-BRICK posterior published with MimiBRICK v2.0.0 (Zenodo 10.5281/zen
     projection draws fire by 2025 under each SSP (2 under each van Vuuren marker), and 7-8 (5) by 2026; on the mean
     climate, none.
   - Hindcast products that subsample the posterior can therefore depend slightly on the paleo assignment.
-  - v1.1 does not condition on the record. v1.2 conditions the joint-climate arm by default and offers the
+  - v0.2 does not condition on the record. v0.3 conditions the joint-climate arm by default and offers the
     calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper reports the
-    conditioned numbers (v1.2 and later).
+    conditioned numbers (v0.3 and later).
 
 ## License
 

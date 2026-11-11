@@ -1,4 +1,4 @@
-# Posterior predictive check: the Ladrillo v1.0 posterior run over the calibration window and compared with the
+# Posterior predictive check: the Ladrillo posterior (L27) run over the calibration window and compared with the
 # observational component targets it was fitted to.
 #
 #   julia --project=. scripts/posterior_predictive.jl [n_draws] [--outdir=outputs/hindcast]
@@ -10,7 +10,7 @@
 #   glaciers   model scope gsic_hind = SLOWG + FASTG plus the per-draw uncharted-ice term F_unch, against the glacier
 #              target with the RGI-19 seam removed (calibration_targets_gsic_adj.csv)
 #   total      modelled ice + steric (with the RGI-19 seam) plus the OBSERVED land-water budget, against the
-#              Frederikse 2020 / NOAA STAR spliced total. v1.0 does not fit the total: it is out-of-sample.
+#              Frederikse 2020 / NOAA STAR spliced total. Ladrillo does not fit the total: it is out-of-sample.
 #
 # Two bands per component:
 #   parameter   posterior parameter spread alone
@@ -19,7 +19,7 @@
 #               Coverage of THIS band is the goodness-of-fit statement. NaN for a series with no fitted error model.
 #
 # Writes <outdir>/postpred_{components_timeseries,bias,coverage}.csv, each with a `provenance` column.
-# Draws: the posterior evenly thinned to n_draws (default 2,000 = rows 1:5:10000); paleo rows from the v1.1 single
+# Draws: the posterior evenly thinned to n_draws (default 2,000 = rows 1:5:10000); paleo rows from the v0.2 single
 # assignment over all 10,000 (four of them cross the fast-dynamics threshold in 2021-2026; CHANGELOG 2026-10-08).
 
 using Ladrillo, CSV, DataFrames, Printf, Random, Statistics
@@ -37,7 +37,7 @@ mkpath(OUTDIR)
 const OUT_BANDS = joinpath(OUTDIR, "postpred_components_timeseries.csv")
 const OUT_BIAS  = joinpath(OUTDIR, "postpred_bias.csv")
 const OUT_COVER = joinpath(OUTDIR, "postpred_coverage.csv")
-const DELTA_END = 1960                     # the glacier delta ramp is zero from here on (v1.0 does not sample it)
+const DELTA_END = 1960                     # the glacier delta ramp is zero from here on (L27 does not sample it)
 
 ## (model component, target column, error-model suffix in the posterior)
 const SERIES = [(:ais, :ais, "ais"), (:glaciers, :gsic, "gsic"), (:gis, :gis, "gis"),
@@ -57,7 +57,7 @@ const OBS_SIGMA = Dict(tcol => tgt.sigma[tcol] for (_, tcol, _) in SERIES)
 const NPOST = Ladrillo.DRAWS_PER_CHAIN * Ladrillo.N_CHAINS
 const ROWS = let step = cld(NPOST, NDRAW_ARG), r = 1:step:NPOST; r[1:min(NDRAW_ARG, length(r))]; end
 post = posterior(rows = ROWS)
-## Which series v1.0 was fitted to, read off the posterior: a series is fitted iff it carries sd_* and rho_* columns.
+## Which series Ladrillo was fitted to, read off the posterior: a series is fitted iff it carries sd_* and rho_* columns.
 const FITTED = Set(k for (k, _, sfx) in SERIES if ("sd_$sfx" in names(post)) && ("rho_$sfx" in names(post)))
 const UNFITTED = [k for (k, _, _) in SERIES if !(k in FITTED)]
 isempty(UNFITTED) || println("NOTE: no calibrated error model for $(join(UNFITTED, ", ")): reported OUT-OF-SAMPLE, " *
@@ -72,7 +72,7 @@ ny = length(FY)
 
 model = Dict(k => Array{Float64}(undef, nrow(post), ny) for (k, _, _) in SERIES)
 pred  = Dict(k => Array{Float64}(undef, nrow(post), ny) for (k, _, _) in SERIES)
-obs_corrected = Array{Float64}(undef, nrow(post), ny)      # glacier target + the per-draw delta ramp (zero in v1.0)
+obs_corrected = Array{Float64}(undef, nrow(post), ny)      # glacier target + the per-draw delta ramp (zero in L27)
 rng = MersenneTwister(NOISE_SEED)
 function ar1_plus_obs_error!(rng, out, sd, rho, sigma_y)
     out[1] = sd / sqrt(1 - rho^2) * randn(rng)
@@ -133,7 +133,7 @@ bands[!, "provenance"] = fill(PROVENANCE, nrow(bands))
 CSV.write(OUT_BANDS, bands)
 
 ## ---------------------------------------------------------------------------------------------------------------
-## bias + coverage. in_sample = FALSE marks a series v1.0 was not fitted to (the total).
+## bias + coverage. in_sample = FALSE marks a series Ladrillo was not fitted to (the total).
 ## ---------------------------------------------------------------------------------------------------------------
 bias = DataFrame(component = String[], year = Int[], obs = Float64[], p50 = Float64[],
                  bias = Float64[], in90 = Bool[], in_sample = Bool[])

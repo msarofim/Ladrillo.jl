@@ -1,7 +1,7 @@
 # BRICK 2.0 comparison arm: stock MimiBRICK v2.0.0 with Ladrillo.BRICK20_LABEL's posterior, on the SAME climate as Ladrillo.
 #
 #   julia --project=. scripts/brick20_joint.jl --scenario=ssp245 [--outdir=outputs/projections]
-#        [--lws-anchor=zero_at_first_year|v1_step] [--v1.0]
+#        [--lws-anchor=zero_at_first_year|obs_at_first_year] [--v0.1]
 #
 # Like-for-like with scripts/project_joint.jl: same FaIR forcing, same 2014 splice, same draw -> config pairing seed,
 # same land-water series (:observed), same 1995-2014 reference. Two arms: `fixed` (ensemble-mean climate) and `joint`
@@ -10,9 +10,9 @@
 # The posterior stores `antarctic_precip0` in log space, as MimiBRICK v2.0.0 expects (src/brick20.jl).
 # Total = glaciers + Greenland + Antarctica + TE + land water.
 #
-# Land water: v1.1 starts the observed series at 0 (the default); `--v1.0` (= `--lws-anchor=v1_step`) reproduces the
-# v1.0 1900 frame step, which BRICK 2.0's Antarctic sea-level feedback also sees (src/landwater.jl).
-# Writes outputs/projections/brick20_{cells,draws,paths}_<scenario>[_lwsv1_step].csv with a provenance column.
+# Land water: v0.2 starts the observed series at 0 (the default); `--v0.1` (= `--lws-anchor=obs_at_first_year`) reproduces the
+# v0.1 1900 frame step, which BRICK 2.0's Antarctic sea-level feedback also sees (src/landwater.jl).
+# Writes outputs/projections/brick20_{cells,draws,paths}_<scenario>[_lwsobs_at_first_year].csv with a provenance column.
 
 using Ladrillo, CSV, DataFrames, Mimi, MimiBRICK, Printf, Random, Statistics
 
@@ -25,7 +25,9 @@ const YEARS = collect(1850:2300)
 const HORIZONS = [2100, 2150, 2300]
 const COMPS = ["glaciers", "gis", "ais", "te", "lws", "total"]
 const REPORT0 = 1990
-const ANCHOR = Symbol(arg("--lws-anchor=", "--v1.0" in ARGS ? "v1_step" : String(Ladrillo.LWS_OBS_ANCHOR)))
+"--v1.0" in ARGS && error("--v1.0 was renamed --v0.1 in Ladrillo 1.0.0: it reproduces the first internal build "
+                             * "(tag v0.1.0). The defaults are the release settings.")
+const ANCHOR = Symbol(arg("--lws-anchor=", "--v0.1" in ARGS ? "obs_at_first_year" : String(Ladrillo.LWS_OBS_ANCHOR)))
 ANCHOR in Ladrillo.LWS_OBS_ANCHORS || error("--lws-anchor must be one of $(Ladrillo.LWS_OBS_ANCHORS)")
 const SFX = ANCHOR === Ladrillo.LWS_OBS_ANCHOR ? "" : "_lws$(ANCHOR)"
 mkpath(OUTDIR)

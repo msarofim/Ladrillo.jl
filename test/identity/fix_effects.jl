@@ -1,10 +1,10 @@
-# The v1.0 -> v1.1 change, decomposed on the identity-gate dumps (package side, new_<case>.jls).
+# The v0.1 -> v0.2 change, decomposed on the identity-gate dumps (package side, new_<case>.jls).
 #   julia --project=. test/identity/fix_effects.jl
 #
-# Each v1.1 case is compared with its v1.0 twin. The case pairs isolate the two fixes:
+# Each v0.2 case is compared with its v0.1 twin. The case pairs isolate the two fixes:
 #   K1  rows 1:10000 in ONE paleo block: v1 and :single assign the same rows, so K1 -> K1_v11 is the LAND-WATER fix
 #       alone. Gated (exact): glaciers, Greenland, TE IDENTICAL; land water (re-referenced to 1995-2014) rises by
-#       exactly obs[first year] before the observed record's first year (v1.0 stepped UP there, so in the 1995-2014
+#       exactly obs[first year] before the observed record's first year (v0.1 stepped UP there, so in the 1995-2014
 #       frame its earlier years sat that much lower) and moves by float noise from it on; total = land water +
 #       Antarctica. Antarctica moves through DAIS's sea-level feedback only; its size is gated against PHYSICS: the
 #       median |dAIS| / AIS must be within ANALYTIC_TOL of the analytic flux sensitivity (1 + gamma) / depth times the
@@ -26,7 +26,7 @@ const ANALYTIC_TOL = 3                      # empirical differing from analytic 
 const AIS_FLOOR_CM = 10.0                   # ratios only where Antarctica has contributed something
 const FLOAT_CM = 1e-9                       # re-referencing noise on a ~1e2 cm series
 const UNMOVED = (:glaciers, :gsic_r19, :gsic_slowg, :gsic_fastg, :gsic_hind, :gis, :te)
-## the v1.0 step: the observed series at its first year (cm), read as lws_observed_increments reads it
+## the v0.1 step: the observed series at its first year (cm), read as lws_observed_increments reads it
 const FIRST_YEAR, STEP_CM = let tg = CSV.read(Ladrillo.datapath("observations", "calibration_targets.csv"), DataFrame)
     obs = Dict(Int(r.year) => Float64(r[Ladrillo.LWS_OBS_COL]) for r in eachrow(tg) if !ismissing(r[Ladrillo.LWS_OBS_COL]))
     fy = minimum(keys(obs)); (fy, obs[fy])
@@ -78,7 +78,7 @@ let n1 = "K3_ssp245harm_central", c = CASES[n1], a = load(n1), b = load("$(n1)_v
     dt = (b[:total] .- a[:total]) .- (b[:ais] .- a[:ais])
     chk(maxabs(dt) < FLOAT_CM, @sprintf("total moves by ais only (max residual %.1e cm)", maxabs(dt)))
     ## the channel: with the threshold removed in BOTH assignments, the moved draws must agree exactly
-    p1 = posterior(rows = c.rows, paleo = :v1, paleo_block = c.block); ps = posterior(rows = c.rows)
+    p1 = posterior(rows = c.rows, paleo = :per_selection, paleo_block = c.block); ps = posterior(rows = c.rows)
     p1.antarctic_temp_threshold .= Inf; ps.antarctic_temp_threshold .= Inf
     mg, mo = mean_forcing(c.scen; years = c.years)
     lm = LadrilloModel(mg, mo; years = c.years, lws = c.lws, lws_anchor = c.anchor, tap = c.tap)

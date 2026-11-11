@@ -1,4 +1,4 @@
-"""Import Ladrillo v1.0 (L27) runtime data from the research repository, with provenance.
+"""Import Ladrillo's runtime data (calibration L27) from the research repository, with provenance.
 
 This is the ONE place the package's data/ directory was populated from SLR-RFF-BRICK. It is kept so that every file
 in data/ can be traced to a source file and commit, and so the import can be re-run if the research repository

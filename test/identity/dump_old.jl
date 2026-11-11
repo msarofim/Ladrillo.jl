@@ -4,11 +4,14 @@
 #   julia --project=$SLR/julia_v2 test/identity/dump_old.jl $SLR [case ...]
 #
 # The research kernel fixes its land-water anchor and paleo assignment when it is loaded (environment variables
-# LADRILLO_LWS_OBS_ANCHOR and LADRILLO_PALEO_ASSIGNMENT, defaulting to v1.1), so one process serves the cases that
-# match those settings and SKIPS the rest, saying so. Run it twice to cover both halves:
-#   LADRILLO_LWS_OBS_ANCHOR=v1_step LADRILLO_PALEO_ASSIGNMENT=v1 julia ... dump_old.jl $SLR     # the v1.0 cases
-#   julia ... dump_old.jl $SLR                                                                    # the v1.1 cases
-# A research kernel that predates both settings (v1.0, SLR <= 5d3add0) is treated as (:v1_step, :v1).
+# LADRILLO_LWS_OBS_ANCHOR and LADRILLO_PALEO_ASSIGNMENT, defaulting to the v0.2 settings), so one process serves the
+# cases that match those settings and SKIPS the rest, saying so. Run it twice to cover both halves:
+#   LADRILLO_LWS_OBS_ANCHOR=v1_step LADRILLO_PALEO_ASSIGNMENT=v1 julia ... dump_old.jl $SLR     # the v0.1 cases
+#   julia ... dump_old.jl $SLR                                                                    # the v0.2 cases
+# A research kernel that predates both settings (v0.1, SLR <= 5d3add0) is treated as (:v1_step, :v1).
+# Those are the RESEARCH kernel's names (it called the first build v1.0); cases.jl uses the package's names, and
+# RESEARCH_NAME below translates them. The package renamed :v1_step -> :obs_at_first_year and :v1 -> :per_selection
+# in 1.0.0, when the first build became v0.1.
 #
 # Draws come from the research repo's own L27 subsample with the OLD column names, read through the old kernel's own
 # loader (`ladrillo_posterior`), so the only thing this side shares with the package is cases.jl.
@@ -25,11 +28,14 @@ mean_old(scen, years) = ([_yearmap(joinpath(OBS, "fair_mean_gmst_$(scen).csv"), 
 
 const OLD_ANCHOR = isdefined(Main, :LWS_OBS_ANCHOR) ? LWS_OBS_ANCHOR : :v1_step
 const OLD_PALEO  = isdefined(Main, :LADRILLO_PALEO_ASSIGNMENT) ? LADRILLO_PALEO_ASSIGNMENT : :v1
+"""Package option name (cases.jl) => the research kernel's name for the same setting."""
+const RESEARCH_NAME = Dict(:obs_at_first_year => :v1_step, :zero_at_first_year => :zero_at_first_year,
+                           :per_selection => :v1, :single => :single)
 @printf("research kernel: land-water anchor :%s, paleo assignment :%s\n", OLD_ANCHOR, OLD_PALEO)
 
 """The case's draws through the research kernel's own loaders.
-:v1     the case's rows, then the paleo attachment in the case's blocks (`ladrillo_native_greenland!` attaches over
-        whatever it is handed, so it is called once per block exactly as the v1.0 research drivers did).
+:per_selection  the case's rows, then the paleo attachment in the case's blocks (`ladrillo_native_greenland!`
+        attaches over whatever it is handed, so it is called once per block exactly as the v0.1 research drivers did).
 :single the research loader `ladrillo_posterior` on the whole file (it assigns over all of it), then the case's rows."""
 function draws_old(c)
     if c.paleo === :single
@@ -43,9 +49,9 @@ function draws_old(c)
 end
 
 function run_case(name, c)
-    if (c.anchor, c.paleo) != (OLD_ANCHOR, OLD_PALEO)
-        @printf("[old] %-26s SKIPPED: case is (:%s, :%s), this kernel is (:%s, :%s)\n", name, c.anchor, c.paleo,
-                OLD_ANCHOR, OLD_PALEO)
+    if (RESEARCH_NAME[c.anchor], RESEARCH_NAME[c.paleo]) != (OLD_ANCHOR, OLD_PALEO)
+        @printf("[old] %-26s SKIPPED: case is (:%s, :%s) = research (:%s, :%s), this kernel is (:%s, :%s)\n", name,
+                c.anchor, c.paleo, RESEARCH_NAME[c.anchor], RESEARCH_NAME[c.paleo], OLD_ANCHOR, OLD_PALEO)
         return
     end
     post = draws_old(c)

@@ -58,7 +58,7 @@ import pandas as pd
 from scipy.optimize import minimize
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TAG = "L27"                                       # the v1.0 posterior's calibration
+TAG = "L27"                                       # the posterior's calibration (every version)
 HIND = os.path.join(REPO, "outputs", "hindcast")
 TABLES = os.path.join(REPO, "outputs", "tables")
 IN_L = os.path.join(HIND, "ic_hindcast_residuals_ladrillo.csv")
@@ -66,7 +66,7 @@ IN_B = os.path.join(HIND, "ic_hindcast_residuals_brick20.csv")
 IN_S = os.path.join(HIND, "ic_hindcast_obs_sigma.csv")
 
 MODELS = ("ladrillo", "brick20")
-## The table's label comes from Project.toml, as the 10-09 banner fix does (it was a literal "Ladrillo v1.0" through v1.3.0).
+## The table's label comes from Project.toml, as the 10-09 banner fix does (it was a literal "Ladrillo v1.0" through tag v0.4.0, formerly v1.3.0).
 PKG_VERSION = re.search(r'^version\s*=\s*"([^"]+)"', open(os.path.join(REPO, "Project.toml")).read(), re.M).group(1)
 LABEL = {"ladrillo": f"Ladrillo {PKG_VERSION}", "brick20": "BRICK 2.0"}
 FIT_SERIES = ("ais", "gsic", "gis", "steric")     # the common in-likelihood set
@@ -110,7 +110,7 @@ K = {"obs_iid": K_PHYS,
      "ar1_prof": {m: K_PHYS[m] + K_NOISE_PROF for m in MODELS}}
 K_TOTAL_IN_FILE = {"ladrillo": _count_sampled(_LAD)[1], "brick20": _count_sampled(_BRK)[1]}
 assert K_PHYS["brick20"] == 27 and K_TOTAL_IN_FILE["brick20"] == 35, K_PHYS
-assert K_PHYS["ladrillo"] == 42 and K_TOTAL_IN_FILE["ladrillo"] == 50, K_PHYS   # v1.0: 42 physical + 8 noise
+assert K_PHYS["ladrillo"] == 42 and K_TOTAL_IN_FILE["ladrillo"] == 50, K_PHYS   # L27: 42 physical + 8 noise
 
 # The AR(1) rho bound. 0.99 is the calibrator's own hard bound.
 # It MATTERS here: BRICK 2.0's residuals are smooth biases, and a rho at the bound turns the

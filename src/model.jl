@@ -150,7 +150,7 @@ end
 
 Build Ladrillo on prescribed GMST (K rel. 1850-1900) and ocean heat content (1e22 J), one value per year.
 `lws` is :observed (projections) or :central (hindcast-side runs); `lws_anchor` is the observed series' start
-(`:v1_step` reproduces v1.0, see landwater.jl); `tap` switches the Greenland above-threshold
+(`:obs_at_first_year` reproduces v0.1, see landwater.jl); `tap` switches the Greenland above-threshold
 discharge channel on at the shipped TAP_CELL. `ref` is the window `sea_level` re-references to: REF_PERIOD
 (1995-2014) for projections, FIT_REF (1995-2005) to compare with the calibration targets. `build_scenario` is only the MimiBRICK scenario get_model is called with
 (see BUILD_SCENARIO).

@@ -1,4 +1,4 @@
-# The v1.0 identity gate: every component, every year, every draw, `==` (NaN == NaN). Exit 1 on any difference.
+# The identity gate: every component, every year, every draw, `==` (NaN == NaN). Exit 1 on any difference.
 #   julia --project=. test/identity/compare.jl [case ...]
 using Serialization, Printf
 include(joinpath(@__DIR__, "cases.jl"))

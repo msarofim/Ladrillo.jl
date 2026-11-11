@@ -4,21 +4,21 @@
 
 using Random, Statistics
 
-## The four v1.0 cases (paleo :v1 in the blocks the v1.0 drivers used, land water :v1_step) are the REGRESSION half of
-## the gate: the package with its v1.0 options must reproduce the v1.0 research kernel. The `_v11` cases run the v1.1
+## The four v0.1 cases (paleo :per_selection in the blocks the v0.1 drivers used, land water :obs_at_first_year) are the REGRESSION half of
+## the gate: the package with its v0.1 options must reproduce the v0.1 research kernel. The `_v11` cases run the v0.2
 ## defaults (paleo :single = one assignment over all 10,000 draws, then the rows; land water :zero_at_first_year).
-## `block` applies to paleo :v1 only. K3 is hindcast-side (:central land water, which the anchor does not touch), so
+## `block` applies to paleo :per_selection only. K3 is hindcast-side (:central land water, which the anchor does not touch), so
 ## K3 and K3_v11 differ only in the paleo assignment; lambda / T_crit do not reach 1850-2026, so they must be equal.
 const CASES = Dict(
     # name   => (forcing, kind, rows, paleo, paleo_block, lws anchor, tap, lws, years)
-    "K1_ssp585_mean_tap"     => (scen = "ssp585",     kind = :mean,  rows = 1:10000,  paleo = :v1, block = 10000,
-                                 anchor = :v1_step, tap = true,  lws = :observed, years = 1850:2300),
-    "K2_ssp245_mean_notap"   => (scen = "ssp245",     kind = :mean,  rows = 1:5:10000, paleo = :v1, block = 2000,
-                                 anchor = :v1_step, tap = false, lws = :observed, years = 1850:2300),
-    "K3_ssp245harm_central"  => (scen = "ssp245harm", kind = :mean,  rows = 1:10:10000, paleo = :v1, block = 1000,
-                                 anchor = :v1_step, tap = false, lws = :central,  years = 1850:2026),
-    "K4_vvH_joint_tap"       => (scen = "vvH",        kind = :joint, rows = 1:5:10000, paleo = :v1, block = 500,
-                                 anchor = :v1_step, tap = true,  lws = :observed, years = 1850:2300),
+    "K1_ssp585_mean_tap"     => (scen = "ssp585",     kind = :mean,  rows = 1:10000,  paleo = :per_selection, block = 10000,
+                                 anchor = :obs_at_first_year, tap = true,  lws = :observed, years = 1850:2300),
+    "K2_ssp245_mean_notap"   => (scen = "ssp245",     kind = :mean,  rows = 1:5:10000, paleo = :per_selection, block = 2000,
+                                 anchor = :obs_at_first_year, tap = false, lws = :observed, years = 1850:2300),
+    "K3_ssp245harm_central"  => (scen = "ssp245harm", kind = :mean,  rows = 1:10:10000, paleo = :per_selection, block = 1000,
+                                 anchor = :obs_at_first_year, tap = false, lws = :central,  years = 1850:2026),
+    "K4_vvH_joint_tap"       => (scen = "vvH",        kind = :joint, rows = 1:5:10000, paleo = :per_selection, block = 500,
+                                 anchor = :obs_at_first_year, tap = true,  lws = :observed, years = 1850:2300),
     "K1_ssp585_mean_tap_v11"    => (scen = "ssp585",     kind = :mean,  rows = 1:10000,   paleo = :single,
                                     block = nothing, anchor = :zero_at_first_year, tap = true,  lws = :observed,
                                     years = 1850:2300),

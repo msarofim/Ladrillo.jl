@@ -1,5 +1,5 @@
 #!/bin/bash
-## Mutation test of the v1.0 identity gate: each mutant must make test/identity/compare.jl FAIL on a case whose
+## Mutation test of the identity gate: each mutant must make test/identity/compare.jl FAIL on a case whose
 ## reference (old_<case>.jls) already exists in $LADRILLO_IDENTITY_DIR. A gate that passes is not a gate that works.
 ##   test/identity/mutation_test.sh <case>      (K3_ssp245harm_central is the cheap one; K4 exercises the paleo block)
 ## Mutants (each applied to a scratch COPY of the package; the working tree is never edited):

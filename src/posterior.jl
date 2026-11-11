@@ -1,4 +1,4 @@
-# The Ladrillo posterior (calibration L27; v1.0 and v1.1 share it) and the per-draw quantities derived from it.
+# The Ladrillo posterior (calibration L27; every version shares it) and the per-draw quantities derived from it.
 #
 # data/posterior/ladrillo_L27_posterior.csv: 10,000 draws pooled from four 2M-iteration chains (second halves, every
 # 400th iteration, in chain order: rows 1-2500 are chain 1, ...). 50 columns. NOT columns, because L27 does not sample
@@ -14,13 +14,13 @@ const PALEO_DRAWS_FILE = ("constants", "paleo_fastdyn_draws.csv")
 const PALEO_MARGINALS_FILE = ("constants", "paleo_dais_marginals.csv")
 """Seed of the fixed RNG that assigns paleo (lambda, T_crit) rows to posterior draws."""
 const PALEO_SEED = 20260920
-"""How the paleo (lambda, T_crit) rows are assigned to posterior draws. `:single` (v1.1): one assignment over all
-10,000 draws of the posterior file, so any subset keeps the rows its draws have in the full table. `:v1` (v1.0): the
-rows are selected FIRST and the assignment is made over the selection, in blocks of `paleo_block` (the v1.0 joint arm
+"""How the paleo (lambda, T_crit) rows are assigned to posterior draws. `:single` (v0.2): one assignment over all
+10,000 draws of the posterior file, so any subset keeps the rows its draws have in the full table. `:per_selection` (v0.1): the
+rows are selected FIRST and the assignment is made over the selection, in blocks of `paleo_block` (the v0.1 joint arm
 used 500, one per chain, so its four chains reused the same 500 paleo rows; the fixed-climate panel used one block
 over its 2,000)."""
 const PALEO_ASSIGNMENT = :single
-const PALEO_ASSIGNMENTS = (:single, :v1)
+const PALEO_ASSIGNMENTS = (:single, :per_selection)
 """Draws per chain in the 10k posterior file."""
 const DRAWS_PER_CHAIN = 2500
 const N_CHAINS = 4
@@ -46,7 +46,7 @@ end
 Attach lambda and T_crit as JOINT paleo draws (rows of paleo_fastdyn_draws.csv chosen by a fixed-seed RNG) and gamma
 at its paleo median. The assignment is made in consecutive blocks of `block` rows, the RNG re-seeded for each block.
 
-`block = nrow(df)` (the default) assigns the whole table in one pass. The v1.0 joint-climate arm read its draws chain by
+`block = nrow(df)` (the default) assigns the whole table in one pass. The v0.1 joint-climate arm read its draws chain by
 chain and assigned each chain's 500 draws separately (`block = 500`), so its four chains share the same 500 paleo rows;
 pass that to reproduce it.
 """
@@ -82,12 +82,12 @@ end
 
 The L27 posterior with every per-draw quantity the model needs. `rows` selects draws (e.g. `1:5:10000`, the 2,000
 draws of the projection arms).
-- `paleo = :single` (v1.1, the default): the paleo rows are assigned over the whole file, then `rows` is taken, so a
+- `paleo = :single` (v0.2, the default): the paleo rows are assigned over the whole file, then `rows` is taken, so a
   draw's (lambda, T_crit) does not depend on which other draws were selected.
-- `paleo = :v1`: `rows` is taken first and the assignment is made over the selection in blocks of `paleo_block`
-  (default: one block). `posterior(rows=1:5:10000, paleo=:v1, paleo_block=500)` is the v1.0 joint arm,
-  `posterior(rows=1:5:10000, paleo=:v1)` the v1.0 fixed-climate panel.
-- `drop_record_crossings = true` (opt-in, v1.2; OFF in v1.1 and in the paper): drop the selected draws whose Antarctic
+- `paleo = :per_selection`: `rows` is taken first and the assignment is made over the selection in blocks of `paleo_block`
+  (default: one block). `posterior(rows=1:5:10000, paleo=:per_selection, paleo_block=500)` is the v0.1 joint arm,
+  `posterior(rows=1:5:10000, paleo=:per_selection)` the v0.1 fixed-climate panel.
+- `drop_record_crossings = true` (opt-in, v0.3; OFF in v0.2 and in the paper): drop the selected draws whose Antarctic
   fast dynamics fires by `record_last_year` (`nothing` = `record_end()`, the Antarctic record's last year) on the
   calibration's own climate, i.e. condition the propagated paleo draws on the record (see record_crossing.jl). Of the
   10,000 draws, 3 fire by 2025 on that climate (file rows 4588, 4618, 9713) and a 4th in 2026 (4182); none is among
@@ -102,7 +102,7 @@ function posterior(; rows=:, paleo::Symbol=PALEO_ASSIGNMENT, paleo_block::Union{
     df = CSV.read(datapath(POSTERIOR_FILE...), DataFrame)
     filerow = collect(1:nrow(df))[rows]
     if paleo === :single
-        paleo_block === nothing || error("paleo_block applies to paleo = :v1 only")
+        paleo_block === nothing || error("paleo_block applies to paleo = :per_selection only")
         attach_paleo!(df)
         df = df[rows, :]
     else

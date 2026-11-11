@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-11-11b — Version 1.0.0; the internal builds become v0.1–v0.4; the v0.1 options renamed
+
+**Marcus 11-11 (GMD guidance, Decision 1):** the paper reports Ladrillo v1.0. The internal tags are renamed and the
+release is tagged v1.0.0. **Ruled the same day:** the options that reproduce the first build get the flag `--v0.1` and
+version-free option names; push the commits, hold the tag changes on GitHub until the release.
+
+| internal build | old tag | new tag | commit |
+|---|---|---|---|
+| v0.1 (first build) | v1.0.0 | v0.1.0 | a2bb3b0 |
+| v0.2 | v1.1.0 | v0.2.0 | 78b03c6 |
+| v0.3 | v1.2.0 | v0.3.0 | c526331 |
+| v0.4 | v1.3.0 | v0.4.0 | 01462a8 |
+
+Entries below this one keep the version names they were written with.
+- `Project.toml` and `CITATION.cff` are 1.0.0; `date-released` and the `v1.0.0` tag wait for the release commit. The
+  README's version text and *Versions* section use the new numbers and add a v1.0 entry.
+- Renamed: `--v1.0` → `--v0.1` (the three projection scripts), `posterior(paleo=:v1)` → `paleo=:per_selection`,
+  `lws_anchor=:v1_step` → `lws_anchor=:obs_at_first_year`; output suffixes follow (`_paleoper_selection`,
+  `_lwsobs_at_first_year`). `--v1.0` now stops with an error rather than silently running the defaults.
+- Comments that called the first builds v1.0–v1.3 now say v0.1–v0.4; text about the model or the L27 posterior, which
+  every version shares, no longer carries a version.
+- Identity gate: `cases.jl` uses the package's names; `dump_old.jl` translates them to the research kernel's own
+  (`RESEARCH_NAME`), whose environment variables and defaults (`v1_step`, `v1`) are unchanged.
+- The tags were renamed in this clone only. GitHub keeps v1.0.0–v1.3.0 until the release.
+- Verified: `test/runtests.jl` 96/96, exact, reporting Ladrillo 1.0.0. The old option names now fail with an error
+  (`paleo=:v1`, `lws_anchor=:v1_step`, `--v1.0`). The research side's translation was checked by re-dumping K3 and
+  K3_v11 through it: byte-identical to the 10-08 reference dumps.
+- **Identity gate 1 PASS, bit-identical on all eight cases, after one stale reference was replaced.** The first run
+  passed K1–K3 and failed K4 by up to 19.9 cm. The K4 reference dumps were written at 06:19–06:21 on 10-08, before
+  the vvH cube was rebuilt on the published emissions that afternoon (the v0.3 change), and gate 1 was not re-dumped
+  for K4 then; v0.3 and v0.4 were certified by gates 2–4. The research kernel re-run on today's cube (sha256 equal to
+  `data/forcing/`) is bit-identical to the package on both K4 cases. The stale dumps are in
+  `test/identity/out/quarantine/20261111_k4_stale_vv_forcing/` (local; `out/` is not tracked) with a README.
+
 ## 2026-11-11 — The paper's figure scripts (Figs. 1–6) and the FACTS / MAGICC-SLR comparison data
 
 **Marcus 11-11 (GMD guidance, Decision 3):** the Code availability text says the archive holds the scripts that

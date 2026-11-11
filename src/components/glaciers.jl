@@ -1,4 +1,4 @@
-# Three-reservoir glacier component (Ladrillo v1.0).
+# Three-reservoir glacier component.
 #
 # Reservoirs (RGI regions):
 #   R19    Antarctic periphery                 {19}

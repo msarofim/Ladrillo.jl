@@ -6,7 +6,7 @@
 # data/brick20/ and checks its sha256.
 #
 # The file stores `antarctic_precip0` in log space, which is what MimiBRICK v2.0.0's `ais_precipitation₀` expects, so
-# it is passed through unchanged. (The May-22 file used through v1.2.0 stored it linearly and was log-transformed here.)
+# it is passed through unchanged. (The May-22 file used through tag v0.3.0, formerly v1.2.0, stored it linearly and was log-transformed here.)
 #
 # get_model draws from the global RNG (its land-water realisation), so every BRICK 2.0 model is built with
 # `Random.seed!(BRICK20_SEED)` immediately before get_model. The hindcast drivers never read BRICK's own land water

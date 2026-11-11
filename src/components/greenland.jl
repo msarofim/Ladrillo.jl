@@ -1,4 +1,4 @@
-# Two-basin Greenland component (Ladrillo v1.0).
+# Two-basin Greenland component.
 #
 # Basins (Mouginot et al. 2019 sectors):
 #   active = SW + CW + CE + SE + NW

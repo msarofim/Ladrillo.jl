@@ -8,20 +8,20 @@
 #   :central   HINDCAST-SIDE runs (calibration, posterior predictive): a constant LWS_MEAN per year, the convention the
 #              likelihood was fitted under.
 #
-# THE LAND-WATER FRAME STEP (fixed in v1.1). The observed series is in the calibration target's 1995-2005 frame, while
-# every other component starts at 0 in 1850. v1.0 started the component at obs[first year] (+1.565 cm in 1900), and the
+# THE LAND-WATER FRAME STEP (fixed in v0.2). The observed series is in the calibration target's 1995-2005 frame, while
+# every other component starts at 0 in 1850. v0.1 started the component at obs[first year] (+1.565 cm in 1900), and the
 # Antarctic sea-level feedback saw that step. Removing it (measured 2026-10-08 on 10,000 draws, SSP5-8.5,
 # test/identity/fix_effects.jl) moves Antarctica by about -1e-4 of its own contribution, linearly in the step: at most
 # 0.014 cm at 2100 and 0.049 cm at 2300. Glaciers, Greenland and thermal expansion are bit-identical, and land water
 # re-referenced to 1995-2014 moves only before 1900. (The "<= 0.012 cm" once quoted here was a different perturbation.)
-# v1.1 (LWS_OBS_ANCHOR = :zero_at_first_year): the component starts at 0 and carries the observed increments.
-# `anchor = :v1_step` reproduces v1.0.
+# v0.2 (LWS_OBS_ANCHOR = :zero_at_first_year): the component starts at 0 and carries the observed increments.
+# `anchor = :obs_at_first_year` reproduces v0.1.
 
 const LWS_MEAN = 0.0003                 # m/yr, MimiBRICK's mean land-water rate
 const LWS_OBS_COL = :lws                # cm, rel. 1995-2005 (the calibration target's own frame)
 const LWS_OBS_LAST_REAL_YEAR = 2023     # GRACE-FO record end; the target holds 2023 flat to 2026
-const LWS_OBS_ANCHOR = :zero_at_first_year   # v1.1; :v1_step reproduces v1.0
-const LWS_OBS_ANCHORS = (:v1_step, :zero_at_first_year)
+const LWS_OBS_ANCHOR = :zero_at_first_year   # v0.2; :obs_at_first_year reproduces v0.1
+const LWS_OBS_ANCHORS = (:obs_at_first_year, :zero_at_first_year)
 const LWS_MODES = (:observed, :central)
 
 """
@@ -51,7 +51,7 @@ function lws_observed_increments(years::AbstractVector{Int}; anchor::Symbol=LWS_
             v[i] = LWS_MEAN
         end
     end
-    return first_year, (anchor === :v1_step ? obs[first_year] / 100.0 : 0.0), v
+    return first_year, (anchor === :obs_at_first_year ? obs[first_year] / 100.0 : 0.0), v
 end
 
 """Set the land-water series of a built model `m` to mode `lws` (:observed or :central)."""
