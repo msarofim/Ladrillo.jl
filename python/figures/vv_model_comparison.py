@@ -24,6 +24,7 @@ never collapsed to one number; modules that are not climate-driven at a horizon 
 (figlib.FACTS_CLIMATE_DRIVEN). FACTS is relative to baseyear 2005; every other source is relative to 1995-2014.
 """
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -65,6 +66,12 @@ SRC_LAD, SRC_BRK = "Ladrillo", "BRICK 2.0"
 SRC_MAG, SRC_FCT = "MAGICC-SLR", "FACTS"
 ## What each upstream draws file must say about itself for the basis strings above to be true.
 DRAWS_MUST_SAY = {SRC_LAD: ("pairing seed 2026", "tap true"), SRC_BRK: ("pairing seed 2026",)}
+## SEEDS. Every provenance clause of a draws file that names a seed is copied into this table's provenance, so the file
+## Figs. 2, 3 and 6 read records every seed behind it. Each source must name these seeds (each word inside one clause),
+## and its clauses must be the same in all seven draws files.
+SEED_RX = re.compile(r"[^|]*seed[^|]*", re.IGNORECASE)    # also NOISE_SEED, "seeded"
+SEEDS_MUST_SAY = {SRC_LAD: (("paleo", "seed"), ("pairing", "seed")),
+                  SRC_BRK: (("Random.seed!", "get_model"), ("pairing", "seed"))}
 DRAW_COLS = ["draw", "config", "component", "horizon", "arm", "value_cm"]
 
 MAGICC_FILE = "magicc_nauels_components_vv.csv"
@@ -92,8 +99,19 @@ def gate_ladrillo(marker):
     return dict(marker=marker, control=g["control"], configs_used=g["configs"], rejected=rejected_draws(marker))
 
 
+def seed_clauses(prov, path, source):
+    """The provenance clauses that name a seed, after checking SEEDS_MUST_SAY."""
+    cl = tuple(c.strip() for c in SEED_RX.findall(prov))
+    for words in SEEDS_MUST_SAY[source]:
+        if not any(all(w in c for w in words) for c in cl):
+            raise SystemExit("[SEED] %s: no provenance clause names %s, so the %s seeds would go unrecorded"
+                             % (os.path.relpath(path, lf.REPO), " + ".join(words), source))
+    return cl
+
+
 def read_joint_draws(scen, model, source):
-    """One run's draws, after checking the file's provenance carries what DRAWS_MUST_SAY requires."""
+    """One run's draws and its seed clauses, after checking the file's provenance carries what DRAWS_MUST_SAY and
+    SEEDS_MUST_SAY require."""
     path = lf.require(lf.product_csv(scen, model, "draws"), model, scen)
     prov = set(pd.read_csv(path, usecols=["provenance"]).provenance)
     if len(prov) != 1:
@@ -103,7 +121,7 @@ def read_joint_draws(scen, model, source):
     if miss:
         raise SystemExit("[PROV] %s: provenance does not say %s, so the %s band basis would be false"
                          % (os.path.relpath(path, lf.REPO), miss, source))
-    return path, pd.read_csv(path, usecols=DRAW_COLS)
+    return path, pd.read_csv(path, usecols=DRAW_COLS), seed_clauses(next(iter(prov)), path, source)
 
 
 def load_joint(path, d, marker, source):
@@ -216,10 +234,13 @@ def main():
           "from data/comparison/.\n" % MAGICC_N)
 
     gates, LAD, BRK, SEQ, INPUTS = {}, {}, {}, {}, []
+    SEEDS = {SRC_LAD: set(), SRC_BRK: set()}
     for m in MKEY:
         gates[m] = gate_ladrillo(m)
-        pl, dl = read_joint_draws(m, "ladrillo", SRC_LAD)
-        pb, db = read_joint_draws(m, "brick20", SRC_BRK)
+        pl, dl, kl = read_joint_draws(m, "ladrillo", SRC_LAD)
+        pb, db, kb = read_joint_draws(m, "brick20", SRC_BRK)
+        SEEDS[SRC_LAD].add(kl)
+        SEEDS[SRC_BRK].add(kb)
         INPUTS += [pl, pb]
         LAD[m], sl = load_joint(pl, dl, m, SRC_LAD)
         BRK[m], sb = load_joint(pb, db, m, SRC_BRK)
@@ -229,6 +250,13 @@ def main():
               f"draw->config permutations agree over {SEQ[m]} draws "
               f"[Ladrillo n={LAD[m][(COMPONENTS[0], HORIZONS[0])]['n']}, "
               f"BRICK 2.0 n={BRK[m][(COMPONENTS[0], HORIZONS[0])]['n']}]")
+
+    for src, k in SEEDS.items():
+        if len(k) != 1:
+            raise SystemExit("[SEED] %s: the draws files of the %d scenarios record different seeds: %s"
+                             % (src, len(MKEY), sorted(k)))
+    seed_text = "; ".join("%s: %s" % (src, " + ".join(next(iter(SEEDS[src])))) for src in (SRC_LAD, SRC_BRK))
+    print("[SEED] the same in all %d draws files of each model: %s" % (len(MKEY), seed_text))
 
     MAG = load_comparator(MAGICC_CSV, SRC_MAG, None, HORIZONS, n_default=MAGICC_N)
     FCT = load_comparator(FACTS_CSV, SRC_FCT, "module", FACTS_HORIZONS)
@@ -267,12 +295,12 @@ def main():
     df["scenario"] = df["marker"]
     df["provenance"] = (
         "Ladrillo %s | posterior %s | Ladrillo: %s (scripts/project_joint.jl), BRICK 2.0: %s "
-        "(scripts/brick20_joint.jl), joint arm, FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, pairing seed 2026 "
-        "(checked in both draws files) | MAGICC-SLR: data/comparison/%s (own climate, n=%d) | FACTS: "
+        "(scripts/brick20_joint.jl), joint arm, FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing | seeds (copied from the "
+        "draws files, the same in all %d scenarios of each model): %s | MAGICC-SLR: data/comparison/%s (own climate, n=%d) | FACTS: "
         "data/comparison/%s (n=200, modules filtered by figlib.FACTS_CLIMATE_DRIVEN) | quantiles %s %% "
         "(numpy.percentile, linear) | %s; FACTS rel. baseyear 2005 | seed n/a (no RNG in this script) | commit %s"
         % (SCRIPT, LADRILLO_TAG, "outputs/projections/joint_draws_<scenario>.csv",
-           "outputs/projections/brick20_draws_<scenario>.csv", MAGICC_FILE, MAGICC_N, FACTS_FILE,
+           "outputs/projections/brick20_draws_<scenario>.csv", len(MKEY), seed_text, MAGICC_FILE, MAGICC_N, FACTS_FILE,
            "/".join(str(q) for q in QUANTILES), lf.PROJ_BASELINE, lf.commit_stamp()))
     os.makedirs(lf.TABLE_DIR, exist_ok=True)
     df.to_csv(OUT, index=False)

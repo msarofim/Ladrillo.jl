@@ -36,7 +36,8 @@ const POST = Ladrillo.brick20_posterior()
 const STEP = max(1, nrow(POST) ÷ NDRAW)
 const ROWS = collect(1:STEP:nrow(POST))
 const PROVENANCE = "BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) | scripts/brick20_joint.jl | Ladrillo " *
-    "$(pkgversion(Ladrillo)) forcing helpers | scenario $SCENARIO | FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, " *
+    "$(pkgversion(Ladrillo)) forcing helpers | scenario $SCENARIO | FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing " *
+    "($(Ladrillo.fair_seed_note(SCENARIO))), " *
     "spliced at $(Ladrillo.SPLICE_YEAR) | rows 1:$(STEP):$(nrow(POST)) | Random.seed!($(Ladrillo.BRICK20_SEED)) before get_model | pairing seed $PAIR_SEED | land water " *
     ":observed ($ANCHOR) | cm rel 1995-2014 | julia $(VERSION)"
 

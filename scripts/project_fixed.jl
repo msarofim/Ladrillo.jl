@@ -34,7 +34,7 @@ const SFX = (TAP ? "" : "_notap") * (PALEO === Ladrillo.PALEO_ASSIGNMENT ? "" : 
 const OUT = joinpath(OUTDIR, "fixed_components_$(join(SCENS, "_"))$(SFX).csv")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_fixed.jl | FaIR 2.2.4 (calib " *
-    "1.6.0) CMIP7-basis ensemble-mean forcing | draws rows $(ROWS) (paleo $(PALEO === :per_selection ? "per_selection, one block over the selection" : "single assignment over 10000"), " *
+    "1.6.0) CMIP7-basis ensemble-mean forcing ($(join(unique(Ladrillo.fair_seed_note.(SCENS)), "; "))) | draws rows $(ROWS) (paleo $(PALEO === :per_selection ? "per_selection, one block over the selection" : "single assignment over 10000"), " *
     "seed $(Ladrillo.PALEO_SEED)) | tap $TAP | land water :observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-" *
     "$(Ladrillo.REF_PERIOD[2]) | julia $(VERSION)"
 

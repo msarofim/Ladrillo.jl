@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-11-11d — Every file a figure reads records the seeds behind it
+
+**Marcus 11-11 (session 2):** yes to recording seed provenance in the figure inputs, so the paper can say where the
+seeds are recorded.
+- **Audit.** The projection, hindcast and BRICK 2.0 files already recorded their seeds: the paleo-draw assignment
+  (`PALEO_SEED` 20260920), the draw-to-config pairing (2026), BRICK 2.0's `Random.seed!(2026)` before `get_model`, and
+  the posterior predictive's noise (`NOISE_SEED` 2026). Every `rand`/`randperm`/`randn` call in `src/` and `scripts/` is
+  one of these. Two gaps:
+  - `outputs/tables/vv_model_comparison.csv`, which Figs. 2, 3 and 6 read, recorded only the pairing seed.
+  - No provenance said whether the FaIR forcing carries internal variability. The SSP files and the calibration forcing
+    ssp245harm (Fig. 1's hindcast) keep the calib 1.6.0 posterior's `stochastic_run=True` with `use_seed=True` (841
+    configs, 841 distinct seeds in its `seed` column); the van Vuuren files are deterministic.
+- `Ladrillo.fair_seed_note(scenario)` (`src/forcing.jl`) states which, and the provenance of `project_joint.jl`,
+  `brick20_joint.jl`, `project_fixed.jl`, `posterior_predictive.jl`, `posterior_predictive_brick20.jl` and
+  `ic_hindcast_residuals.jl` now carries it.
+- `vv_model_comparison.py` copies every provenance clause that names a seed from the 14 draws files into its own
+  provenance, and stops if a model's clauses differ between scenarios or a required seed (paleo and pairing for
+  Ladrillo; `Random.seed!` before `get_model` and pairing for BRICK 2.0) is missing. Mutation-tested on scratch copies:
+  a paleo seed changed in one file, BRICK 2.0's seed clause dropped from one file, and the Ladrillo pairing clause
+  dropped each stop the script; the unmutated copy passes.
+- **Two runs are byte-identical.** `posterior_predictive.jl`, `posterior_predictive_brick20.jl`, and `project_joint.jl`
+  and `brick20_joint.jl` on vvLN, each run twice: all 11 output files byte-identical between the runs.
+- **The local products were regenerated** (both hindcasts and the seven van Vuuren scenarios for both models, 53
+  files) in a staging directory, checked equal to the previous products on every non-provenance cell (0 differences),
+  and swapped in. The SSP projection products were not regenerated and keep their 10-08 provenance (no figure reads
+  them). `check_figures_identity.py`: PASS, every PNG still byte-identical to the paper's render.
+  `check_tables_identity.py`: PASS. `test/runtests.jl`: 97/97, exact.
+- Not changed: the research repository's figure inputs (`vv_model_comparison_L27.csv` and the
+  `scope_slr_fairunc_{draws,paths}` files have no provenance column). Recording seeds there means re-running the research
+  projections and changing column sets that this package's identity gates read.
+
 ## 2026-11-11c — Table 4's script; Table A1 shows its log₁₀ rows in ln, as the research table does
 
 **Marcus 11-11 (session 2):** the Code availability text claims the scripts for every table, so Table 4's scorecard

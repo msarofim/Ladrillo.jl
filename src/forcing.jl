@@ -13,6 +13,22 @@ const SPLICE_YEAR = 2014
 """Scenarios with shipped forcing. ssp245harm is the calibration forcing (harmonized SSP2-4.5 emissions)."""
 const SCENARIOS = ["ssp126", "ssp245", "ssp585", "vvVL", "vvLN", "vvL", "vvML", "vvM", "vvHL", "vvH"]
 
+"""
+    fair_seed_note(scenario) -> String
+
+FaIR's internal variability in the shipped forcing for `scenario` (an SSP, a van Vuuren marker or ssp245harm), for
+provenance strings, so that every output depending on a random seed records it. The van Vuuren cubes and means were
+built with `stochastic_run=False` (tools/forcing/build_fair_cube_vv_v160.py) and carry no FaIR seed. Every other
+shipped forcing (the SSP cubes and means, and the calibration forcing ssp245harm) keeps the calib 1.6.0 posterior's
+`stochastic_run=True` with `use_seed=True`: config i is seeded from the posterior's `seed` column (841 distinct values).
+The label rests on data/forcing/ being byte-identical to those builds (tools/forcing/check_forcing_identity.py; a vv
+cube built with stochastic on fails it).
+"""
+function fair_seed_note(scenario::AbstractString)
+    startswith(scenario, "vv") && return "FaIR stochastic_run=false, no FaIR seed"
+    return "FaIR stochastic_run=true, each config seeded from the calib 1.6.0 posterior's seed column"
+end
+
 """Ensemble-mean forcing for `scenario` on `years`: (gmst, ohc)."""
 function mean_forcing(scenario::AbstractString; years=1850:2300)
     g = _yearmap(datapath("forcing", "fair_mean_gmst_$(scenario).csv"), "gmst_C")

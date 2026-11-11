@@ -62,7 +62,7 @@ for c in comps
 end
 band[!, "provenance"] = fill("BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) | Ladrillo $(pkgversion(Ladrillo)) " *
     "scripts/posterior_predictive_brick20.jl | Random.seed!($(Ladrillo.BRICK20_SEED)) immediately before get_model | " *
-    "rows 1:$ND | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING | land water = OBSERVED series | run $Y0-$Y1, saved " *
+    "rows 1:$ND | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING ($(Ladrillo.fair_seed_note(FORCING))) | land water = OBSERVED series | run $Y0-$Y1, saved " *
     "$(first(FY))-$(last(FY)), cm rel $(FIT_REF[1])-$(FIT_REF[2]) | julia $(VERSION)", ny)
 CSV.write(OUT, band)
 println("wrote ", OUT)

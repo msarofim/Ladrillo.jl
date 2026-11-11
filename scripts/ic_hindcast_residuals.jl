@@ -97,7 +97,7 @@ lnoise = [(c, Float64.(post[!, c])) for c in ("sd_ais", "rho_ais", "sd_gsic", "r
                                               "sd_gis", "rho_gis", "sd_steric", "rho_steric")]
 write_residuals(OUT_L, ldraws, lnoise, resL,
     "$PKG | Ladrillo $(pkgversion(Ladrillo)) (posterior L27) rows $(nrow(post)) evenly thinned of $NPOST (paleo :$(Ladrillo.PALEO_ASSIGNMENT) over the file, seed " *
-    "$(Ladrillo.PALEO_SEED)) | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING | land water :central | tap off | run " *
+    "$(Ladrillo.PALEO_SEED)) | FaIR 2.2.4 (calib 1.6.0) forcing $FORCING ($(Ladrillo.fair_seed_note(FORCING))) | land water :central | tap off | run " *
     "$Y0-$Y1 scored $(first(FY))-$(last(FY)) | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | gsic = gsic_hind + F_unch vs " *
     "the RGI-19-adjusted target, no delta ramp, no d2 | total = glaciers+ais+gis+te+OBSERVED lws | residual = model - obs")
 println("wrote ", OUT_L)
@@ -135,7 +135,7 @@ bnoise = [(c, Float64.(bpost[!, c])) for c in ("sd_glaciers", "rho_glaciers", "s
 write_residuals(OUT_B, bdraws, bnoise, resB,
     "$PKG | BRICK 2.0 ($(Ladrillo.BRICK20_LABEL)) rows $(nrow(bpost)) evenly thinned of " *
     "$(nrow(bpost_full)) | Random.seed!($(Ladrillo.BRICK20_SEED)) immediately before get_model | FaIR 2.2.4 " *
-    "(calib 1.6.0) forcing $FORCING | run $Y0-$Y1 scored $(first(FY))-$(last(FY)) | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | " *
+    "(calib 1.6.0) forcing $FORCING ($(Ladrillo.fair_seed_note(FORCING))) | run $Y0-$Y1 scored $(first(FY))-$(last(FY)) | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | " *
     "gsic = gsic_sea_level vs the RGI-19-adjusted target | total = ais+gsic+gis+te+OBSERVED lws | residual = model - obs")
 println("wrote ", OUT_B)
 

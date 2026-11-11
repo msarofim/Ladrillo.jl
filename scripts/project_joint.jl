@@ -57,7 +57,7 @@ const SFX = (TAP ? "" : "_notap") * (PALEO === Ladrillo.PALEO_ASSIGNMENT ? "" : 
 SCENARIO in Ladrillo.SCENARIOS || error("no shipped forcing for '$SCENARIO'; have $(Ladrillo.SCENARIOS)")
 mkpath(OUTDIR)
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/project_joint.jl | scenario $SCENARIO | " *
-    "FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing, spliced at $(Ladrillo.SPLICE_YEAR) | draws rows $(ROWS) " *
+    "FaIR 2.2.4 (calib 1.6.0) CMIP7-basis forcing ($(Ladrillo.fair_seed_note(SCENARIO))), spliced at $(Ladrillo.SPLICE_YEAR) | draws rows $(ROWS) " *
     "(paleo $(PALEO === :per_selection ? "per_selection, blocks of $PALEO_BLOCK" : "single assignment over 10000"), seed $(Ladrillo.PALEO_SEED)) | pairing seed $PAIR_SEED | tap $TAP | land water " *
     ":observed ($ANCHOR) | cm rel $(Ladrillo.REF_PERIOD[1])-$(Ladrillo.REF_PERIOD[2]) | record conditioning " *
     "$(RECORD_CONDITION ? "ON (joint draws firing by $(Ladrillo.record_end()) on their own config dropped)" : "OFF") | " *

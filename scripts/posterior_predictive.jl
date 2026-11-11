@@ -115,7 +115,7 @@ end
 ## ---------------------------------------------------------------------------------------------------------------
 const PROVENANCE = "Ladrillo $(pkgversion(Ladrillo)) (posterior L27) | scripts/posterior_predictive.jl | draws rows " *
     "$(ROWS) (paleo :$(Ladrillo.PALEO_ASSIGNMENT) over the file, seed $(Ladrillo.PALEO_SEED)) | AR(1)+obs noise MersenneTwister(NOISE_SEED=$NOISE_SEED) | " *
-    "FaIR 2.2.4 (calib 1.6.0) forcing $FORCING | land water :central | tap off | targets calibration_targets.csv + " *
+    "FaIR 2.2.4 (calib 1.6.0) forcing $FORCING ($(Ladrillo.fair_seed_note(FORCING))) | land water :central | tap off | targets calibration_targets.csv + " *
     "calibration_targets_gsic_adj.csv | cm rel $(FIT_REF[1])-$(FIT_REF[2]) | julia $(VERSION)"
 qv(x, p) = (v = filter(isfinite, x); isempty(v) ? NaN : quantile(v, p))
 bands = DataFrame(year = FY)
