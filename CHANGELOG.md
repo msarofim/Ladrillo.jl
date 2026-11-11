@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-11-11c — Table 4's script; Table A1 shows its log₁₀ rows in ln, as the research table does
+
+**Marcus 11-11 (session 2):** the Code availability text claims the scripts for every table, so Table 4's scorecard
+moves into the package now; the calibration drivers and target builders move before the release.
+- New `python/tables/ladrillo_vs_brick20_scorecard.py`, a port of the research
+  `python/scope_ladrillo_vs_brick20_scorecard.py`: mean bias, RMSE, largest error and 90 % band coverage of Ladrillo and
+  BRICK 2.0 against the hindcast observations, by component and in five windows. It reads the two posterior-predictive
+  band files in `outputs/hindcast/`; `--ladrillo`, `--brick20` and `--targets` let the test suite point it at the
+  research references. Its provenance records that it uses no random numbers.
+- Its inputs were checked first: both band files equal the research files on every non-provenance column, and the
+  targets file is the research `recalib_targets_ext.csv` (md5 070f74ab).
+- `check_tables_identity.py` gains a Table 4 row: 250 of 250 numbers bit-identical to the research
+  `outputs/scope_ladrillo_vs_brick20_scorecard_L27.csv`. New references `research_postpred_brick20_components_timeseries.csv`
+  and `research_scope_ladrillo_vs_brick20_scorecard_L27.csv` (SLR-RFF-BRICK 88ae6b4); `test/runtests.jl` runs the
+  scorecard on them, so the suite checks its arithmetic from a fresh clone.
+- **Table A1 had fallen behind the research table.** On 11-10 (research b8d7fdf, Marcus "Option 1") the research
+  builder began showing the four parameters the calibrator samples as log₁₀ (the three glacier κ and `gis_s_high`) in
+  natural logs, with footnote ᶜ, so that Table A1 uses one log base. The package port still printed log₁₀; the gate
+  against the research repository failed on five lines of the markdown. Ported: the markdown scales prior μ, σ, bounds
+  and the posterior quantiles by ln 10, and the [LN-DISPLAY] check recomputes each row as quantiles of ln(10^x). The
+  CSV keeps log₁₀ values and units, as the research CSV does. References for both Table A1 files re-copied from the
+  research repository.
+- `mutation_test_tables.py` adds seven mutants (Table A1's prior left unscaled; ln 10 written as 2.30; Table 4's window,
+  band column, one observation and one BRICK 2.0 median moved by 1e-12, and its re-reference window). The two that must
+  stop the script (the ln 10 value and the re-reference window) do; the other five fail the gate. It also fixes the
+  harness's handling of a script that stops (it returned two values where three were unpacked). Result in
+  `python/tables/mutation_result.txt`: 14 of 14 as expected.
+- Verified: `test/runtests.jl` 97/97, exact on the pinned runtime; `check_tables_identity.py` against the research
+  repository PASS on all five outputs.
+
 ## 2026-11-11b — Version 1.0.0; the internal builds become v0.1–v0.4; the v0.1 options renamed
 
 **Marcus 11-11 (GMD guidance, Decision 1):** the paper reports Ladrillo v1.0. The internal tags are renamed and the

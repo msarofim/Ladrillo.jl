@@ -19,7 +19,7 @@
 # The BRICK 2.0 comparison runs only if its posterior has been fetched (tools/fetch_brick20_posterior.sh), and so does
 # that file's row of the data/MANIFEST.csv check (FETCHED_DATA). Without it a fresh clone reports 2 skipped ("Broken").
 #
-# Tables A1/A2 (python/tables/) run only if a Python with NumPy and pandas is found: LADRILLO_PYTHON, else
+# Tables 4, A1 and A2 (python/tables/) run only if a Python with NumPy and pandas is found: LADRILLO_PYTHON, else
 # ~/climate-env/bin/python, else python3 on the PATH. Their numbers are compared exactly on the PINNED runtime
 # (requirements.txt's NumPy and pandas, on macOS arm64) and to RTOL_PORTABLE elsewhere, with the count of values that
 # are not bit-identical printed.
@@ -50,10 +50,16 @@ pairing(n, ncfg) = (rng = MersenneTwister(PAIR_SEED); a = Int[];
                     while length(a) < n; append!(a, randperm(rng, ncfg)); end; a[1:n])
 runscript(args...) = success(pipeline(`$JULIA --project=$ROOT $(args)`; stdout = stdout, stderr = stderr))
 
-## Tables A1/A2: the ported research scripts (python/tables/), run in this order, and their research references
+## Tables A1/A2: the ported research scripts (python/tables/), run in this order, and their research references.
+## Table 4 runs on the research hindcast bands in test/reference/ (the BRICK 2.0 band needs the fetched posterior to
+## remake here), so it checks the scorecard's arithmetic; the bands themselves are checked by the postpred testset.
 const TABLE_DIR = joinpath(ROOT, "python", "tables")
 const TABLE_SCRIPTS = ("diag_ais_block_pca.py", "ladrillo_table_a2.py", "ladrillo_prior_posterior_table.py")
 const TABLE_GATE = "check_tables_identity.py"
+const TABLE4_SCRIPT = "ladrillo_vs_brick20_scorecard.py"
+const TABLE4_INPUTS = ("--ladrillo=" * joinpath(REF, "research_postpred_components_timeseries.csv"),
+                       "--brick20=" * joinpath(REF, "research_postpred_brick20_components_timeseries.csv"),
+                       "--targets=" * joinpath(ROOT, "data", "observations", "calibration_targets.csv"))
 const TABLE_A2_REF, TABLE_A2_OUT = "research_ladrillo_table_a2_L27_sub10k.md", "ladrillo_table_a2.md"
 const TABLE_A1_REF, TABLE_A1_OUT = "research_ladrillo_prior_posterior_L27.csv", "ladrillo_prior_posterior.csv"
 const TABLE_RENAME = ("SLOWP" => "SLOWG", "FAST" => "FASTG")   # the package's glacier-block rename, as whole tokens
@@ -180,11 +186,11 @@ end
     @test runscript(joinpath(@__DIR__, "conditioning", "check_record_crossing.jl"))
 end
 
-@testset "Tables A1/A2 (python/tables) == research" begin
+@testset "Tables 4, A1, A2 (python/tables) == research" begin
     py = table_python()
     if py === nothing
         @info "No Python with NumPy and pandas found (set LADRILLO_PYTHON, or `pip install -r requirements.txt`): " *
-              "skipping the Table A1/A2 comparison"
+              "skipping the Table 4, A1 and A2 comparison"
         @test_skip false
     else
         vcode = "import " * join(PY_PINNED, ", ") * "; print(" * join(("$m.__version__" for m in PY_PINNED), ", ") * ")"
@@ -201,6 +207,8 @@ end
         for s in TABLE_SCRIPTS
             @test success(pipeline(`$py $(joinpath(TABLE_DIR, s)) --outdir=$out`; stdout = devnull, stderr = stderr))
         end
+        @test success(pipeline(`$py $(joinpath(TABLE_DIR, TABLE4_SCRIPT)) --outdir=$out $(TABLE4_INPUTS)`;
+                               stdout = devnull, stderr = stderr))
         ## the identity gate itself, against the research references
         @test success(pipeline(`$py $(joinpath(TABLE_DIR, TABLE_GATE)) --refdir=$REF --pkgdir=$out --rtol=$rtol`;
                                stdout = stdout, stderr = stderr))

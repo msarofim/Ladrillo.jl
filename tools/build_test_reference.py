@@ -39,7 +39,11 @@ FILES = [(f"research_joint_draws_{s}.csv", f"outputs/scope_slr_fairunc_draws_{s}
         [("research_ladrillo_table_a2_L27_sub10k.md", "outputs/ladrillo_table_a2_L27_sub10k.md", "copy"),   # Table A2
          ("research_ladrillo_prior_posterior_L27.csv", "outputs/ladrillo_prior_posterior_L27.csv", "copy"),   # Table A1
          ("research_ladrillo_prior_posterior_L27.md", "outputs/ladrillo_prior_posterior_L27.md", "copy"),     # Table A1
-         ("research_diag_ais_block_pca_L27_sub10k.csv", "outputs/diag_ais_block_pca_L27_sub10k.csv", "copy")]  # A2 basis
+         ("research_diag_ais_block_pca_L27_sub10k.csv", "outputs/diag_ais_block_pca_L27_sub10k.csv", "copy"),  # A2 basis
+         ("research_postpred_brick20_components_timeseries.csv", "outputs/postpred_oldbrick_components_timeseries.csv",
+          "copy"),                                                                                          # Table 4 input
+         ("research_scope_ladrillo_vs_brick20_scorecard_L27.csv", "outputs/scope_ladrillo_vs_brick20_scorecard_L27.csv",
+          "copy")]                                                                                          # Table 4
 
 
 def sha256(p):

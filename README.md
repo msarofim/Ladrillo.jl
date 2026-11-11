@@ -60,7 +60,7 @@ Components: `:glaciers`, `:gis`, `:ais`, `:te`, `:lws`, `:total`, and the glacie
 Outputs go to `outputs/projections/`; every file carries a `provenance` column. Scenarios: `ssp126 ssp245 ssp585
 vvVL vvLN vvL vvML vvM vvHL vvH`.
 
-## Reproducing the hindcast comparison (Table 5)
+## Reproducing the hindcast comparison (Tables 4 and 5)
 
 Run in this order; each later step checks itself against the earlier ones.
 
@@ -68,6 +68,7 @@ Run in this order; each later step checks itself against the earlier ones.
 |---|---|---|
 | Ladrillo posterior predictive (bands, bias, coverage) | `julia --project=. scripts/posterior_predictive.jl` | ~2 min |
 | BRICK 2.0 hindcast on the same conventions | `julia --project=. scripts/posterior_predictive_brick20.jl` | ~2 min |
+| Table 4, the hindcast scorecard (bias, RMSE, coverage by component and window) | `python python/tables/ladrillo_vs_brick20_scorecard.py` | seconds |
 | per-draw residuals of both models, 10,000 draws each | `julia --project=. scripts/ic_hindcast_residuals.jl` | ~5 min |
 | Table 5, the information-criterion test (rho bound 0.99; 0.95 and 0.9 for the sensitivity) | `python python/ic_ladrillo_vs_brick20.py --rho-max=0.99` | |
 
@@ -77,6 +78,10 @@ Outputs go to `outputs/hindcast/` and `outputs/tables/`. Runtimes were measured 
 jobs; expect them to be shorter.
 
 Tables A1 and A2 (seconds, NumPy and pandas, to `outputs/tables/`): `python python/tables/ladrillo_prior_posterior_table.py` for A1; `python python/tables/diag_ais_block_pca.py` then `python python/tables/ladrillo_table_a2.py` for A2.
+
+`python python/tables/check_tables_identity.py <SLR-RFF-BRICK checkout>` compares Tables 4, A1 and A2 with the
+research outputs behind the paper (every number exact on the versions in `requirements.txt`). Table A1's markdown shows
+the four parameters sampled as log₁₀ in natural logs (footnote ᶜ); its CSV keeps the log₁₀ values.
 
 ## Rebuilding the FaIR forcing
 
@@ -173,7 +178,7 @@ data/brick20/        the BRICK 2.0 comparison posterior: fetched from Zenodo, no
 data/comparison/     FACTS and MAGICC-SLR outputs for Figs. 2, 3 and 6 (static; see its README)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
-python/              the Table 5 information-criterion test; tables/ (Tables A1, A2); figures/ (Figs. 1-6)
+python/              the Table 5 information-criterion test; tables/ (Tables 4, A1, A2); figures/ (Figs. 1-6)
 test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo)
 tools/               data import, test-reference builder, BRICK 2.0 fetch; forcing/ (the FaIR builders)
 ```

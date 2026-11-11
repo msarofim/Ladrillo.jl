@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-check_tables_identity.py -- identity gate for Tables A1 and A2: the outputs of python/tables/ against the research
+check_tables_identity.py -- identity gate for Tables 4, A1 and A2: the outputs of python/tables/ against the research
 outputs that produced the paper.
 
   python python/tables/check_tables_identity.py <SLR-RFF-BRICK repo> [--pkgdir=outputs/tables]
   python python/tables/check_tables_identity.py --refdir=test/reference [--pkgdir=DIR] [--rtol=0]
 
-The first form compares all four outputs with the research repository's files. The second compares the same four
+The first form compares all five outputs with the research repository's files. The second compares the same five
 against the copies tools/build_test_reference.py makes in test/reference/; test/runtests.jl uses it. (The PCA CSV is
 the one that sees a 1-ulp input change: Table A2's markdown prints 3 significant figures.)
 
@@ -58,6 +58,8 @@ PAIRS = [
      "ladrillo_prior_posterior.csv"),
     ("Table A1 (md)", "md", "outputs/ladrillo_prior_posterior_L27.md", "research_ladrillo_prior_posterior_L27.md",
      "ladrillo_prior_posterior.md"),
+    ("Table 4: hindcast scorecard", "csv", "outputs/scope_ladrillo_vs_brick20_scorecard_L27.csv",
+     "research_scope_ladrillo_vs_brick20_scorecard_L27.csv", "ladrillo_vs_brick20_scorecard.csv"),
 ]
 
 
@@ -135,7 +137,7 @@ def compare_csv(res, pkg, rtol, renamed, stats):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="identity gate for Tables A1/A2 (python/tables/)")
+    ap = argparse.ArgumentParser(description="identity gate for Tables 4, A1 and A2 (python/tables/)")
     ap.add_argument("research", nargs="?", help="the SLR-RFF-BRICK repository")
     ap.add_argument("--refdir", help="compare against test/reference/ instead of the research repository")
     ap.add_argument("--pkgdir", default=DEFAULT_PKGDIR, help="the package outputs (default outputs/tables)")

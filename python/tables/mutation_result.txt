@@ -1,10 +1,12 @@
-# python/tables/mutation_test_tables.py 2026-10-08 11:03 | Ladrillo 3bf4992 + uncommitted python/tables | research SLR-RFF-BRICK 6d262ac | python 3.14.3 numpy 2.4.2 pandas 2.3.3
+# python/tables/mutation_test_tables.py 2026-11-11 14:28 | Ladrillo aaed555 + uncommitted python/tables | research SLR-RFF-BRICK 88ae6b4 | python 3.14.3 numpy 2.4.2 pandas 2.3.3
 control (unmutated copy)   expected PASS  gate PASS (  0 DIFF lines)  outputs changed: none  OK
                               266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
                               IDENTICAL
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
+                              IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
 posterior_1ulp             expected PASS  gate PASS (  0 DIFF lines)  outputs changed: none  OK
                               266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
@@ -13,12 +15,16 @@ posterior_1ulp             expected PASS  gate PASS (  0 DIFF lines)  outputs ch
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
                               IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
 posterior_1e-12            expected FAIL  gate FAIL (239 DIFF lines)  outputs changed: diag_ais_block_pca.csv, ladrillo_prior_posterior.csv  OK
                               266 numbers, 28 bit-identical, 238 not, max rel diff 7.940e-13
                               FAIL (238 differences)
                               IDENTICAL
                               473 numbers, 472 bit-identical, 1 not, max rel diff 1.779e-16
                               FAIL (1 differences)
+                              IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
 geoprior_sd_1ulp           expected FAIL  gate FAIL (235 DIFF lines)  outputs changed: diag_ais_block_pca.csv  OK
                               266 numbers, 31 bit-identical, 235 not, max rel diff 5.485e-13
@@ -27,12 +33,16 @@ geoprior_sd_1ulp           expected FAIL  gate FAIL (235 DIFF lines)  outputs ch
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
                               IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
 prop_min_0.78              expected FAIL  gate FAIL (  1 DIFF lines)  outputs changed: ladrillo_table_a2.md  OK
                               266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
                               FAIL (1 differences)
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
+                              IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
 prop_min_0.85              expected FAIL  gate FAIL (  1 DIFF lines)  outputs changed: ladrillo_table_a2.md  OK
                               266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
@@ -41,6 +51,8 @@ prop_min_0.85              expected FAIL  gate FAIL (  1 DIFF lines)  outputs ch
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
                               IDENTICAL
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
 double_rename              expected FAIL  gate FAIL (  4 DIFF lines)  outputs changed: ladrillo_prior_posterior.csv, ladrillo_prior_posterior.md  OK
                               266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
                               IDENTICAL
@@ -48,4 +60,55 @@ double_rename              expected FAIL  gate FAIL (  4 DIFF lines)  outputs ch
                               473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
                               FAIL (2 differences)
                               FAIL (2 differences)
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+ln_prior_unscaled          expected FAIL  gate FAIL (  4 DIFF lines)  outputs changed: ladrillo_prior_posterior.md  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              FAIL (4 differences)
+                              250 numbers, 250 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+ln10_2.30                  expected SCRIPT  gate SCRIPT (  0 DIFF lines)  outputs changed: none  OK
+                              ladrillo_prior_posterior_table.py stopped: AssertionError: [LN-DISPLAY] gic_log10_kappa_R19: scaled quantiles [np.float64(-6.894722159147015), np.float64(-6.395150201607808), np.float64(-5.894978001994194)] != ln(10**x) quantiles [-6.90247151 -6.40233805 -5.90160368]
+t4_window                  expected FAIL  gate FAIL ( 36 DIFF lines)  outputs changed: ladrillo_vs_brick20_scorecard.csv  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              250 numbers, 214 bit-identical, 36 not, max rel diff 7.245e-01
+                              FAIL (36 differences)
+t4_band                    expected FAIL  gate FAIL ( 18 DIFF lines)  outputs changed: ladrillo_vs_brick20_scorecard.csv  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              250 numbers, 232 bit-identical, 18 not, max rel diff 1.000e+00
+                              FAIL (18 differences)
+t4_obs_1e-12               expected FAIL  gate FAIL (  8 DIFF lines)  outputs changed: ladrillo_vs_brick20_scorecard.csv  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              250 numbers, 242 bit-identical, 8 not, max rel diff 8.926e-13
+                              FAIL (8 differences)
+t4_brick_1e-12             expected FAIL  gate FAIL (  4 DIFF lines)  outputs changed: ladrillo_vs_brick20_scorecard.csv  OK
+                              266 numbers, 266 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              473 numbers, 473 bit-identical, 0 not, max rel diff 0.000e+00
+                              IDENTICAL
+                              IDENTICAL
+                              250 numbers, 246 bit-identical, 4 not, max rel diff 1.222e-13
+                              FAIL (4 differences)
+t4_refwin                  expected SCRIPT  gate SCRIPT (  0 DIFF lines)  outputs changed: none  OK
+                              ladrillo_vs_brick20_scorecard.py stopped: targets are not zeroed on the shared re-reference window (1995, 2006): {'ais': 0.006164150165789026, 'gsic': 0.03449503309798947, 'gis': 0.027238147908990956, 'steric': 0.07090817292531335}; the two arms would not be on one baseline
 [TABLES-MUTATION] PASS: every mutant behaved as expected
