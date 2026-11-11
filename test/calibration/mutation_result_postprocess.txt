@@ -1,0 +1,6 @@
+post-processing gate mutation test, 2026-11-11 16:37, julia 1.12.6
+P1: gate FAILED -- mutant KILLED  ([GATE] FAIL (1) posterior differs from the shipped file: 10001 vs 10001 lines, first difference at line 2 )
+P2: gate FAILED -- mutant KILLED  ([GATE] FAIL (2) certificate differs from the research file: [GATE] FAIL (4) log lines differ (28 vs research 28): )
+P3: gate FAILED -- mutant KILLED  ([GATE] FAIL (3) covariance differs at 50 of 2500 entries; max |rel diff| 1.1713480873141415 )
+P4: gate FAILED -- mutant KILLED  ([GATE] FAIL (4) log lines differ (28 vs research 28): )
+P5: gate PASSED -- mutant SURVIVED

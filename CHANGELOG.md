@@ -36,6 +36,11 @@ The second of the four calibration-port pieces (SLR-RFF-BRICK `notes/handoff_202
   `research_adapted_cov_L27.csv`, `research_postprocess_L27_log_lines.txt`.
 - `test/runtests.jl`: 118/118 pass, unchanged. The gate stays outside the suite because it needs the 8 GB of production
   chains.
+- **Mutation test** (`test/calibration/mutation_test_postprocess.sh`, run on a frozen copy of this commit; result in
+  `mutation_result_postprocess.txt`). Four mutants are killed: P1 subsample offset (check 1), P2 certificate thinning
+  (checks 2 and 4), P3 covariance jitter 1e-10 to 1e-9 (check 3, 50 of 2,500 entries) and P4 ESS maxlag 200,000 to
+  100,000 (check 4). The no-power control P5 (noise-mode threshold 0.10 to 0.20 cm) survives, as it should: every
+  chain's second-half median sd_gis (0.025 cm) is far below both thresholds.
 
 ## 2026-11-11e — The calibration sampler; it reproduces the production L27 chain
 
