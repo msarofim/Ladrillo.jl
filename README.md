@@ -92,7 +92,27 @@ the inputs, their checksums and their sources.
 - ⚠ One input is not public: an AR6 SSP2-4.5 file, which shapes the calibration forcing after 2100 only. Without it
   the build makes the other 41 of the 43 files and says which two it skipped.
 
-*In progress: the calibration code.*
+## Reproducing the calibration
+
+`scripts/calibrate.jl` samples the L27 calibration, one chain per call:
+
+```bash
+julia --project=. --threads=1 scripts/calibrate.jl 2000000 2026
+```
+
+The production run is four chains (seeds 2026-2029) of 2,000,000 iterations. Each takes about 3 h on an Apple M4 and
+writes a ~2 GB chain to `outputs/calibration/`, with the adapted proposal covariance and a provenance file.
+- `src/calibration.jl` holds the log-posterior, the parameter table, the start rows and the proposal seed. It ports the
+  research calibrator (`julia/calibrate_mcmc_ext.jl` with the flags of `run_mcmc_L27.sh`) onto this package's model.
+- `data/calibration/` holds its three frozen inputs: the four start rows (posterior draws of a tuning run), the proposal
+  covariance adapted by the L26 run, and the Greenland amplification prior.
+- `test/calibration/gate_chain_prefix.jl` (about 2 min) checks it against the production chains: the log-posterior at
+  the four start rows, and the first 20,000 rows of the seed-2026 chain (4,603 accepted moves), are bit-identical to
+  production. `test/calibration/mutation_test.sh` checks that the gate catches a changed sampler target, a tighter
+  bound on the AR(1) rho and two changed likelihood constants.
+- Bit-identity holds on the reference runtime only (Apple M4, Julia 1.12.6, the Manifest's versions, one BLAS thread).
+  Elsewhere a single changed accept decision separates the chains, and the agreement is statistical.
+- Still to port: pooling the four chains into `data/posterior/`, and the scripts that build the calibration targets.
 
 ## Reproducing the figures (Figs. 1–6)
 
@@ -129,8 +149,8 @@ That takes about 2 minutes on an Apple M4, and `julia --project=. -e 'using Pkg;
 Pkg's sandbox. The suite re-runs 33 posterior draws in both projection arms (SSP2-4.5, SSP5-8.5), the full posterior
 predictive and a BRICK 2.0 sample. It compares them with values the RESEARCH code wrote (`test/reference/`, sources and
 sha256 in `test/reference/SOURCES.csv`). It also checks every data file against `data/MANIFEST.csv`, the component-sum
-and splice identities, the v0.1 options, the record-crossing test, and Tables A1 / A2 (when Python with
-NumPy and pandas is available).
+and splice identities, the v0.1 options, the record-crossing test, the calibration's log-posterior at the four chain
+starts and its parameter table, and Tables A1 / A2 (when Python with NumPy and pandas is available).
 - **On the reference runtime** (macOS arm64, Julia 1.12.6, default bounds checking) every comparison is exact (`==`).
   A one-ulp change to a live parameter fails it.
 - **Elsewhere, including `Pkg.test()`, which forces `--check-bounds=yes`,** values must agree to a relative 1e-12. The
@@ -177,9 +197,11 @@ data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
 data/brick20/        the BRICK 2.0 comparison posterior: fetched from Zenodo, not shipped (see *BRICK 2.0 posterior*)
 data/comparison/     FACTS and MAGICC-SLR outputs for Figs. 2, 3 and 6 (static; see its README)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
-scripts/             Julia drivers that produce the paper's products
+data/calibration/    the calibration's start rows, proposal-covariance seed and Greenland amplification prior
+scripts/             Julia drivers that produce the paper's products, and the calibration sampler
 python/              the Table 5 information-criterion test; tables/ (Tables 4, A1, A2); figures/ (Figs. 1-6)
-test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo)
+test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo),
+                     calibration/ (the calibration gate)
 tools/               data import, test-reference builder, BRICK 2.0 fetch; forcing/ (the FaIR builders)
 ```
 
@@ -241,7 +263,7 @@ The internal tags `v1.0.0` to `v1.3.0` are renamed `v0.1.0` to `v0.4.0`.
 ## Known issues
 
 - **The fast-dynamics threshold is crossed inside the hindcast by a few propagated draws.**
-  - The calibration holds lambda and T_crit at their paleo medians, which never cross, but the paleo ensemble's
+  - The calibration holds lambda and T_crit at fixed values that never cross (next item), but the paleo ensemble's
     low-T_crit tail does: 4 of the 10,000 draws (T_crit -16.4 to -16.9 C, DAIS scale) start fast dynamics in
     2021-2026 on the calibration climate, adding up to 1.6 cm of Antarctic sea level by 2026.
   - On its own FaIR config a draw can cross where it does not on the mean. In the joint-climate arm, 3 of the 2,000
@@ -251,6 +273,18 @@ The internal tags `v1.0.0` to `v1.3.0` are renamed `v0.1.0` to `v0.4.0`.
   - v0.2 does not condition on the record. v0.3 conditions the joint-climate arm by default and offers the
     calibration-climate test as `posterior(; drop_record_crossings=true)` (*Versions*). The paper reports the
     conditioned numbers (v0.3 and later).
+- **The calibration and the products use different values of the Antarctic gamma.**
+  - The calibration holds lambda, T_crit and gamma at the central row's values (0.01365, -15.14 and 2.038;
+    `Calibration.HELD`). The research calibrator was meant to hold them at their paleo medians, but it loaded the central
+    row over them.
+  - lambda and T_crit do not affect the hindcast. gamma does: `posterior()` attaches its paleo median, 2.834, so the
+    projections and the posterior predictive use a gamma the chain was not conditioned on.
+  - Measured on 500 draws: the hindcast moves by at most 0.015 cm; the projections by at most 0.13 cm through 2100, and
+    by up to 3.2 cm in the 2300 Antarctic median (SSP5-8.5).
+  - A calibration at gamma = 2.834 would give nearly the same posterior. Importance weights that convert the 10,000
+    draws to it (the log-posterior difference between the two gammas) have an effective sample size of 99.7 %, and the
+    reweighted SSP2-4.5 and SSP5-8.5 quantiles at 2100 and 2300 move by at most 0.54 cm. The products are therefore what
+    a calibration at the paleo median would give, to that precision.
 
 ## License
 

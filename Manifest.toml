@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "2cbeec770e1b00cf4989a6f403430a1623cf429f"
+project_hash = "bd95eb6d2d3c5edfb997bd5729893b50e8c68d31"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -698,7 +698,7 @@ version = "1.4.0"
 deps = ["CSV", "DataFrames", "Mimi", "MimiBRICK", "Random", "Statistics"]
 path = "."
 uuid = "a7357428-476d-4570-8bf3-97ba83aac5dd"
-version = "1.3.0"
+version = "1.0.0"
 
 [[deps.Latexify]]
 deps = ["Format", "Ghostscript_jll", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]

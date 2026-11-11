@@ -233,6 +233,33 @@ end
     end
 end
 
+## The calibration (src/calibration.jl). Two of the gate's checks run here; the chain itself (20,000 iterations, about
+## 2 min) is test/calibration/gate_chain_prefix.jl.
+@testset "calibration: objective == research L27" begin
+    C = Ladrillo.Calibration
+    p = C.problem()
+    ## (a) the log-posterior at each chain's start row == the first row of that production chain
+    for seed in C.SEEDS_CANON
+        l = readlines(joinpath(REF, "research_chain_L27_seed$(seed)_row1.csv"))
+        hdr, row = split(l[1], ","), split(l[2], ",")
+        @test maplabel.(String.(hdr[1:end-2])) == C.param_names(p)
+        θ0 = C.start_point(p, seed)
+        @test θ0 == parse.(Float64, row[1:end-2])
+        lp, lpref = C.logposterior(p, θ0), parse(Float64, row[end-1])
+        @printf("  calibration seed %d: logposterior(start) %s, production %s\n", seed, repr(lp), repr(lpref))
+        @test agree(lp, lpref)
+    end
+    ## (b) the parameter table == the research calibrator's own dump of the priors it scores (--dump-priors, Table A1's
+    ## input): name, component, mu, sigma and bounds of all 50 parameters
+    ref = CSV.read(joinpath(ROOT, "data", "constants", "ladrillo_priors_L27.csv"), DataFrame)
+    tab = C.parameter_table(p)
+    @test tab.name == String.(ref.name)
+    @test tab.comp == String.(ref.comp)
+    for c in (:mu, :sigma, :lo, :hi)
+        @test all(isequal.(tab[!, c], Float64.(ref[!, c])))
+    end
+end
+
 @testset "BRICK 2.0 == research draws (ssp245)" begin
     if !isfile(Ladrillo.datapath(Ladrillo.BRICK20_FILE...))
         @info "BRICK 2.0 posterior not fetched (tools/fetch_brick20_posterior.sh): skipping its comparison"

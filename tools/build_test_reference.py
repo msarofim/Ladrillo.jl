@@ -29,7 +29,8 @@ TAP = "_tap4p69K_V5p64m_tau800"
 ## exercised too.
 REGRESSION_DRAWS = sorted(set(range(1, 2001, 67)) | {229, 610, 1260})
 SCENARIOS = ("ssp245", "ssp585")
-## (reference file, research source, kind): kind "draws" keeps only REGRESSION_DRAWS, "copy" copies the whole file
+## (reference file, research source, kind): kind "draws" keeps only REGRESSION_DRAWS, "copy" copies the whole file,
+## "chain_*" read the head of a production chain (below)
 FILES = [(f"research_joint_draws_{s}.csv", f"outputs/scope_slr_fairunc_draws_{s}_spliced_L27{TAP}.csv", "draws")
          for s in SCENARIOS] + \
         [("research_brick20_joint_draws_ssp245.csv", "outputs/scope_slr_fairunc_draws_ssp245_spliced_oldbrick.csv",
@@ -43,7 +44,17 @@ FILES = [(f"research_joint_draws_{s}.csv", f"outputs/scope_slr_fairunc_draws_{s}
          ("research_postpred_brick20_components_timeseries.csv", "outputs/postpred_oldbrick_components_timeseries.csv",
           "copy"),                                                                                          # Table 4 input
          ("research_scope_ladrillo_vs_brick20_scorecard_L27.csv", "outputs/scope_ladrillo_vs_brick20_scorecard_L27.csv",
-          "copy")]                                                                                          # Table 4
+          "copy")] + \
+        [(f"research_chain_L27_seed{s}_row1.csv", f"outputs/mcmc/chain_L27_seed{s}_n2000000.csv", "chain_row1")
+         for s in (2026, 2027, 2028, 2029)] + \
+        [("research_chain_L27_seed2026_prefix_logpost.csv", "outputs/mcmc/chain_L27_seed2026_n2000000.csv",
+          "chain_logpost"),
+         ("research_chain_L27_seed2026_prefix_rows.csv", "outputs/mcmc/chain_L27_seed2026_n2000000.csv", "chain_rows")]
+## The calibration gate (test/calibration/): the production L27 chains (4 x ~2 GB, not tracked in either repository).
+## chain_row1: the header and the first row (the start, its log-posterior). chain_logpost: the log_post field of the first
+## CHAIN_PREFIX rows. chain_rows: the header and full rows at CHAIN_ROWS (the first accepted move is row 460).
+CHAIN_PREFIX = 20000
+CHAIN_ROWS = sorted({1, 459, 460, 461} | set(range(500, CHAIN_PREFIX + 1, 500)))
 
 
 def sha256(p):
@@ -71,7 +82,20 @@ for name, src, kind in TODO:
     sp = os.path.join(RES, src)
     with open(sp) as f:
         header = f.readline()
-        if kind == "draws":
+        if kind.startswith("chain_"):
+            cols = header.rstrip("\n").split(",")
+            nrows = 1 if kind == "chain_row1" else CHAIN_PREFIX
+            lines = [f.readline() for _ in range(nrows)]
+            assert all(ln.endswith("\n") and ln.count(",") == len(cols) - 1 for ln in lines), src
+            if kind == "chain_logpost":      # the log_post field, as text
+                j = cols.index("log_post")
+                header = "row,log_post\n"
+                keep = [f"{i},{ln.split(',')[j]}\n" for i, ln in enumerate(lines, 1)]
+            elif kind == "chain_rows":
+                keep = [lines[i - 1] for i in CHAIN_ROWS]
+            else:
+                keep = lines
+        elif kind == "draws":
             cols = header.rstrip("\n").split(",")
             assert cols[0] == "draw", (src, cols[:3])
             keep = [ln for ln in f if int(ln.split(",", 1)[0]) in REGRESSION_DRAWS]
@@ -81,8 +105,10 @@ for name, src, kind in TODO:
         g.write(header); g.writelines(keep)
     if kind == "copy":      # a whole-file copy must be byte-identical (no newline or encoding translation)
         assert sha256(os.path.join(OUT, name)) == sha256(sp), f"{name}: copy differs from {src}"
-    rows.append(f"{name},{src},{commit},{sha256(sp)},{len(keep)},"
-                f"{' '.join(map(str, REGRESSION_DRAWS)) if kind == 'draws' else ''}")
+    kept = (' '.join(map(str, REGRESSION_DRAWS)) if kind == 'draws' else
+            ' '.join(map(str, CHAIN_ROWS)) if kind == 'chain_rows' else
+            f"1-{CHAIN_PREFIX}" if kind == 'chain_logpost' else '')
+    rows.append(f"{name},{src},{commit},{sha256(sp)},{len(keep)},{kept}")
     print(f"  {name}: {len(keep)} lines from {src}")
 if ARGS.only:
     ## keep every other row as it is; replace a copied file's row in place, append a new one at the end

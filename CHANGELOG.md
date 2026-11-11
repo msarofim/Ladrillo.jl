@@ -1,5 +1,49 @@
 # Changelog
 
+## 2026-11-11e — The calibration sampler; it reproduces the production L27 chain
+
+**Marcus 11-11 (session 2):** port the calibration drivers and target builders before the release. This entry is the
+first of the four pieces scoped in SLR-RFF-BRICK `notes/handoff_2026-11-11c_table4_seeds_calibration_scope.md` §5: the
+calibrator and its gate. Pooling the chains and the target builders are still to come.
+- New `src/calibration.jl` (module `Ladrillo.Calibration`): the L27 log-posterior, the parameter table, the start rows,
+  the proposal-covariance seed and `run_chain`. It ports the research `julia/calibrate_mcmc_ext.jl` with the flags of
+  `run_mcmc_L27.sh` (43d84aa), reduced to that configuration: no flags, no other arms. The model is this package's
+  `LadrilloModel` on 1850-2026 (land water `:central`, Greenland tap off). Every likelihood and prior term keeps the
+  research arithmetic and order of accumulation.
+- New `scripts/calibrate.jl <n_iter> <seed>`: one chain, its adapted covariance and a provenance file recording the seed
+  and where it is applied (`Random.seed!` on the global RNG immediately before `RAM_sample`).
+- New `data/calibration/` (imported by `tools/import_l27_data.py`, label-only renames): the four over-dispersed start
+  rows, the L26 adapted covariance that seeds the proposal, and the Greenland amplification prior table.
+- New direct dependencies Distributions, LinearAlgebra and RobustAdaptiveMetropolisSampler. `Pkg.add` first upgraded
+  Distributions 0.25.126 -> 0.25.134; reverted and pinned, so the Manifest now equals the research `julia_v2`
+  environment on every shared package.
+- **Gate** (`test/calibration/gate_chain_prefix.jl`, new references from the four production chains via
+  `tools/build_test_reference.py`; their sha256 in `test/reference/SOURCES.csv`). PASS: the log-posterior at all four
+  start rows equals production (792.9208399273703 for seed 2026), and the first 20,000 rows of the seed-2026 chain equal
+  production in the log_post of every row and in all 50 parameters at 44 reference rows. The window holds 4,603 accepted
+  moves; the research gate's 300 rows held none (the first move is row 460). 20,000 iterations take 103 s here
+  (production ran at ~140/s).
+- `test/runtests.jl` gains the start-row check and a check of the parameter table against the research calibrator's own
+  `--dump-priors` output (`data/constants/ladrillo_priors_L27.csv`): all 50 names, components, means, sds and bounds equal.
+- **The production chain held gamma at 2.038, not at its paleo median.** The first port, which held lambda, T_crit and
+  gamma at their paleo medians as the research flags `--cut-fastdyn` / `--fix-gamma` describe, missed the four
+  production start values by -0.015 to +0.034. A state dump against the research calibrator (every glacier, Greenland,
+  thermal-expansion and land-water series identical; Antarctica not) found the cause: the research calibrator sets the
+  paleo medians at :1605-1607 and then `update_brick_nu3!(m, medoid, ...)` at :1627 loads the central row over all three.
+  Holding the central row's values (lambda 0.01365, T_crit -15.14, gamma 2.038) reproduces all four starts exactly;
+  holding the paleo lambda and T_crit with the central gamma does too, so lambda and T_crit are inert in the hindcast
+  and gamma is the only one that matters. `posterior()` attaches gamma = 2.834 (the paleo median) to every product.
+  Paired on 500 draws (rows 1:20:10000, ensemble-mean forcing), 2.834 against 2.038: hindcast AIS differs by at most
+  0.015 cm (AIS RMSE 0.1276 vs 0.1274 cm); projected AIS by at most 0.13 cm through 2100; in 2300 the AIS median is
+  lower by 1.4 cm (SSP2-4.5), 3.2 cm (SSP5-8.5) and 2.6 cm (vvH), and the SSP5-8.5 total median by 4.1 cm.
+- Would a calibration at gamma = 2.834 differ? Importance weights on all 10,000 draws, w = exp(logpost at 2.834 minus
+  logpost at 2.038), every other term identical: the log-posterior difference spans -0.27 to +0.42 (p05-p95 -0.07 to
+  +0.10), the effective sample size is 9,972 (99.7 %) and the largest weight is 1.5 x uniform. Reweighted p05/p50/p95 of
+  AIS and the total at 2100 and 2300 (SSP2-4.5, SSP5-8.5, ensemble-mean forcing, gamma 2.834) move by at most 0.54 cm
+  (SSP2-4.5 2300 total p95, 407.87 -> 407.33), most by under 0.1 cm. So the shipped products, which run gamma 2.834,
+  match what a calibration at 2.834 would give to about half a centimetre. The port holds what production ran
+  (`Calibration.HELD`); how the release describes this is Marcus's decision (README *Known issues*).
+
 ## 2026-11-11d — Every file a figure reads records the seeds behind it
 
 **Marcus 11-11 (session 2):** yes to recording seed provenance in the figure inputs, so the paper can say where the

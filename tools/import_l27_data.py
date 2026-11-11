@@ -65,6 +65,12 @@ FILES = [
     ## the production flags) and the DAIS paleo-ensemble joint prior of the seven geometry parameters
     ("constants/ladrillo_priors_L27.csv", "outputs/ladrillo_priors_L27.csv", "labels"),
     ("constants/paleo_geo_prior_ton.csv", "outputs/paleo_geo_prior_ton.csv", "copy"),
+    ## The calibration (src/calibration.jl, scripts/calibrate.jl): the four over-dispersed start rows (one per chain,
+    ## seeds 2026-2029), the proposal-covariance seed (adapted by the L26 run; it cannot be rebuilt without re-running
+    ## L26) and the Greenland amplification prior table (calibration L27 reads the south/full row).
+    ("calibration/overdispersed_starts_L27.csv", "outputs/mcmc/overdispersed_starts_L27.csv", "header"),
+    ("calibration/adapted_cov_L26_named.csv", "outputs/mcmc/adapted_cov_L26_named.csv", "header"),
+    ("calibration/gis_amp_prior.csv", "outputs/gis_amp_prior.csv", "copy"),
 ] + [("forcing/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else
       "forcing/fair_%s_%s_%s_raw.csv" % (kind, var, k),
       "data/observations/fair_%s_%s_%s.csv" % (kind, var, k) if kind == "mean" else
