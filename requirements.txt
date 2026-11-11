@@ -1,5 +1,8 @@
-# Python dependencies of python/ (the Table 5 information-criterion test) and test/identity/compare_ic_table.py.
+# Python dependencies of python/ (the Table 5 information-criterion test, Tables A1/A2, the figures in python/figures/)
+# and test/identity/compare_ic_table.py.
 # Pinned to the environment the identity gate was run in (Python 3.14.3).
 numpy==2.4.2
 pandas==2.3.3
 scipy==1.17.1
+# python/figures/: the paper's PNGs are byte-identical only with this matplotlib (and its bundled fonts).
+matplotlib==3.10.8

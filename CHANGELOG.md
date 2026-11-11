@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-11-11 — The paper's figure scripts (Figs. 1–6) and the FACTS / MAGICC-SLR comparison data
+
+**Marcus 11-11 (GMD guidance, Decision 3):** the Code availability text says the archive holds the scripts that
+produce every figure and table, so the figure scripts move into the package before the release.
+- `python/figures/`: ports of the six research builders (`plot_hindcast_components.py`, `vv_model_comparison.py`,
+  `plot_model_comparison_components.py`, `plot_future_components.py`, `plot_vv_gsic_ladrillo.py` from
+  `plot_vv_gsic_wr_vs_ladrillo.py --ladrillo-only`, `plot_vv_responsiveness.py`) and `figlib.py` (cut down from
+  `ladrillo_figs.py`). Drawing code copied unchanged; only the I/O differs. Paper mode only, one posterior, outputs to
+  `outputs/figures/` and `outputs/tables/`.
+- Inputs are the package's own products. Before porting, every file the figures read was compared with its research
+  counterpart: the joint and BRICK 2.0 paths, cells and draws for all ten scenarios, both posterior-predictive files,
+  the calibration targets and the mean-GMST drivers are equal on every non-provenance column. The package's gates
+  files have no CONTROL row, so `figlib.gate_ladrillo` requires PAIRING, SPLICE-IDENTITY and SUM instead.
+- `data/comparison/`: FACTS (n = 200) and MAGICC-SLR outputs for the van Vuuren scenarios, MAGICC's GMST, and the
+  FACTS module classes, copied unchanged from SLR-RFF-BRICK, with four `data/MANIFEST.csv` rows and a README.
+- Dropped from the research scripts: the opt-in overlays of Fig. 1 (MAGICC history, IGCC GMSL, IMBIE, the >2000 m band)
+  and their input files; the SSP sets and memo mode; the `_width`, `_gmst` and `_pathdep` side tables (no figure
+  reads them); the Wigley–Raper glacier file behind Fig. 5, whose panel (a) GMST now comes from
+  `data/forcing/fair_mean_gmst_*.csv` (equal on every drawn row).
+- Identity: `python/figures/check_figures_identity.py` passes 16/16 against the research renders in
+  `figures/paper/`: all seven PNGs byte-identical, all captions identical except Fig. 5's driver-commit clause
+  (declared), the comparison table (560 × 15) and the responsiveness table (80 × 11) equal. Mutation-tested
+  (`python/figures/mutation_result.txt`): a one-pixel change, a caption edit, a 1e-12 cell change, a stale declared
+  difference and a missing PNG each fail.
+- `requirements.txt` pins matplotlib 3.10.8, the version the paper renders were made with.
+
 ## 2026-10-15c — Table 5's .md: computed reading sentences and a versioned label
 
 - `python/ic_ladrillo_vs_brick20.py` (6674807, c964ccb):

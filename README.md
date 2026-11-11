@@ -89,7 +89,30 @@ the inputs, their checksums and their sources.
 - ⚠ One input is not public: an AR6 SSP2-4.5 file, which shapes the calibration forcing after 2100 only. Without it
   the build makes the other 41 of the 43 files and says which two it skipped.
 
-*In progress: the calibration code and the figure scripts.*
+*In progress: the calibration code.*
+
+## Reproducing the figures (Figs. 1–6)
+
+Run these after the projection products for the seven van Vuuren scenarios (`project_joint.jl` and `brick20_joint.jl`,
+above) and the two posterior-predictive steps (Fig. 1). Each takes a few seconds and needs matplotlib
+(`pip install -r requirements.txt`).
+
+| figure | command |
+|---|---|
+| Fig. 1, hindcast by component | `python python/figures/plot_hindcast_components.py` |
+| the four-model comparison table that Figs. 2, 3 and 6 read | `python python/figures/vv_model_comparison.py` |
+| Figs. 2 and 3, the four models at 2100 and 2300 (and 2150) | `python python/figures/plot_model_comparison_components.py` |
+| Fig. 4, components to 2300 | `python python/figures/plot_future_components.py` |
+| Fig. 5, glaciers | `python python/figures/plot_vv_gsic_ladrillo.py` |
+| Fig. 6, response to the High minus Very Low scenario | `python python/figures/plot_vv_responsiveness.py` |
+
+Figures go to `outputs/figures/`, each with its caption text in a `.caption.txt` beside it, and tables to
+`outputs/tables/`. Figs. 2, 3 and 6 also show FACTS and MAGICC-SLR, which this repository does not run; their outputs
+ship as data in `data/comparison/` (see its README).
+
+`python python/figures/check_figures_identity.py <SLR-RFF-BRICK checkout>` compares every PNG byte for byte, every
+caption and both tables with the research renders in the paper. With the versions in `requirements.txt` all 16 checks
+pass; other matplotlib versions can move pixels without any change in the data.
 
 ## Validation
 
@@ -149,9 +172,10 @@ data/constants/      fixed constants, the Greenland amplification shape, paleo d
 data/observations/   the calibration targets (and the glacier target with the RGI-19 seam removed)
 data/forcing/        FaIR 2.2.4 (calib 1.6.0) GMST and ocean heat content
 data/brick20/        the BRICK 2.0 comparison posterior: fetched from Zenodo, not shipped (see *BRICK 2.0 posterior*)
+data/comparison/     FACTS and MAGICC-SLR outputs for Figs. 2, 3 and 6 (static; see its README)
 data/MANIFEST.csv    source file, commit and sha256 of every data file
 scripts/             Julia drivers that produce the paper's products
-python/              the Table 5 information-criterion test; tables/ (Tables A1, A2)
+python/              the Table 5 information-criterion test; tables/ (Tables A1, A2); figures/ (Figs. 1-6)
 test/                runtests.jl + reference/ (self-contained), identity/ (the certification against the research repo)
 tools/               data import, test-reference builder, BRICK 2.0 fetch; forcing/ (the FaIR builders)
 ```

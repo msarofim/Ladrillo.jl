@@ -1,0 +1,7 @@
+check_figures_identity.py mutation test, 2026-11-11, on a scratch copy of outputs/ (--pkgdir), research = SLR-RFF-BRICK.
+Unmutated: 16/16 PASS.
+M1 one pixel of Fig. 3 changed by +1 in RGB          -> FAIL (1 of 3564000 pixels differ, x 600, y 500)
+M2 Fig. 4 caption "thinned to 1998" -> "1999"        -> FAIL (caption differs)
+M3 one cell of vv_model_comparison.csv, +1e-12       -> FAIL (cells differ)
+M4 Fig. 5 caption reverted to the research text      -> FAIL (declared caption difference no longer occurs)
+M5 Fig. 6 PNG deleted                                -> FAIL (png and caption missing)
