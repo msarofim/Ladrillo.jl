@@ -1,0 +1,6 @@
+# sha256 of the research (SLR-RFF-BRICK, ladrillo-dev) intermediates that Ladrillo does not ship.
+# <sha256>  <research path>  <last research commit touching it>. Checked by check_targets_identity.py.
+9ee23865d312bef370af0880dc0bff7dbcff1901edbcc858456871b9d9d9291d  outputs/diag_constraint_anatomy_regions.csv  2061a4b
+4e00dfbe52f9de815ce83a4cfcb4cb60150e449e304247a3fa37306ad32e6913  outputs/lws_grace_extension_L14.csv  d2e23d3
+84697ae6000d6d301522006f57f2e5841f41a45d24bff6c234f7c88f01d8290c  outputs/gis_driver_constants.csv  4e25ec8
+0f47862d60c37927cd1b84b6d851e2e06dc5370ba2bbbb0b6002213fec14ce15  outputs/gis_amp_anchor.csv  8b68d19
