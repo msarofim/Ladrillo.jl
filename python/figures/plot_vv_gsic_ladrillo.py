@@ -136,8 +136,8 @@ for s in LABELS:
     if s == SPREAD_LO:
         ax[2].fill_between(d.index.values, d.p05_cm.values, d.p95_cm.values,
                            color=COL[s], alpha=0.15, lw=0)
-ax[2].text(0.012, 0.93, "(b)" + "  %s — the 3 reservoirs equilibrate, so declining T slows the melt"
-           % LAD_NAME, transform=ax[2].transAxes, fontsize=9.5, fontweight="bold", va="top")
+## Short panel titles (Marcus 2026-11-12): the caption explains the panels.
+ax[2].text(0.012, 0.93, "(b)  %s" % LAD_NAME, transform=ax[2].transAxes, fontsize=9.5, fontweight="bold", va="top")
 sp_lad = lad(SPREAD_HI).med_cm.loc[2300] - lad(SPREAD_LO).med_cm.loc[2300]
 ax[2].legend(handles=[Line2D([], [], color="none",
                              label=f"{SPREAD_LO}→{SPREAD_HI} spread @2300:")]
@@ -167,8 +167,7 @@ ax[3].set_ylabel("melt rate\n(cm / century)")
 ax[3].set_xlabel("year")
 ax[3].set_xlim(X0, X1)
 lf.direct_label(ax[3], _ends3)
-ax[3].text(0.012, 0.93, ("(c)  melt rate on the %d peak-and-decline pathways — falls toward zero "
-                         "as the reservoirs equilibrate") % len(DECLINE),
+ax[3].text(0.012, 0.93, "(c)  melt rate on the %d peak-and-decline pathways" % len(DECLINE),
            transform=ax[3].transAxes, fontsize=9.5, fontweight="bold", va="top")
 ## The research script also drew ax[3].legend(handles=[]) here (its handles are the WR/Ladrillo line styles, empty
 ## under --ladrillo-only). It draws nothing, and the PNG is byte-identical without it, so it is not ported.

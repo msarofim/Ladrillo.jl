@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-12 — Fig. 5: short panel titles (Marcus)
+
+- `python/figures/plot_vv_gsic_ladrillo.py`: the panel (b) and (c) titles drop their explanatory clauses ("the 3
+  reservoirs equilibrate, so declining T slows the melt"; "falls toward zero as the reservoirs equilibrate"), as the
+  research script does from the same day (SLR-RFF-BRICK CHANGELOG 2026-11-12). `check_figures_identity.py` passes 16/16
+  against the re-rendered research figure.
+
 ## 2026-11-11f — Post-processing: the four production chains give the shipped posterior, byte for byte
 
 The second of the four calibration-port pieces (SLR-RFF-BRICK `notes/handoff_2026-11-11c_table4_seeds_calibration_scope.md`
