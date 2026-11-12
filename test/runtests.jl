@@ -109,6 +109,21 @@ end
     end
 end
 
+@testset "data/sources match tools/targets/inputs.sha256" begin
+    ## the shipped inputs of the target builders (tools/targets/); fetch/ and raw/ lines are not shipped
+    pins = [split(l) for l in readlines(joinpath(ROOT, "tools", "targets", "inputs.sha256"))
+            if !startswith(l, "#") && !isempty(strip(l))]
+    shipped = [(p[1], p[2][length("sources/")+1:end]) for p in pins if startswith(p[2], "sources/")]
+    @test length(shipped) > 0
+    for (sha, rel) in shipped
+        p = joinpath(ROOT, "data", "sources", rel)
+        @test isfile(p) && bytes2hex(open(sha256, p)) == sha
+    end
+    on_disk = [relpath(joinpath(d, f), joinpath(ROOT, "data", "sources"))
+               for (d, _, fs) in walkdir(joinpath(ROOT, "data", "sources")) for f in fs if f != "README.md"]
+    @test sort(on_disk) == sort(last.(shipped))
+end
+
 @testset "projections == research draws ($s)" for s in SCENARIOS
     ref = CSV.read(joinpath(REF, "research_joint_draws_$s.csv"), DataFrame)
     draws = sort(unique(ref.draw))

@@ -1,5 +1,62 @@
 # Changelog
 
+## 2026-11-12c — Calibration targets and drivers rebuilt from their sources (piece 3 of the calibration port)
+
+The third of the four calibration-port pieces (SLR-RFF-BRICK `notes/handoff_2026-11-11e_postprocess_r1111_pass.md` §4).
+New `tools/targets/` rebuilds the eight observation-based files in `data/` (calibration targets and the seam-adjusted
+glacier target, the glacier and Greenland drivers, the glacier reservoir constants, the Greenland amplification prior
+and its CMIP6 shape) and four research intermediates, and gates them byte for byte. Details in `tools/targets/README.md`.
+- **Settled defaults** (parent session, 11-12): the builders are a pinned-Python tier like `tools/forcing/` and
+  `python/figures/` (Python 3.14.3, `tools/targets/requirements-targets.txt`), ported from the research scripts with I/O
+  changes only, and the gate is byte identity, not a tolerance. Four constants have no builder in any history
+  (`central_row.csv`, `paleo_dais_marginals.csv`, `paleo_fastdyn_draws.csv`, `paleo_geo_prior_ton.csv`) and stay
+  frozen data with their research commits.
+- **Result.** From `data/sources/` plus the fetch-yourself inputs: 20/20 files identical (the eight `data/` files, their
+  research-named twins, four intermediates), about 6 s. With `--from-raw`, starting from the raw gridded products
+  (HadCRUT5, Berkeley Earth, GISTEMP, GRACE mascons, Dangendorf fields): 27/27, every extraction re-made byte for byte,
+  about 50 s. The one exempt cell is the `commit` column of `gis_amp_shape_meta.csv` (d59ce12 shipped; the rebuild writes
+  the Ladrillo commit); the gate requires every other byte of that file to match.
+- **Gate checks.** `check_targets_identity.py --self-test` (one ulp, a dropped row, CRLF, a changed meta value all fail;
+  the label alone passes) and `mutation_test_targets.py` (`mutation_result.txt`): five builder mutants each fail on
+  exactly their files, including the 1-ulp land-water mutant and the glacier-fit seed; a console-only control passes
+  20/20; a melt-rate-smoothing control fails only the intermediate it feeds; a one-digit change to a shipped or a
+  fetched input aborts the build before any step runs.
+- **What is shipped (ruling 2, Marcus 11-12).** Licences read on 11-12 from the publishers' pages and the Zenodo API.
+  Shipped in `data/sources/` (2.4 MB): the Dangendorf v2 file (ruling 1) and the annual GMSL extraction of the Dangendorf
+  fields (CC BY 4.0); the JPL GRACE Antarctic and Greenland series and a monthly land-water extraction of the mascon grid
+  (NASA, without restriction); 20 GlaMBIE calendar-year files (CC BY 4.0); three GlacierMIP3 tables and the 12-row
+  committed-loss ladder (CC BY 4.0); the HadCRUT5 glacier-region and Greenland-zone extractions (OGL v3); 40 CMIP6
+  Greenland-zone series (CC BY 4.0, GISS CC0). Fetch yourself (`fetch_inputs.py`, pinned in `inputs.sha256`): Frederikse
+  2020 (original Zenodo record "Other (Not Open)"; Dangendorf's CC BY record redistributes the files but cannot
+  relicense them; our copies match its published md5), NOAA STAR (no licence, data-use policy with a credit line), NOAA
+  NCEI thermosteric (no licence stated), and the Berkeley Earth (CC BY-NC 4.0) and GISTEMP (no licence stated) Greenland
+  series. STAR, NCEI, Berkeley Earth and GISTEMP are rolling: the pinned files are no longer served, so outside the
+  maintainer's archive the build stops at the input check.
+- **Research traps fixed in the port.** Hard-coded paths became flags. `diag_constraint_anatomy.py`'s region table is
+  ported without its `exec` of `d0_glacier_shootout.py` (nothing in part 2 read it). The silent LWS-flat fallback of
+  `prep_recalib_targets_ext.py:483-497` is an error. The newest-mascon glob is a named, pinned file. `build_t_gis.py`'s
+  guard that read its own previous output is replaced by the gate.
+- **The circular read, and a one-ulp detail.** The land-water builder read the Frederikse TWS for its splice offset
+  from the targets file that the targets builder writes after it. The port computes the TWS from the Frederikse workbook
+  instead. The first version of that change missed by 1.1e-16 cm: the research values had passed through the targets CSV
+  and pandas' default parser, which rounds some 17-digit decimals one ulp off (`float_precision="round_trip"` gives 0).
+  The port now sends the values through the same in-memory CSV write/read, and mutant M2 shows the gate catches its
+  removal.
+- **Tried and dropped.** The first layout shipped every Tier A source, the Berkeley Earth and GISTEMP Greenland series
+  included; the licence check moved Frederikse, the two NOAA files and those two series to fetch-yourself before any
+  commit. One Greenland extraction file for all three products became one per product, so a product can be withheld
+  alone. Not ported because nothing Ladrillo reads depends on them: the IMBIE-2026 AIS branch and the IMBIE 2023
+  cross-check, the splice PNG and the sources sidecar, `t_gis_zones_allproducts.csv`, the provenance markdown files,
+  figures and console tables, and every part of `diag_gis_amp_cmip6.py` except the shape (its bootstraps never reached
+  it; its figure code raised a NameError on `lf`). The GlacierMIP3 ladder builder (a development cell, quantile LOWESS
+  over a 1.47 GB netCDF) is not ported; its 12 rows are shipped as a frozen extraction. The CMIP6 reducer is kept as the
+  record but not re-run (the Pangeo archive changes).
+- `test/runtests.jl` checks every file in `data/sources/` against `inputs.sha256` (and that no unpinned file is there).
+  The README sources tables (here and in `tools/targets/README.md`) are generated from `tools/targets/target_inputs.py`,
+  and the gate's self-test fails if they drift.
+- Seed: one step draws random numbers (`ladrillo_data.py`, `FIT_RNG_SEED = 2026`, per-block streams); the build records
+  it in `BUILD_PROVENANCE.json`, since the byte-gated outputs cannot carry a new column.
+
 ## 2026-11-12b — FACTS land-water storage dropped past 2100 (Marcus)
 
 - `python/figures/figlib.py`: `FACTS_CLIMATE_DRIVEN` loses "ssp-lws" at 2150 and 2300. FACTS's land-water module reads
