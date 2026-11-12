@@ -1,4 +1,4 @@
-targets gate mutation test, 2026-11-12 08:56, Ladrillo working tree before the first targets commit (run from a frozen copy), maintainer inputs (fetch_inputs.py --from-research)
+targets gate mutation test, 2026-11-12 09:13, Ladrillo ab3d1e8 + the 2026-11-12d working tree (run from a frozen copy), maintainer inputs (fetch_inputs.py --from-research)
 ok  M1 altimetry sigma 4.0 -> 4.1 mm                               expect FAIL      got FAIL        TARGETS IDENTITY: 18/20 pass, 2 FAIL (2 on the named provenance label); failing: data/observations/calibration_targets.csv, outputs/recalib_targets_ext.csv
 ok  M2 land-water read-back emulation removed (1-ulp)              expect FAIL      got FAIL        TARGETS IDENTITY: 17/20 pass, 3 FAIL (2 on the named provenance label); failing: data/observations/calibration_targets.csv, outputs/recalib_targets_ext.csv, outputs/lws_grace_extension_L14.csv
 ok  M3 glacier fit seed 2026 -> 2027                               expect FAIL      got FAIL        TARGETS IDENTITY: 18/20 pass, 2 FAIL (2 on the named provenance label); failing: data/constants/glacier_block_constants.csv, outputs/extc_block_constants.csv
@@ -7,5 +7,6 @@ ok  M5 Greenland driver from Berkeley Earth instead of HadCRUT5    expect FAIL  
 ok  C1 control: a console message only                             expect PASS      got PASS        TARGETS IDENTITY: 20/20 pass (2 on the named provenance label); failing: -
 ok  C2 control: melt-rate smoothing 11 -> 9 yr (feeds only an intermediate) expect FAIL-ONLY got FAIL        TARGETS IDENTITY: 19/20 pass, 1 FAIL (2 on the named provenance label); failing: outputs/gis_driver_constants.csv
 ok  I1 one digit in a shipped input (GlaMBIE global)               expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
-ok  I2 one digit in a fetched input (NOAA STAR annual means)       expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
+ok  I2 one byte in a fetched input (Frederikse workbook)           expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
+ok  I3 one digit in a shipped rolling-product file (NOAA STAR annual means) expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
 MUTATION TEST PASS: every mutant behaved as expected

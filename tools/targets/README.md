@@ -22,12 +22,13 @@ FASTG). Four intermediates the research repository also keeps are gated too:
 
 **Status (2026-11-12, macOS arm64, Python 3.14.3, `requirements-targets.txt`).**
 All eight shipped files and the four intermediates rebuild byte for byte (sha256
-identical) from `data/sources/` plus the fetch-yourself inputs, in about 6 s.
-One cell differs by design: the `commit` column of `gis_amp_shape_meta.csv`
-records the commit of the code that built the shape (`d59ce12` in the shipped
-file). With `--from-raw` the chain starts from the raw gridded products instead,
-re-makes all seven extractions byte for byte, and then rebuilds the same files
-(about 1-3 min). Gate: 20/20 and 27/27.
+identical) from `data/sources/` plus the two Frederikse (2020) files fetched from
+Zenodo, in about 6 s. Nothing else has to be fetched. One cell differs by design:
+the `commit` column of `gis_amp_shape_meta.csv` records the commit of the code
+that built the shape (`d59ce12` in the shipped file). With `--from-raw` the chain
+starts from the raw gridded products instead, re-makes all seven extractions
+byte for byte, and then rebuilds the same files (about 1-3 min). Gate: 20/20 and
+27/27.
 
 ## Quick start
 
@@ -36,10 +37,7 @@ python -m venv .venv-targets && . .venv-targets/bin/activate
 pip install -r tools/targets/requirements-targets.txt
 
 python tools/targets/fetch_inputs.py --inputs-dir ~/ladrillo_inputs             # the plan: what to fetch, from where
-python tools/targets/fetch_inputs.py --inputs-dir ~/ladrillo_inputs --download  # Frederikse (Zenodo) and NOAA STAR
-#   place the other fetch-yourself files where the plan says, and the raw Berkeley Earth,
-#   GISTEMP and GTN-G files under ~/ladrillo_inputs/raw/, then:
-python tools/targets/fetch_inputs.py --inputs-dir ~/ladrillo_inputs --extract   # the two Greenland series
+python tools/targets/fetch_inputs.py --inputs-dir ~/ladrillo_inputs --download  # the two Frederikse (2020) files, Zenodo
 python tools/targets/fetch_inputs.py --inputs-dir ~/ladrillo_inputs --verify
 
 python tools/targets/build_targets.py --inputs-dir ~/ladrillo_inputs --work-dir /tmp/targets_build
@@ -65,17 +63,23 @@ every script, input and output, the package versions, the Ladrillo commit, and
 the one seed the chain uses (below). It touches `data/` only with `--install`.
 Install only on purpose: the shipped posterior was calibrated on these targets.
 
-### Rolling products: who can rebuild what
+### Rolling products and current vintages
 
 Several sources are overwritten by their publishers (marked rolling below):
 NOAA STAR, NOAA NCEI, Berkeley Earth, GISTEMP, HadCRUT5, the GRACE mascons and
-CMIP6 on Pangeo. A download made today will not match the pinned file, and the
-builder refuses it. The shipped extractions remove that problem for HadCRUT5,
-GRACE and CMIP6. For the four fetch-yourself rolling inputs (NOAA STAR, NOAA
-NCEI, and the Berkeley Earth and GISTEMP Greenland series) the exact files are
-today only in the maintainer's archive. Without them, `build_targets.py` stops
-at the input check. Anyone can still run every builder on newer downloads by
-replacing the pins, which builds a different target set.
+CMIP6 on Pangeo. The vintages the targets were built from are no longer served,
+so Ladrillo ships the small files made from them (ruling, 2026-11-12): the NOAA
+STAR annual means and the NCEI thermosteric series as received, and extractions
+of the others. The standard rebuild uses these and needs no archive.
+
+To build on today's versions instead, `fetch_inputs.py` describes the route
+(CURRENT VINTAGES in its plan): `--download` also writes the current STAR file,
+reduced to annual means as the research did; place a current NCEI file the same
+way; put current Berkeley Earth and GISTEMP grids in `raw/` and run `--extract
+--no-pin-check`; then `build_targets.py --current-vintages`. Those files replace
+the shipped copies unpinned (the build lists them). Today's vintages do not
+reproduce the shipped bytes, and the gate reports which outputs move and by how
+much.
 
 ## The chain
 
@@ -113,13 +117,18 @@ by the maintainer extractions). The table below is generated from
 from the publishers' pages and the Zenodo API on 2026-11-12; nothing was
 downloaded.
 
-Ruling (Marcus, 2026-11-12): a dataset whose licence leaves redistribution in
-doubt is not shipped. It is fetched, and pinned by sha256. Four sources fall
-under it: Frederikse (2020), whose original Zenodo record (3862995) is "Other
-(Not Open)" and whose files Dangendorf's CC BY 4.0 record (10621070)
-redistributes but cannot relicense; Berkeley Earth (CC BY-NC 4.0); GISTEMP and
-NOAA NCEI (no licence stated); NOAA STAR (no licence, a data-use policy with a
-required credit line). The Dangendorf v2 file is shipped by ruling.
+Rulings (Marcus, 2026-11-12). A dataset whose licence leaves redistribution in
+doubt is not shipped; it is fetched, and pinned by sha256. That applies to
+Frederikse (2020): its original Zenodo record (3862995) is "Other (Not Open)",
+and Dangendorf's CC BY 4.0 record (10621070), which redistributes the two files,
+cannot relicense them. The four small derived files of rolling products are
+shipped with licence notes, because their vintages are no longer served: NOAA
+STAR (no licence; the data-use policy requires the credit line "Altimetry data
+are provided by the NOAA Laboratory for Satellite Altimetry"), NOAA NCEI (no
+licence stated), Berkeley Earth (CC BY-NC 4.0: non-commercial use only, not
+covered by Ladrillo's MIT licence) and GISTEMP (no licence stated). Each has a
+README next to it (`data/sources/noaa/`, `data/sources/greenland_zones/`). The
+Dangendorf v2 file is shipped by ruling.
 
 <!-- SOURCES TABLE: generated by `python tools/targets/target_inputs.py`; do not edit by hand -->
 | source | what | files | kind | where from | accessed | licence (read 2026-11-12) | feeds |
@@ -127,18 +136,18 @@ required credit line). The Dangendorf v2 file is shipped by ruling.
 | Frederikse et al. (2020) | sea-level budget: global basin time series (xlsx) and the 5000-member weighted ensemble (nc) | `frederikse2020/frederikse2020_global_basin_timeseries.xlsx (+1 more)` | fetch yourself | https://zenodo.org/records/10621070/files/global_basin_timeseries.xlsx?download=1 and https://zenodo.org/records/10621070/files/GMSL_ensembles_F20.nc?download=1 (rename on save); DOI 10.5281/zenodo.10621070 (redistributed by Dangendorf et al.; original 10.5281/zenodo.3862995) | 2026-05-21 (xlsx), 2026-07-19 (nc) | original record 3862995: 'Other (Not Open)', all rights reserved; record 10621070: CC BY 4.0, which cannot relicense Frederikse's files | every component target (ais, gis, gsic, steric, lws) 1900-2018 and its sigma; the total's budget-closure sigma; the land-water splice offset |
 | Dangendorf et al. (2024), corrected global file | Kalman-smoother GMSL reconstruction, global series with standard errors (v2) | `dangendorf2024/dangendorf2024_KalmanSmootherHR_Global_v2.nc` | shipped | none: personal communication, S. Dangendorf to M. Sarofim, 2026-08-07 (fixes the slot shift in Zenodo 10621070's KalmanSmootherHR_Global.nc) | 2026-08-07 | none stated; shipped by Marcus's ruling (2026-11-12) | dang_sig, dang_lo, dang_hi 1900-2021 (the total target's own SE) |
 | Dangendorf et al. (2024) | annual GMSL = cos(lat)-weighted mean of the HR field (extraction) | `dangendorf2024/dangendorf2024_gmsl_annual.csv` | shipped | https://zenodo.org/records/10621070; DOI 10.5281/zenodo.10621070 | 2026-07-20 | CC BY 4.0 (Zenodo API) | dang (the total target) 1900-2021 |
-| JPL GRACE/GRACE-FO mascons RL06.3Mv04 | Antarctic and Greenland mass time series | `grace/grace_antarctica_mass.txt (+1 more)` | shipped | https://podaac.jpl.nasa.gov/ (Earthdata login); DOI 10.5067/TEMSC-AT634, 10.5067/TEMSC-GT634 | 2026-06-13 | NASA EOSDIS data-use guidance: openly shared without restriction (CC0 unless marked) | ais and gis 2019-2026; the mask gates of the land-water extraction |
-| JPL GRACE/GRACE-FO mascons RL06.3Mv04 | monthly mass over global land minus both ice sheets (extraction) | `grace/grace_lws_domain_monthly.csv` | shipped | https://podaac.jpl.nasa.gov/ (Earthdata login); DOI 10.5067/TEMSC-3JC634 | 2026-08-24 | as above (NASA, without restriction) | lws 2019-2023, held flat to 2026 |
+| JPL GRACE/GRACE-FO mascons RL06.3Mv04 | Antarctic and Greenland mass time series | `grace/grace_antarctica_mass.txt (+1 more)` | shipped (rolling) | https://podaac.jpl.nasa.gov/ (Earthdata login); DOI 10.5067/TEMSC-AT634, 10.5067/TEMSC-GT634 | 2026-06-13 | NASA EOSDIS data-use guidance: openly shared without restriction (CC0 unless marked) | ais and gis 2019-2026; the mask gates of the land-water extraction |
+| JPL GRACE/GRACE-FO mascons RL06.3Mv04 | monthly mass over global land minus both ice sheets (extraction) | `grace/grace_lws_domain_monthly.csv` | shipped (rolling) | https://podaac.jpl.nasa.gov/ (Earthdata login); DOI 10.5067/TEMSC-3JC634 | 2026-08-24 | as above (NASA, without restriction) | lws 2019-2023, held flat to 2026 |
 | GlaMBIE Team (2025) | regional calendar-year glacier mass change (results, calendar_years/ of glambie_data.zip) | `glambie/calendar_years/0_global.csv (+19 more)` | shipped | https://doi.org/10.5904/wgms-glambie-2024-07 | 2026-06-13 | WGMS data policy: open access with citation (= CC BY 4.0) | gsic 2019-2023 (global minus region 5); glacier block weights, modern rates, 2020 losses; the region-19 seam; glaciers removed from the land-water extension |
-| NOAA NCEI | World Ocean 0-2000 m thermosteric sea level, yearly | `noaa/noaa_thermosteric_w0-2000m_yearly.dat` | fetch yourself (rolling) | https://www.ncei.noaa.gov/access/global-ocean-heat-content/ (yearly thermosteric sea level, World Ocean, 0-2000 m) | 2026-06-13 | none stated on the pages read | steric 2019-2025 |
-| NOAA STAR Laboratory for Satellite Altimetry | global mean sea level, seasonal signals removed; annual means of the 2026-05 release | `noaa/nasa_gmsl_annual.csv` | fetch yourself (rolling) | https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_gbl_free_ref_90.csv (fetch_inputs.py --download derives the annual means as the research did) | 2026-05-20 | no licence; LSA data-use policy (2008) requires a credit line | dang 2022-2024 |
+| NOAA NCEI | World Ocean 0-2000 m thermosteric sea level, yearly | `noaa/noaa_thermosteric_w0-2000m_yearly.dat` | shipped (rolling) | https://www.ncei.noaa.gov/access/global-ocean-heat-content/ (yearly thermosteric sea level, World Ocean, 0-2000 m) | 2026-06-13 | none stated on the pages read; shipped by ruling (rolling product, 2026-06 vintage) | steric 2019-2025 |
+| NOAA STAR Laboratory for Satellite Altimetry | global mean sea level, seasonal signals removed; annual means of the 2026-05 release | `noaa/nasa_gmsl_annual.csv` | shipped (rolling) | https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_gbl_free_ref_90.csv (fetch_inputs.py --download derives the annual means as the research did) | 2026-05-20 | no licence; LSA data-use policy (2008) requires the credit line "Altimetry data are provided by the NOAA Laboratory for Satellite Altimetry"; shipped by ruling (rolling, 2026-05-20 release) | dang 2022-2024 |
 | GlacierMIP3 (Zekollari et al. 2025) | Tables S1a and S3, region characteristics | `gmip3/table_S1a.csv (+2 more)` | shipped | https://zenodo.org/records/15046588; DOI 10.5281/zenodo.15046588 | 2026-08-07 | CC BY 4.0 (Zenodo API) | glacier inventory, response times, ISIMIP3 amplification |
 | GlacierMIP3 (Zekollari et al. 2025) | committed-loss ladder per Ladrillo glacier reservoir (extraction) | `gmip3/gmip3_block_ladder_L27.csv` | shipped | https://zenodo.org/records/15046588; DOI 10.5281/zenodo.15046588 | 2026-08-07 | CC BY 4.0 (Zenodo API) | the glacier equilibrium curves (b, T_off) and their committed rungs |
-| Met Office HadCRUT5.0.2.0 (Morice et al. 2021) | glacier-area-weighted annual temperature per RGI region, and the global mean (extraction) | `hadcrut5/t_glac_hadcrut5.csv (+1 more)` | shipped | https://www.metoffice.gov.uk/hadobs/hadcrut5/; DOI 10.1029/2019JD032361 | 2026-08-06 | Open Government Licence v3 (Crown copyright); acknowledgement line required | the three glacier reservoir drivers; the observational amplification fit |
-| Met Office HadCRUT5.0.2.0 | Greenland land-zone and global annual temperature (extraction) | `greenland_zones/greenland_zone_series_HadCRUT5.csv` | shipped | https://www.metoffice.gov.uk/hadobs/hadcrut5/; DOI 10.1029/2019JD032361 | 2026-08-06 | Open Government Licence v3 (the zone weights use the Berkeley Earth 1-degree land fraction and the GTN-G region-05 polygon; no Berkeley values are in the file) | the Greenland driver; the amplification prior and anchor |
-| Berkeley Earth | Greenland land-zone and global annual temperature (extraction, made by fetch_inputs.py --extract) | `greenland_zones/greenland_zone_series_BerkeleyEarth.csv` | fetch yourself (rolling) | https://berkeleyearth.org/data/ (Land_and_Ocean_LatLong1.nc) | 2026-08-09 | CC BY-NC 4.0 (berkeleyearth.org/data) | the amplification prior and anchor (one of three products) |
-| NASA GISS GISTEMP v4 | Greenland land-zone and global annual temperature (extraction, made by fetch_inputs.py --extract) | `greenland_zones/greenland_zone_series_GISTEMP.csv` | fetch yourself (rolling) | https://data.giss.nasa.gov/gistemp/ (gistemp1200_GHCNv4_ERSSTv5.nc.gz) | 2026-08-09 | none stated (citation requested) | the amplification prior and anchor (one of three products) |
-| CMIP6 (40 models) | Amon tas, annual global and Greenland-zone means, historical + ssp126/245/585 (extraction) | `cmip6_gis/tas_series_gis_ACCESS-CM2.csv (+39 more)` | shipped | https://storage.googleapis.com/cmip6/cmip6-zarr-consolidated-stores.csv (Pangeo) | 2026-08-12 / 2026-08-18 | CC BY 4.0 for all groups since 2022-10 (CMIP6 Terms of Use v6.2); GISS sources CC0 | the Greenland amplification shape S(dT) |
+| Met Office HadCRUT5.0.2.0 (Morice et al. 2021) | glacier-area-weighted annual temperature per RGI region, and the global mean (extraction) | `hadcrut5/t_glac_hadcrut5.csv (+1 more)` | shipped (rolling) | https://www.metoffice.gov.uk/hadobs/hadcrut5/; DOI 10.1029/2019JD032361 | 2026-08-06 | Open Government Licence v3 (Crown copyright); acknowledgement line required | the three glacier reservoir drivers; the observational amplification fit |
+| Met Office HadCRUT5.0.2.0 | Greenland land-zone and global annual temperature (extraction) | `greenland_zones/greenland_zone_series_HadCRUT5.csv` | shipped (rolling) | https://www.metoffice.gov.uk/hadobs/hadcrut5/; DOI 10.1029/2019JD032361 | 2026-08-06 | Open Government Licence v3 (the zone weights use the Berkeley Earth 1-degree land fraction and the GTN-G region-05 polygon; no Berkeley values are in the file) | the Greenland driver; the amplification prior and anchor |
+| Berkeley Earth | Greenland land-zone and global annual temperature (extraction) | `greenland_zones/greenland_zone_series_BerkeleyEarth.csv` | shipped (rolling) | https://berkeleyearth.org/data/ (Land_and_Ocean_LatLong1.nc) | 2026-08-09 | CC BY-NC 4.0 (berkeleyearth.org/data): non-commercial use only, not covered by Ladrillo's MIT licence; shipped by ruling (rolling, 2026-08 vintage) | the amplification prior and anchor (one of three products) |
+| NASA GISS GISTEMP v4 | Greenland land-zone and global annual temperature (extraction) | `greenland_zones/greenland_zone_series_GISTEMP.csv` | shipped (rolling) | https://data.giss.nasa.gov/gistemp/ (gistemp1200_GHCNv4_ERSSTv5.nc.gz) | 2026-08-09 | none stated (citation of Lenssen et al. 2024 requested); shipped by ruling (rolling, 2026-08 vintage) | the amplification prior and anchor (one of three products) |
+| CMIP6 (40 models) | Amon tas, annual global and Greenland-zone means, historical + ssp126/245/585 (extraction) | `cmip6_gis/tas_series_gis_ACCESS-CM2.csv (+39 more)` | shipped (rolling) | https://storage.googleapis.com/cmip6/cmip6-zarr-consolidated-stores.csv (Pangeo) | 2026-08-12 / 2026-08-18 | CC BY 4.0 for all groups since 2022-10 (CMIP6 Terms of Use v6.2); GISS sources CC0 | the Greenland amplification shape S(dT) |
 
 | raw product (maintainer extractions only) | size | from | accessed | licence | note |
 |---|---|---|---|---|---|
@@ -159,10 +168,9 @@ were built from (Zenodo's published md5, checked through its API on
 2026-11-12). No other fetch was tested: `fetch_inputs.py --download` and
 `--verify` are the first real test for each.
 
-Two shipped files carry derived weights from a fetch-yourself source: the
-HadCRUT5 Greenland series and the 40 CMIP6 series are zone means whose cell
-weights use the Berkeley Earth 1-degree land fraction and the GTN-G region-05
-polygon. No Berkeley Earth temperature is in them.
+The HadCRUT5 and GISTEMP Greenland series and the 40 CMIP6 series are zone means
+whose cell weights use the Berkeley Earth 1-degree land fraction and the GTN-G
+region-05 polygon. No Berkeley Earth temperature is in them.
 
 ### Attribution
 
@@ -180,11 +188,14 @@ polygon. No Berkeley Earth temperature is in them.
   Antarctic and Greenland mass series, 10.5067/TEMSC-AT634, 10.5067/TEMSC-GT634).
 - CMIP6: the modelling groups of the 40 models in `data/sources/cmip6_gis/`, under
   the CMIP6 Terms of Use (CC BY 4.0; GISS models CC0).
-- Fetched, for whoever uses them: Frederikse, T., et al. (2020), Nature 584,
-  393-397; Rohde, R. A., and Hausfather, Z. (2020), Earth Syst. Sci. Data 12,
-  3469-3479 (Berkeley Earth); Lenssen, N., et al. (2024) (GISTEMP v4); NOAA STAR
-  Laboratory for Satellite Altimetry (the credit line its data-use policy asks
-  for); NOAA NCEI.
+- NOAA STAR, the credit line its data-use policy requires: "Altimetry data are
+  provided by the NOAA Laboratory for Satellite Altimetry".
+- Berkeley Earth (CC BY-NC 4.0, non-commercial use only): Rohde, R. A., and
+  Hausfather, Z. (2020), Earth Syst. Sci. Data 12, 3469-3479.
+- GISTEMP v4: GISTEMP Team, GISS Surface Temperature Analysis, NASA GISS, and
+  Lenssen, N., et al. (2024).
+- NOAA NCEI World Ocean thermosteric sea level (no licence stated).
+- Fetched, not shipped: Frederikse, T., et al. (2020), Nature 584, 393-397.
 
 ## What the port changed
 
@@ -274,7 +285,7 @@ cannot carry a new column, so the seed is recorded in `BUILD_PROVENANCE.json`.
   in place cannot pass.
 - **intermediate**: the four research intermediates against `reference.sha256`.
 - **extraction** (after `--from-raw`): the seven re-made extractions against
-  `inputs.sha256`.
+  `inputs.sha256` and the shipped copies.
 
 The one exemption is the `commit` cell of `gis_amp_shape_meta.csv` (verdict
 PASS-LABEL): every other byte of that file must be identical. On a failure the
@@ -288,7 +299,7 @@ alone is PASS-LABEL.
 and runs the gate. Result of 2026-11-12 (`mutation_result.txt`):
 
 ```
-targets gate mutation test, 2026-11-12 08:56, Ladrillo working tree before the first targets commit (run from a frozen copy), maintainer inputs (fetch_inputs.py --from-research)
+targets gate mutation test, 2026-11-12 09:13, Ladrillo ab3d1e8 + the 2026-11-12d working tree (run from a frozen copy), maintainer inputs (fetch_inputs.py --from-research)
 ok  M1 altimetry sigma 4.0 -> 4.1 mm                               expect FAIL      got FAIL        TARGETS IDENTITY: 18/20 pass, 2 FAIL (2 on the named provenance label); failing: data/observations/calibration_targets.csv, outputs/recalib_targets_ext.csv
 ok  M2 land-water read-back emulation removed (1-ulp)              expect FAIL      got FAIL        TARGETS IDENTITY: 17/20 pass, 3 FAIL (2 on the named provenance label); failing: data/observations/calibration_targets.csv, outputs/recalib_targets_ext.csv, outputs/lws_grace_extension_L14.csv
 ok  M3 glacier fit seed 2026 -> 2027                               expect FAIL      got FAIL        TARGETS IDENTITY: 18/20 pass, 2 FAIL (2 on the named provenance label); failing: data/constants/glacier_block_constants.csv, outputs/extc_block_constants.csv
@@ -297,7 +308,8 @@ ok  M5 Greenland driver from Berkeley Earth instead of HadCRUT5    expect FAIL  
 ok  C1 control: a console message only                             expect PASS      got PASS        TARGETS IDENTITY: 20/20 pass (2 on the named provenance label); failing: -
 ok  C2 control: melt-rate smoothing 11 -> 9 yr (feeds only an intermediate) expect FAIL-ONLY got FAIL        TARGETS IDENTITY: 19/20 pass, 1 FAIL (2 on the named provenance label); failing: outputs/gis_driver_constants.csv
 ok  I1 one digit in a shipped input (GlaMBIE global)               expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
-ok  I2 one digit in a fetched input (NOAA STAR annual means)       expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
+ok  I2 one byte in a fetched input (Frederikse workbook)           expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
+ok  I3 one digit in a shipped rolling-product file (NOAA STAR annual means) expect ABORT     got ABORT       ABORT: inputs do not match inputs.sha256 (fetch_inputs.py --verify says more); nothing was run
 MUTATION TEST PASS: every mutant behaved as expected
 ```
 

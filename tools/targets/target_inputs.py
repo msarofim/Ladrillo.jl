@@ -4,16 +4,21 @@ driver builders read, where it comes from, and under what licence.
 
 Kinds (the prefix each file carries in inputs.sha256):
 
-  sources/  SHIPPED in data/sources/. The licence clearly allows
-            redistribution (attribution at most). Copied byte-for-byte from the
-            research repository (SLR-RFF-BRICK), or a small extraction of a
-            large product (its builder is in tools/targets/extract/).
+  sources/  SHIPPED in data/sources/. Copied byte-for-byte from the research
+            repository (SLR-RFF-BRICK), or a small extraction of a large product
+            (its builder is in tools/targets/extract/). Each keeps its source's
+            licence (`licence`, and a README next to the file where it carries a
+            condition such as non-commercial use or a credit line).
   fetch/    FETCH YOURSELF into an --inputs-dir, at the path shown. Not shipped
             because the licence leaves redistribution in doubt (Marcus's ruling
-            of 2026-11-12: such files are not shipped; they are pinned by sha256
-            and the builder refuses any other file). Some are ROLLING products
-            the publisher overwrites: a download made today will not match the
-            pin (see `rolling`).
+            of 2026-11-12); pinned by sha256, and the builder refuses any other
+            file.
+
+Ruling of 2026-11-12, second part (Marcus): the four small derived files of
+ROLLING products (NOAA STAR annual means, NOAA NCEI thermosteric, and the
+Berkeley Earth and GISTEMP Greenland series) ARE shipped, with licence notes,
+because the vintages they were made from are no longer served. A download made
+today (`rolling`) does not reproduce them.
   raw/      RAW gridded products read only by the maintainer re-extractions
             (build_targets.py --from-raw, fetch_inputs.py --extract).
 
@@ -109,19 +114,21 @@ SOURCES = [
                              "losses; the region-19 seam; glaciers removed from the land-water extension"),
     dict(key="noaa_steric", short="NOAA NCEI",
          name="World Ocean 0-2000 m thermosteric sea level, yearly",
-         files=[("fetch", "noaa/noaa_thermosteric_w0-2000m_yearly.dat",
+         files=[("sources", "noaa/noaa_thermosteric_w0-2000m_yearly.dat",
                  "data/observations/raw/noaa_thermosteric_w0-2000m_yearly.dat")],
          url="https://www.ncei.noaa.gov/access/global-ocean-heat-content/ (yearly thermosteric sea level, "
              "World Ocean, 0-2000 m)", doi="", accessed="2026-06-13", rolling=True,
-         licence="none stated on the pages read", verified="",
+         licence="none stated on the pages read; shipped by ruling (rolling product, 2026-06 vintage)", verified="",
          used_by="steric 2019-2025"),
     dict(key="noaa_star", short="NOAA STAR Laboratory for Satellite Altimetry",
          name="global mean sea level, seasonal signals removed; annual means of the 2026-05 release",
-         files=[("fetch", "noaa/nasa_gmsl_annual.csv", "data/observations/nasa_gmsl_annual.csv")],
+         files=[("sources", "noaa/nasa_gmsl_annual.csv", "data/observations/nasa_gmsl_annual.csv")],
          url="https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_gbl_free_ref_90.csv "
              "(fetch_inputs.py --download derives the annual means as the research did)",
          doi="", accessed="2026-05-20", rolling=True,
-         licence="no licence; LSA data-use policy (2008) requires a credit line", verified="",
+         licence="no licence; LSA data-use policy (2008) requires the credit line \"Altimetry data are provided by "
+                 "the NOAA Laboratory for Satellite Altimetry\"; shipped by ruling (rolling, 2026-05-20 release)",
+         verified="",
          used_by="dang 2022-2024"),
     dict(key="gmip3_tables", short="GlacierMIP3 (Zekollari et al. 2025)",
          name="Tables S1a and S3, region characteristics",
@@ -156,17 +163,19 @@ SOURCES = [
          verified="", extractor="extract/extract_greenland_zones.py",
          used_by="the Greenland driver; the amplification prior and anchor"),
     dict(key="greenland_berkeley", short="Berkeley Earth",
-         name="Greenland land-zone and global annual temperature (extraction, made by fetch_inputs.py --extract)",
-         files=[("fetch", "greenland_zones/greenland_zone_series_BerkeleyEarth.csv", None)],
+         name="Greenland land-zone and global annual temperature (extraction)",
+         files=[("sources", "greenland_zones/greenland_zone_series_BerkeleyEarth.csv", None)],
          url="https://berkeleyearth.org/data/ (Land_and_Ocean_LatLong1.nc)", doi="", accessed="2026-08-09",
-         rolling=True, licence="CC BY-NC 4.0 (berkeleyearth.org/data)", verified="",
+         rolling=True, licence="CC BY-NC 4.0 (berkeleyearth.org/data): non-commercial use only, not covered by "
+                               "Ladrillo's MIT licence; shipped by ruling (rolling, 2026-08 vintage)", verified="",
          extractor="extract/extract_greenland_zones.py --products BerkeleyEarth",
          used_by="the amplification prior and anchor (one of three products)"),
     dict(key="greenland_gistemp", short="NASA GISS GISTEMP v4",
-         name="Greenland land-zone and global annual temperature (extraction, made by fetch_inputs.py --extract)",
-         files=[("fetch", "greenland_zones/greenland_zone_series_GISTEMP.csv", None)],
+         name="Greenland land-zone and global annual temperature (extraction)",
+         files=[("sources", "greenland_zones/greenland_zone_series_GISTEMP.csv", None)],
          url="https://data.giss.nasa.gov/gistemp/ (gistemp1200_GHCNv4_ERSSTv5.nc.gz)", doi="", accessed="2026-08-09",
-         rolling=True, licence="none stated (citation requested)", verified="",
+         rolling=True, licence="none stated (citation of Lenssen et al. 2024 requested); shipped by ruling (rolling, "
+                               "2026-08 vintage)", verified="",
          extractor="extract/extract_greenland_zones.py --products GISTEMP",
          used_by="the amplification prior and anchor (one of three products)"),
     dict(key="cmip6_gis", short="CMIP6 (40 models)",
@@ -254,7 +263,7 @@ def render_markdown() -> str:
         where = s["url"] or s["doi"]
         if s["doi"] and s["url"] and s["doi"] not in s["url"]:
             where = f"{s['url']}; DOI {s['doi']}"
-        kind = " / ".join(KIND_LABEL[k] for k in kinds) + (" (rolling)" if s["rolling"] and "fetch" in kinds else "")
+        kind = " / ".join(KIND_LABEL[k] for k in kinds) + (" (rolling)" if s["rolling"] else "")
         out.append(f"| {s['short']} | {s['name']} | `{shown}` | {kind} | {where} | {s['accessed']} | "
                    f"{s['licence']} | {s['used_by']} |")
     out += ["", "| raw product (maintainer extractions only) | size | from | accessed | licence | note |",
@@ -272,7 +281,7 @@ def render_compact() -> str:
     out = ["| source | kind | licence | feeds |", "|---|---|---|---|"]
     for s in SOURCES:
         kinds = sorted({k for k, _, _ in s["files"]})
-        kind = " / ".join(KIND_LABEL[k] for k in kinds) + (" (rolling)" if s["rolling"] and "fetch" in kinds else "")
+        kind = " / ".join(KIND_LABEL[k] for k in kinds) + (" (rolling)" if s["rolling"] else "")
         out.append(f"| {s['short']}: {s['name']} | {kind} | {s['licence']} | {s['used_by']} |")
     return "\n".join(out)
 

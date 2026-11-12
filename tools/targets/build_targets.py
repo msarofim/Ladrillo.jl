@@ -13,10 +13,19 @@ data/drivers/glacier_block_temperature.csv and greenland_zone_temperature.csv,
 data/constants/glacier_block_constants.csv, gis_amp_shape.csv,
 gis_amp_shape_meta.csv, data/calibration/gis_amp_prior.csv), plus the four
 intermediates the research repository also keeps. It reads data/sources/
-(shipped) and the files Ladrillo does not ship from --inputs-dir (laid out by
-fetch_inputs.py), merged into <work-dir>/sources/. With --from-raw it first
-re-runs every maintainer extraction (tools/targets/extract/) from the raw
-gridded products in <inputs-dir>/raw/ and builds from those instead.
+(shipped) and the two files Ladrillo does not ship (Frederikse 2020, from
+Zenodo; fetch_inputs.py --download puts them in --inputs-dir), merged into
+<work-dir>/sources/. With --from-raw it first re-runs every maintainer
+extraction (tools/targets/extract/) from the raw gridded products in
+<inputs-dir>/raw/ and builds from those instead.
+
+--current-vintages builds on newer downloads instead: any shipped file that is
+also present in --inputs-dir (fetch_inputs.py --download writes the current NOAA
+STAR file there, --extract the Greenland series of whatever Berkeley Earth and
+GISTEMP files are in raw/) replaces the shipped copy. Those files are not
+checked against their pins (the build lists them as UNPINNED). The rolling
+products have moved on since the shipped vintages, so such a build does not
+reproduce the shipped bytes, and the gate says where it differs.
 
 Before any step runs, every input is checked against tools/targets/inputs.sha256;
 one mismatch or missing file aborts the build, and the message says which. Each step runs from a frozen copy
@@ -154,6 +163,8 @@ def main():
     ap.add_argument("--sources", default=str(TI.SOURCES_DIR), help="the shipped inputs (default: data/sources/)")
     ap.add_argument("--from-raw", action="store_true",
                     help="re-run every maintainer extraction from <inputs-dir>/raw/ first")
+    ap.add_argument("--current-vintages", action="store_true",
+                    help="shipped files also present in --inputs-dir replace the shipped copies, unpinned")
     ap.add_argument("--tools-dir", default=str(HERE), help="scripts to snapshot (default: this directory)")
     ap.add_argument("--install", action="store_true", help="copy the eight built files into data/ (see docstring)")
     a = ap.parse_args()
@@ -175,8 +186,15 @@ def main():
     shutil.copy2(REPO / "tools" / "import_l27_data.py", snap / "import_l27_data.py")
     log: list = []
 
+    if a.current_vintages and a.from_raw:
+        sys.exit("--current-vintages and --from-raw are separate routes; use one")
     # every input checked BEFORE anything runs; extraction outputs are skipped when they will be re-made
     skip = set(EXTRACTED_FILES) if a.from_raw else set()
+    unpinned = []
+    if a.current_vintages:
+        unpinned = sorted(k[len("sources/"):] for k in pins
+                          if k.startswith("sources/") and (inputs / k[len("sources/"):]).is_file())
+        skip |= set(unpinned)
     bad = check_inputs(sources0, pins, "sources/", skip) + check_inputs(inputs, pins, "fetch/", skip)
     if a.from_raw:
         bad += check_inputs(inputs / "raw", pins, "raw/")
@@ -192,6 +210,11 @@ def main():
             rel = k[len("fetch/"):]
             (sources / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(inputs / rel, sources / rel)
+    for rel in unpinned:
+        shutil.copy2(inputs / rel, sources / rel)
+        same = TI.sha256(sources / rel) == pins["sources/" + rel]
+        print(f"  UNPINNED (--current-vintages) {rel}  from {inputs}"
+              f"{'  [identical to the shipped vintage]' if same else '  [differs from the shipped vintage]'}")
     if a.from_raw:
         for rel in EXTRACTED_FILES:
             if (sources / rel).exists():
@@ -214,6 +237,7 @@ def main():
         built=dt.datetime.now().isoformat(timespec="seconds"),
         ladrillo_commit=commit, uncommitted_changes=dirty,
         sources=str(sources0), inputs_dir=str(inputs), from_raw=a.from_raw,
+        current_vintages_unpinned={rel: TI.sha256(sources / rel) for rel in unpinned},
         steps=log,
         seeds=SEEDS,
         randomness_note="No other step draws random numbers. The research diag_gis_amp_cmip6.py bootstraps "

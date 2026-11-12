@@ -48,7 +48,9 @@ BUILDER_MUTANTS = [
 ]
 INPUT_MUTANTS = [
     ("I1 one digit in a shipped input (GlaMBIE global)", "sources", "glambie/calendar_years/0_global.csv"),
-    ("I2 one digit in a fetched input (NOAA STAR annual means)", "fetch", "noaa/nasa_gmsl_annual.csv"),
+    ("I2 one byte in a fetched input (Frederikse workbook)", "fetch",
+     "frederikse2020/frederikse2020_global_basin_timeseries.xlsx"),
+    ("I3 one digit in a shipped rolling-product file (NOAA STAR annual means)", "sources", "noaa/nasa_gmsl_annual.csv"),
 ]
 
 

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-11-12d — The four rolling-product files are shipped (Marcus)
+
+Marcus's ruling on 2026-11-12c's open question: "Ship the four small derived files with licence notes."
+- `data/sources/` gains `noaa/nasa_gmsl_annual.csv` (NOAA STAR annual means of the 2026-05-20 release, 772 B),
+  `noaa/noaa_thermosteric_w0-2000m_yearly.dat` (NOAA NCEI, 1.3 KB), and
+  `greenland_zones/greenland_zone_series_BerkeleyEarth.csv` (30 KB) and `_GISTEMP.csv` (24 KB). They are the same bytes
+  as before (same sha256 in `tools/targets/inputs.sha256`, now under `sources/` instead of `fetch/`). Their vintages are
+  no longer served, so shipping them is what makes the rebuild work without the maintainer's archive.
+- Licence notes next to the files (`data/sources/noaa/README.md`, `data/sources/greenland_zones/README.md`), in
+  `data/sources/README.md`, the sources tables and the README's License section: Berkeley Earth CC BY-NC 4.0
+  (non-commercial use only, not covered by the MIT licence); NOAA STAR's required credit line, "Altimetry data are
+  provided by the NOAA Laboratory for Satellite Altimetry"; NOAA NCEI and GISTEMP, no licence stated.
+- The default build now needs only the two Frederikse (2020) files from Zenodo; everything else is in `data/sources/`.
+  Gate 20/20 from an inputs directory holding only those two files; 27/27 with `--from-raw`.
+- Today's vintages are still reachable: `fetch_inputs.py` lists them (CURRENT VINTAGES), `--download` also writes the
+  current STAR annual means, `--extract --no-pin-check` re-extracts current Berkeley Earth and GISTEMP grids, and the new
+  `build_targets.py --current-vintages` lets such files replace the shipped copies, unpinned and listed. They do not
+  reproduce the shipped bytes; a test with one STAR value changed (2024 set to 99.0 mm) fails the gate on the targets
+  and their research twin only (max |diff| 1.71 cm, dang_lo 2024).
+- Mutation test: input mutant I2 now flips a byte of the fetched Frederikse workbook, and a new I3 flips a digit of the
+  shipped STAR file; both abort before any step. The other seven mutants are unchanged.
+
 ## 2026-11-12c — Calibration targets and drivers rebuilt from their sources (piece 3 of the calibration port)
 
 The third of the four calibration-port pieces (SLR-RFF-BRICK `notes/handoff_2026-11-11e_postprocess_r1111_pass.md` §4).
