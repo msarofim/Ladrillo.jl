@@ -113,7 +113,8 @@ for s in LABELS:
     ax[0].plot(d.year.values, d.gmst.values, color=COL[s], lw=1.8)
     _ends0.append((d.gmst.values[-1], s, COL[s]))
 ax[0].set_ylabel("GMST (°C rel. PI)")
-ax[0].text(0.012, 0.93, "(a)  GMST forcing" + (" (FaIR ensemble mean)" if ARM == "joint" else ""),
+## Short panel title (Marcus 2026-11-12); the caption says panel (a) is the FaIR ensemble mean under the joint arm.
+ax[0].text(0.012, 0.93, "(a)  GMST forcing",
            transform=ax[0].transAxes, fontsize=9.5, fontweight="bold", va="top")
 lf.direct_label(ax[0], _ends0)
 _pk = {s: (gmst(s).set_index("year").gmst.loc[2015:2300].idxmax(),

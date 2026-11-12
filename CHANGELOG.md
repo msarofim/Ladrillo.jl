@@ -6,6 +6,7 @@
   reservoirs equilibrate, so declining T slows the melt"; "falls toward zero as the reservoirs equilibrate"), as the
   research script does from the same day (SLR-RFF-BRICK CHANGELOG 2026-11-12). `check_figures_identity.py` passes 16/16
   against the re-rendered research figure.
+- Later the same day, panel (a) drops "(FaIR ensemble mean)" (the caption says it); identity gate 16/16 again.
 
 ## 2026-11-11f — Post-processing: the four production chains give the shipped posterior, byte for byte
 
