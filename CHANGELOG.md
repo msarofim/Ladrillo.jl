@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-12b — FACTS land-water storage dropped past 2100 (Marcus)
+
+- `python/figures/figlib.py`: `FACTS_CLIMATE_DRIVEN` loses "ssp-lws" at 2150 and 2300. FACTS's land-water module reads
+  no climate (SSP population, held at its 2100 value), so its post-2100 High-minus-Very-Low difference was a population
+  difference; it had been kept as an exception. Same change as the research repo (SLR-RFF-BRICK CHANGELOG 2026-11-12d).
+  The comparison table loses 14 rows (546 remain) and the responsiveness table 2 (78). `check_figures_identity.py`
+  passes 16/16 against the re-rendered research figures.
+
 ## 2026-11-12 — Fig. 5: short panel titles (Marcus)
 
 - `python/figures/plot_vv_gsic_ladrillo.py`: the panel (b) and (c) titles drop their explanatory clauses ("the 3

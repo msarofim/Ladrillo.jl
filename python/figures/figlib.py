@@ -36,12 +36,13 @@ PROJ_BASELINE = "cm, rel. 1995-2014"         # every projection product
 # --- FACTS: which modules are CLIMATE-DRIVEN at each horizon (Marcus 2026-09-12) ---------
 ## FittedISMIP GrIS overwrites years >= 2100 with the 2080-2100 rate; bamber19 and deconto21 are lookups keyed on SAT
 ## integrated over 2000-2099; ar5AIS dynamics are a prescribed function of time; larmip's 200-year response functions
-## are zero-padded, so at 2300 every pre-2100 forcing year is dropped. RULE (Marcus): drop any module, and any total
-## containing one, whose components are not climate-driven at that horizon (land water excepted).
+## are zero-padded, so at 2300 every pre-2100 forcing year is dropped. ssp-lws reads no climate (SSP population, held
+## at its 2100 value); it was kept past 2100 as an exception until 2026-11-12 (Marcus: drop it). RULE (Marcus): drop
+## any module, and any total containing one, whose components are not climate-driven at that horizon.
 FACTS_CLIMATE_DRIVEN = {
     2100: None,                                        # None = every module is genuine here
-    2150: {"larmip", "ar5glaciers", "tlm", "ssp-lws"},
-    2300: {"ar5glaciers", "tlm", "ssp-lws"},
+    2150: {"larmip", "ar5glaciers", "tlm"},
+    2300: {"ar5glaciers", "tlm"},
 }
 
 
