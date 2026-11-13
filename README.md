@@ -37,8 +37,7 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 ## Quick start
 
-From the repository directory, start an interactive Julia session with `julia --project=.`, then run the following
-Julia commands.
+Start Julia from the repository directory with `julia --project=.`, then run:
 
 ```julia
 using Ladrillo
@@ -52,61 +51,45 @@ sea_level(lm, :total)                       # cm rel. 1995-2014, one value per y
 Components: `:glaciers`, `:gis`, `:ais`, `:te`, `:lws`, `:total`, and the glacier reservoirs `:gsic_r19`,
 `:gsic_slowg`, `:gsic_fastg`. Any forcing on any year span can be passed in place of `mean_forcing`.
 
-For Mimi users: `lm.m` is a Mimi model, so the usual Mimi functions can be used with it. `lm` itself is the
-`LadrilloModel` that holds it and is not a Mimi model.
+For Mimi users: `lm.m` is a Mimi model, so the usual Mimi functions work on it; `lm` itself is not.
 
 ## Reproducing the paper's projections
 
-The first time you run the code, fetch the BRICK 2.0 posterior with `./tools/fetch_brick20_posterior.sh` (*BRICK 2.0
-posterior* below). This repository does not redistribute it. Every step that runs or scores BRICK 2.0 needs it,
-including the BRICK 2.0 row below, the hindcast comparison (Tables 4 and 5) and the figures. The tests skip their BRICK
-2.0 checks until it is fetched. Ladrillo's own projections do not need it.
+Before the first run, fetch the BRICK 2.0 posterior with `./tools/fetch_brick20_posterior.sh` (*BRICK 2.0 posterior*
+below). Every step that uses BRICK 2.0 needs it, including Tables 4 and 5 and the figures; Ladrillo's own projections
+do not.
 
 | product | command | runtime (one core, Apple M4) |
 |---|---|---|
 | projection with FaIR climate uncertainty (one scenario) | `julia --project=. scripts/project_joint.jl --scenario=ssp245` | ~5 min |
 | BRICK 2.0 on the same climate | `julia --project=. scripts/brick20_joint.jl --scenario=ssp245` | ~1 min |
-| the fixed-climate SSP panel (SSP1-2.6, SSP2-4.5, SSP5-8.5) | `julia --project=. scripts/project_fixed.jl` | ~1 min |
+| the fixed-climate SSP panel | `julia --project=. scripts/project_fixed.jl` | ~1 min |
 
 Outputs go to `outputs/projections/`; every file carries a `provenance` column. Scenarios: `ssp126 ssp245 ssp585
 vvVL vvLN vvL vvML vvM vvHL vvH`.
 
 ### The projection files
 
-All values are sea-level contributions in cm relative to the 1995–2014 mean. Components are `glaciers`, `gis`, `ais`,
-`te`, `lws` and `total`. Horizons are 2100, 2150 and 2300.
+Sea level is in cm relative to 1995–2014, for the components `glaciers`, `gis`, `ais`, `te`, `lws` and `total`.
 
 | file | one row per | columns |
 |---|---|---|
-| `joint_cells_<scenario>.csv` | component, horizon and arm | `n_draws`, `med_cm`, `mean_cm`, `p05_cm`, `p95_cm` |
+| `joint_cells_<scenario>.csv` | component, horizon (2100, 2150, 2300) and arm | `n_draws`, `med_cm`, `mean_cm`, `p05_cm`, `p95_cm` |
 | `joint_draws_<scenario>.csv` | draw, component, horizon and arm | `draw`, `config`, `value_cm` |
 | `joint_paths_<scenario>.csv` | year (1990–2300), component and arm | `med_cm`, `p05_cm`, `p95_cm` |
 | `joint_gates_<scenario>.csv` | internal check | `gate`, `key`, `value`, `verdict` |
-| `brick20_{cells,draws,paths}_<scenario>.csv` | as for the `joint_` files, for BRICK 2.0 | as for the `joint_` files |
-| `fixed_components_ssp126_ssp245_ssp585.csv` | year (1990–2300), scenario and component | `gmst` (°C), `med`, `p05`, `p17`, `p83`, `p95`, `n_finite` |
+| `brick20_{cells,draws,paths}_<scenario>.csv` | the same, for BRICK 2.0 | the same |
+| `fixed_components_ssp126_ssp245_ssp585.csv` | year (1990–2300), scenario and component | `gmst` (°C rel. 1850–1900), `med`, `p05`, `p17`, `p83`, `p95`, `n_finite` (draws with a finite value) |
 
-- **Arms.** `fixed` runs every draw on the FaIR ensemble-mean climate. `joint` pairs each draw with one of the 841
-  FaIR configs and runs it on that config's climate, spliced to the ensemble mean at 2014. The joint arm is the
-  paper's projection band.
-- **Draws.** Ladrillo uses 2,000 posterior draws: `draw` k is row 5k − 4 of `data/posterior/ladrillo_L27_posterior.csv`.
-  BRICK 2.0 uses 1,000: `draw` k is row 10k − 9 of its posterior. The draws file holds every draw's value, so any
-  other statistic at the three horizons can be computed from it without a re-run. The cells and paths files summarise
-  the same draws.
-- **`config`** names the FaIR config the draw is paired with. Ladrillo's fixed-arm rows carry the same pairing, although
-  those runs used the ensemble mean; BRICK 2.0's fixed-arm rows say `MEAN`.
-- **Record conditioning.** The joint arm drops each draw whose Antarctic fast dynamics start by 2025 on the climate of
-  its paired config (*Versions*, v0.3). Dropped draws are missing from the draws file, the cells file's `n_draws` counts
-  what remains (1,997 for SSP2-4.5), and the gates file lists each one as a `REJECTED` row whose `value` is the onset
-  year. The fixed arm and BRICK 2.0 keep every draw.
-- **Gates.** `PAIRING`: all 841 configs are used, and the paired sample's median warming from 1995–2014 to 2300 is
-  within 0.1 °C of the full ensemble's (`CHECK` otherwise). `SPLICE-IDENTITY`: the two arms agree exactly through 1998,
-  before the post-2014 climate can reach back. `SUM`: the five components add up to `total` in every draw at each
-  horizon. `RECORD-CONDITIONING`: the counts above. A `FAIL` stops the script before any file is written.
-- **Options.** A non-default option adds a suffix to the file names (`_notap`, `_paleoper_selection`,
-  `_lwsobs_at_first_year`, `_uncond`).
-- **Fixed-climate panel.** `gmst` is the ensemble-mean warming that drives each year, in °C relative to 1850–1900.
-  `med` to `p95` are quantiles over the draws with a finite value, and `n_finite` counts them (2,000 when every draw
-  is finite).
+- `arm`: `fixed` runs every draw on the FaIR ensemble-mean climate. `joint` runs each draw on the climate of the FaIR
+  config named in `config` (one of 841) and is the paper's projection band. `config` matters only in the joint arm.
+- `draw` k is row 5k − 4 of `data/posterior/ladrillo_L27_posterior.csv` (2,000 draws), or row 10k − 9 of the BRICK
+  2.0 posterior (1,000 draws). The cells and paths files are statistics over the same draws.
+- The joint arm drops draws whose Antarctic fast dynamics start by 2025 (*Versions*, v0.3), for example 3 for
+  SSP2-4.5, which leaves `n_draws` at 1,997. The gates file lists them as `REJECTED`, with the onset year as `value`.
+- Gates: `PAIRING` (all 841 configs used, and the paired sample's median warming at 2300 within 0.1 °C of the
+  ensemble's), `SPLICE-IDENTITY` (the arms agree exactly through 1998), `SUM` (the components add up to `total`) and
+  `RECORD-CONDITIONING` (the dropped draws). A `FAIL` stops the script before it writes any file.
 
 ## Reproducing the hindcast comparison (Tables 4 and 5)
 
@@ -118,10 +101,10 @@ Run in this order; each later step checks itself against the earlier ones.
 | BRICK 2.0 hindcast on the same conventions | `julia --project=. scripts/posterior_predictive_brick20.jl` | ~2 min |
 | Table 4, the hindcast scorecard (bias, RMSE, coverage by component and window) | `python python/tables/ladrillo_vs_brick20_scorecard.py` | seconds |
 | per-draw residuals of both models, 10,000 draws each | `julia --project=. scripts/ic_hindcast_residuals.jl` | ~5 min |
-| Table 5, the information-criterion test (rho bound 0.99; 0.95 and 0.9 for the sensitivity) | `python python/ic_ladrillo_vs_brick20.py --rho-max=0.99` | ~16 min (9 processes, about 100 CPU-minutes) |
+| Table 5, the information-criterion test (rho bound 0.99; 0.95 and 0.9 for the sensitivity) | `python python/ic_ladrillo_vs_brick20.py --rho-max=0.99` | ~16 min (9 processes) |
 
 The Python step needs `pip install -r requirements.txt` (NumPy, pandas, SciPy). `IC_WORKERS` sets its process count
-(default: the number of CPU cores minus one).
+(default: CPU cores − 1).
 
 Outputs go to `outputs/hindcast/` and `outputs/tables/`. Runtimes were measured on an Apple M4 that was busy with other
 jobs; expect them to be shorter.
@@ -130,17 +113,15 @@ Tables A1 and A2 (seconds, NumPy and pandas, to `outputs/tables/`): `python pyth
 
 `python python/tables/check_tables_identity.py <SLR-RFF-BRICK checkout>` compares Tables 4, A1 and A2 with the
 research outputs behind the paper (every number exact on the versions in `requirements.txt`). Table A1's markdown shows
-the four parameters sampled as log₁₀ in natural logs (footnote ᶜ); its CSV keeps the log₁₀ values. The tests make the
-same comparison against copies in `test/reference/` and need no checkout.
+the four parameters sampled as log₁₀ in natural logs (footnote ᶜ); its CSV keeps the log₁₀ values.
 
-`<SLR-RFF-BRICK checkout>` is the path to a local copy of the research repository,
-https://github.com/msarofim/SLR-RFF-BRICK, at commit `70df729` on its `ladrillo-dev` branch. A full checkout is about
-1.3 GB. The two identity checks (this one and the figures check below) read about 20 files, and the commands below,
-run from this repository's directory, fetch only those directories into `../SLR-RFF-BRICK` (about 12 MB):
+`<SLR-RFF-BRICK checkout>` is a local copy of the research repository, https://github.com/msarofim/SLR-RFF-BRICK, at
+commit `70df729` (branch `ladrillo-dev`). Run from this repository, these commands fetch only the parts the identity
+checks read (about 115 MB of 1.3 GB) into `../SLR-RFF-BRICK`:
 
 ```bash
 git clone --filter=blob:none --no-checkout https://github.com/msarofim/SLR-RFF-BRICK.git ../SLR-RFF-BRICK
-git -C ../SLR-RFF-BRICK sparse-checkout set --no-cone figures/paper/ outputs/diag_ais_block_pca_L27_sub10k.csv outputs/ladrillo_table_a2_L27_sub10k.md 'outputs/ladrillo_prior_posterior_L27.*' outputs/scope_ladrillo_vs_brick20_scorecard_L27.csv outputs/vv_model_comparison_L27.csv outputs/vv_responsiveness_L27.csv
+git -C ../SLR-RFF-BRICK sparse-checkout set --no-cone figures/paper/ 'outputs/*_L27*'
 git -C ../SLR-RFF-BRICK checkout 70df729
 python python/tables/check_tables_identity.py ../SLR-RFF-BRICK
 ```
@@ -264,10 +245,10 @@ Figures go to `outputs/figures/`, each with its caption text in a `.caption.txt`
 `outputs/tables/`. Figs. 2, 3 and 6 also show FACTS and MAGICC-SLR, which this repository does not run; their outputs
 ship as data in `data/comparison/` (see its README).
 
-`python python/figures/check_figures_identity.py <SLR-RFF-BRICK checkout>` (the checkout is described under
-*Reproducing the hindcast comparison*) compares every PNG byte for byte, every caption and both tables with the
-research renders in the paper. With the versions in `requirements.txt` all 16 checks pass; other matplotlib versions
-can move pixels without any change in the data.
+`python python/figures/check_figures_identity.py <SLR-RFF-BRICK checkout>` compares every PNG byte for byte, every
+caption and both tables with the research renders in the paper. With the versions in `requirements.txt` all 16 checks
+pass; other matplotlib versions can move pixels without any change in the data. The checkout is described under
+*Reproducing the hindcast comparison*.
 
 ## Validation
 

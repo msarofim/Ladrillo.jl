@@ -5,21 +5,23 @@
 - **PR #1 not merged; its three notes carried onto current main.** Tony's branch `tonytest` sits on main's tip, but its
   README is the v1.3.0 copy of 2026-10-15, so GitHub reports a clean merge that would revert the seven README commits
   since (+46/−182). His net change against that copy is three insertions, kept here with small edits: the
-  `julia --project=.` line before the Quick start block (typo fixed); `lm.m` is the Mimi model and `lm` is not; fetch
-  the BRICK 2.0 posterior before the first run. The last is scoped: Ladrillo's own projections run without it, and the
-  tests skip their BRICK 2.0 checks until it is fetched.
-- **#2:** new subsection *The projection files*: what each `joint_`, `brick20_` and `fixed_components` file holds, the
-  arms, the draw-to-posterior-row mapping (Ladrillo row 5k − 4, BRICK 2.0 row 10k − 9), record conditioning and the
-  gates. One inconsistency is documented, not changed: Ladrillo's draws file writes the paired FaIR config on fixed-arm
-  rows, which ran on the ensemble mean, while BRICK 2.0's writes `MEAN`.
+  `julia --project=.` line before the Quick start block; `lm.m` is a Mimi model and `lm` is not; fetch the BRICK 2.0
+  posterior before the first run, scoped to the steps that use BRICK 2.0 (Ladrillo's own projections do not).
+- **#2:** new subsection *The projection files*: one table of files and columns, and four short notes (arms and
+  `config`, the draw-to-posterior-row mapping, record conditioning, the gates). Ladrillo's draws file writes the paired
+  FaIR config on fixed-arm rows, which ran on the ensemble mean, while BRICK 2.0's writes `MEAN`; the README says
+  `config` matters only in the joint arm, and the code is unchanged.
 - **#3:** runtimes measured 2026-11-13 in a temporary checkout of `1168c9b` (Apple M4, 10 cores, load ~2.3 at start):
   `project_fixed.jl` 47 s with one Julia and BLAS thread; Table 5 (`--rho-max=0.99`) 935 s wall with the default 9
-  workers, 6,120 s user. Table 5's CSV equals the shipped one in every cell except `provenance`. The first Table 5
-  attempt failed in that checkout for want of `data/brick20/` (the script counts BRICK 2.0's sampled parameters from
-  the posterior file), which is why the fetch note names Table 5.
+  workers. Table 5's CSV equals the shipped one in every cell except `provenance`. The first Table 5 attempt failed in
+  that checkout for want of `data/brick20/` (the script counts BRICK 2.0's sampled parameters from the posterior
+  file), which is why the fetch note names Table 5.
 - **#4:** `<SLR-RFF-BRICK checkout>` defined as the research repository at `70df729` on `ladrillo-dev`, the last commit
-  that touches the reference files. A full checkout is 1.3 GB; the README's sparse partial clone fetches 50 files
-  (12 MB including `.git`). Tested from GitHub: tables identity PASS, figures identity 16/16 PASS.
+  that touches the reference files, with a three-line sparse partial clone (`figures/paper/` and `outputs/*_L27*`,
+  115 MB of 1.3 GB). Tested from GitHub: tables identity PASS, figures identity 16/16 PASS. A clone naming the seven
+  output files one by one fetched 12 MB but needed a much longer command; dropped for the shorter one.
+- Simplified in review (Marcus: "as straightforward and simple as possible"): the first draft's README change went
+  from +64/−3 to +48/−4 lines (shorter wording; no file-suffix, `n_finite` or tests asides).
 
 ## 2026-11-12d — The four rolling-product files are shipped (Marcus)
 
