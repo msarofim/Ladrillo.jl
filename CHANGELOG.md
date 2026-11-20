@@ -6,7 +6,8 @@
   `README.md`. The sources-table entry is rendered from `tools/targets/target_inputs.py`, so it changed there and both
   tables were regenerated (`--write-readme`; `--check-readme` passes).
 - Then (Marcus 11-19) the package docstring in `src/Ladrillo.jl` ("sea level emulator", "sea level budgets") and
-  `data/comparison/README.md` (four places). Past CHANGELOG entries are left as written.
+  `data/comparison/README.md` (four places), and the `CITATION.cff` title (shown by GitHub's "Cite this repository"
+  and used for the Zenodo record). Past CHANGELOG entries and code comments are left as written.
 
 ## 2026-11-13 — README: Tony Wong's notes (PR #1) and issues #2–#4
 

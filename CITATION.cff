@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use Ladrillo, please cite it as below."
-title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea-level rise"
+title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea level rise"
 type: software
 ## The version the GMD paper reports is 1.0.0 (Marcus 2026-11-11): v0.4's model and numbers plus the figure scripts.
 ## The internal builds are tags v0.1.0-v0.4.0 (tagged v1.0.0-v1.3.0 until the release). Set date-released, and tag
