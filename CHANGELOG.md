@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-19 — README: "sea level" in the open form
+
+- Marcus 11-19, matching the paper (GMD round r1119): "sea level rise", "sea level budget", "sea level feedback" in
+  `README.md`. The sources-table entry is rendered from `tools/targets/target_inputs.py`, so it changed there and both
+  tables were regenerated (`--write-readme`; `--check-readme` passes).
+- Not changed: the package docstring in `src/Ladrillo.jl`, `data/comparison/README.md`, and past CHANGELOG entries.
+
 ## 2026-11-13 — README: Tony Wong's notes (PR #1) and issues #2–#4
 
 - **PR #1 not merged; its three notes carried onto current main.** Tony's branch `tonytest` sits on main's tip, but its

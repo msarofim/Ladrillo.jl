@@ -59,7 +59,7 @@ GLAMBIE_FILES = ["0_global.csv", "1_alaska.csv", "2_western_canada_us.csv", "3_a
 # One entry per source dataset. `files`: (kind, rel, research path or None).
 SOURCES = [
     dict(key="frederikse2020", short="Frederikse et al. (2020)",
-         name="sea-level budget: global basin time series (xlsx) and the 5000-member weighted ensemble (nc)",
+         name="sea level budget: global basin time series (xlsx) and the 5000-member weighted ensemble (nc)",
          files=[("fetch", "frederikse2020/frederikse2020_global_basin_timeseries.xlsx",
                  "data/observations/raw/frederikse2020_global_basin_timeseries.xlsx"),
                 ("fetch", "frederikse2020/frederikse2020_GMSL_ensembles.nc",
