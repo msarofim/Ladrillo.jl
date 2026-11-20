@@ -1,8 +1,8 @@
 """
     Ladrillo
 
-A calibrated sea-level emulator: MimiBRICK v2.0.0 with a three-reservoir glacier component and a two-basin Greenland
-component, calibrated jointly to observed component sea-level budgets (posterior = calibration L27, shared by every version).
+A calibrated sea level emulator: MimiBRICK v2.0.0 with a three-reservoir glacier component and a two-basin Greenland
+component, calibrated jointly to observed component sea level budgets (posterior = calibration L27, shared by every version).
 
 Quick start:
 ```julia

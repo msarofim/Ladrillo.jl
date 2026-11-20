@@ -5,7 +5,8 @@
 - Marcus 11-19, matching the paper (GMD round r1119): "sea level rise", "sea level budget", "sea level feedback" in
   `README.md`. The sources-table entry is rendered from `tools/targets/target_inputs.py`, so it changed there and both
   tables were regenerated (`--write-readme`; `--check-readme` passes).
-- Not changed: the package docstring in `src/Ladrillo.jl`, `data/comparison/README.md`, and past CHANGELOG entries.
+- Then (Marcus 11-19) the package docstring in `src/Ladrillo.jl` ("sea level emulator", "sea level budgets") and
+  `data/comparison/README.md` (four places). Past CHANGELOG entries are left as written.
 
 ## 2026-11-13 — README: Tony Wong's notes (PR #1) and issues #2–#4
 
