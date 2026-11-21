@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-21 — Internal tags renamed on GitHub (v1.0.0–v1.3.0 → v0.1.0–v0.4.0)
+
+- Marcus 11-21 (approved the rename on 11-11, the push on 11-21): pushed v0.1.0–v0.4.0 and deleted the old tags
+  v1.0.0–v1.3.0 on GitHub and locally. Each pair was checked to point at the same commit before the deletion
+  (a2bb3b0, 78b03c6, c526331, 01462a8). There were no GitHub releases on the old tags. The tag messages keep their
+  original wording, so v0.1.0's message still reads "Ladrillo.jl v1.0.0: …".
+- v1.0.0 is now free for the release commit, which waits for the reserved Zenodo DOI (CITATION.cff `doi:` and
+  `date-released:`). Plan: SLR-RFF-BRICK `notes/release_ladrillo_v1.0.0_plan_2026-11-21.md`. The repo stays private
+  until submission (Marcus 11-21).
+
 ## 2026-11-19 — README: "sea level" in the open form
 
 - Marcus 11-19, matching the paper (GMD round r1119): "sea level rise", "sea level budget", "sea level feedback" in
