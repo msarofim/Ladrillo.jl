@@ -18,6 +18,8 @@ markers, as both the 841-config ensemble mean and the full ensemble.
 **This is version 1.0, the release the model-description paper reports, on its posterior (calibration L27).**
 The posterior is `data/posterior/ladrillo_L27_posterior.csv`: 10,000 draws pooled from four chains. No version changes a
 parameter.
+Version 1.0.0 is archived on Zenodo, DOI [10.5281/zenodo.24445689](https://doi.org/10.5281/zenodo.24445689). To cite it,
+use `CITATION.cff` (GitHub's "Cite this repository").
 - Versions 0.1 to 0.4 were internal builds, git tags `v0.1.0` to `v0.4.0` (tagged `v1.0.0` to `v1.3.0` before the
   release). See *Versions* below.
 - Version 1.0 has v0.4's model and numbers. It adds the scripts for the paper's figures and renames the options that
@@ -369,7 +371,7 @@ joint SNEASY-BRICK posterior published with MimiBRICK v2.0.0 (Zenodo 10.5281/zen
   at 2100 and 2300, and Table 5's profiled-AR(1) ΔAIC goes from 88.9 to 95.5.
 - Certified bit-for-bit against the research re-run (identity gates 2-5; CHANGELOG 2026-10-15).
 
-**v1.0** (the release the GMD paper reports). v0.4's model, posterior and numbers. Adds `python/figures/`, which
+**v1.0** (2026-11-22; the release the GMD paper reports; Zenodo 10.5281/zenodo.24445689). v0.4's model, posterior and numbers. Adds `python/figures/`, which
 regenerates Figs. 1–6 byte-identical to the paper's renders, and `data/comparison/`, the FACTS and MAGICC-SLR
 outputs those figures show. The options that reproduce v0.1 are renamed (`--v1.0` → `--v0.1`, `paleo=:v1` →
 `paleo=:per_selection`, `lws_anchor=:v1_step` → `lws_anchor=:obs_at_first_year`); the old names stop with an error.

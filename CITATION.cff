@@ -3,9 +3,11 @@ message: "If you use Ladrillo, please cite it as below."
 title: "Ladrillo.jl: a calibrated reduced-complexity emulator of global mean sea level rise"
 type: software
 ## The version the GMD paper reports is 1.0.0 (Marcus 2026-11-11): v0.4's model and numbers plus the figure scripts.
-## The internal builds are tags v0.1.0-v0.4.0 (tagged v1.0.0-v1.3.0 until the release). Set date-released, and tag
-## v1.0.0, at the release commit; update both at each later tagged release. (date-released is added then.)
+## The internal builds are tags v0.1.0-v0.4.0. v1.0.0 is archived on Zenodo under the version DOI below (reserved
+## 2026-11-22). Update version, date-released and doi at each later tagged release.
 version: 1.0.0
+date-released: 2026-11-22
+doi: 10.5281/zenodo.24445689
 license: MIT
 repository-code: "https://github.com/msarofim/Ladrillo.jl"
 authors:
@@ -13,7 +15,7 @@ authors:
     given-names: Marcus C.
     affiliation: "NYU Marron Institute"
 ## The model-description paper (Geoscientific Model Development, in preparation) becomes `preferred-citation` once it
-## has a DOI; the software DOI goes in `doi:` when the release is archived.
+## has a DOI.
 references:
   - type: software
     title: "MimiBRICK.jl"

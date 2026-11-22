@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-22 — v1.0.0: Zenodo DOI reserved, release commit tagged
+
+- Marcus reserved the version DOI 10.5281/zenodo.24445689 on Zenodo (a manual upload, still an unpublished draft; the
+  DOI resolves only once the record is published). `CITATION.cff` gets `doi:` and `date-released: 2026-11-22`; the
+  README gets the DOI near the top and in the v1.0 entry of *Versions*. `--check-readme` passes.
+- This commit is tagged `v1.0.0`. The Zenodo file is `git archive --format=zip --prefix=Ladrillo.jl-1.0.0/ v1.0.0`;
+  `git archive` stamps files with the tagged commit's time, so the zip can be rebuilt byte-identically from the tag.
+- Open before the record is published: S. Dangendorf's answer on redistributing
+  `data/sources/dangendorf2024/dangendorf2024_KalmanSmootherHR_Global_v2.nc`. If he declines, the file comes out,
+  `v1.0.0` moves to that commit (the repo is still private) and the zip is rebuilt and replaced in the Zenodo draft.
+- The repo goes public at submission (Marcus 11-21). Do not turn on the GitHub–Zenodo integration for this repo:
+  publishing a GitHub release would then mint a second DOI for the same version.
+
 ## 2026-11-21 — Internal tags renamed on GitHub (v1.0.0–v1.3.0 → v0.1.0–v0.4.0)
 
 - Marcus 11-21 (approved the rename on 11-11, the push on 11-21): pushed v0.1.0–v0.4.0 and deleted the old tags
