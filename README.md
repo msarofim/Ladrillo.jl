@@ -245,7 +245,8 @@ above) and the two posterior-predictive steps (Fig. 1). Each takes a few seconds
 
 Figures go to `outputs/figures/`, each with its caption text in a `.caption.txt` beside it, and tables to
 `outputs/tables/`. Figs. 2, 3 and 6 also show FACTS and MAGICC-SLR, which this repository does not run; their outputs
-ship as data in `data/comparison/` (see its README).
+ship as data in `data/comparison/` (see its README), and the FACTS run configurations
+and the scripts that extracted both models' outputs are in `comparison/`.
 
 `python python/figures/check_figures_identity.py <SLR-RFF-BRICK checkout>` compares every PNG byte for byte, every
 caption and both tables with the research renders in the paper. With the versions in `requirements.txt` all 16 checks

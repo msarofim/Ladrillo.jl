@@ -184,7 +184,10 @@ _CAPTION = (("Ladrillo %s 3-reservoir ν glaciers (%s chains, `%s` arm), " + _SP
               "each scenario on its own CMIP7 land-use, irrigation and volcanic/solar forcing.")
 with open(os.path.splitext(OUTPNG)[0] + ".caption.txt", "w") as _fh:
     _fh.write(_CAPTION.replace("\n", " ").strip() + "\n")
-fig.savefig(OUTPNG, dpi=150, bbox_inches="tight")
+## The paper places this figure 5.8 in wide; at 150 dpi it was 1327 px (about 230 dpi in place, under GMD's 300), so it is
+## saved at 300 dpi (2026-11-22), as the research repository's paper render is.
+FIG_DPI = 300
+fig.savefig(OUTPNG, dpi=FIG_DPI, bbox_inches="tight")
 print("wrote " + os.path.relpath(OUTPNG, lf.REPO))
 
 print("\n%-16s %8s %8s %10s %12s" % ("scenario", "peak K", "@yr", "Lad@2300", "Lad rate@2300"))

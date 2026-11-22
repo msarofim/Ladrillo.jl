@@ -26,6 +26,9 @@ reference (the midpoint of that window is 2004.5), and the figure captions state
 | `magicc_gmst_vv.csv` | MAGICC's GMST quantiles per scenario and year from the same run, used in Fig. 6 for the High minus Very Low temperature gap on MAGICC's climate. | K rel. 1850-1900 | `python/extract_magicc_vv_gmst.py` |
 | `comparator_classes.csv` | Classifies FACTS modules as `sej` (structured expert judgement: `bamber19`, and `wf4`, which uses bamber19 for both ice sheets) or `model` (every module not listed). The figures draw `sej` modules with an open marker. Lines starting with `#` are comments. | none | hand-maintained in the research repository as `benchmark/comparator_classes.csv` |
 
+The FACTS run configurations, copies of the extraction scripts named above, and the receipt for the FACTS Greenland
+numbers in Sect. 4.3 are in `comparison/` (see its README).
+
 ## Caption note
 
 The Fig. 2 and 3 captions keep a sentence from the research renders saying the comparators are frozen for the SSP set

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-22b — v1.0.0 re-cut: comparison run scripts added, Fig. 5 at 300 dpi; the tag moves
+
+Marcus 11-22: "yes, add them to the archive", "should we fix Figure 5 at the same time?" and "I want the published
+version to continue to be labeled 1.0.0 if possible". Prompted by GMD's code and data policy, which asks for the
+"preprocessing, run control and postprocessing scripts covering every data processing action".
+- `comparison/` (34 files, 204 KB): the FACTS run configurations, run scripts, container file, climate-input and
+  extraction scripts (FACTS checkout `d52b9ed4` on v1.1.4, the state that wrote `data/comparison/`'s FACTS file); the
+  receipt for Sect. 4.3's FACTS Greenland numbers (46 and 112 cm) with its untracked `crate0` config; and the MAGICC-SLR
+  extraction scripts (SLR-RFF-BRICK `f7942da`). Copied unchanged from git objects by `tools/copy_comparison_scripts.py`,
+  which writes `comparison/MANIFEST.csv` (source, commit, sha256); `--check` verifies the copies. Not run by the tests.
+  The MAGICC run itself is in the members-only probabilistic MAGICC repository and is not redistributed.
+- Fig. 5 (`python/figures/plot_vv_gsic_ladrillo.py`) is saved at 300 dpi instead of 150: at 150 it was 1327 px wide,
+  about 230 dpi at its 5.8 in width in the paper, under GMD's 300. Now 2658 x 2361 px. The research render
+  (SLR-RFF-BRICK `python/plot_vv_gsic_wr_vs_ladrillo.py --paper`) changed the same way, and
+  `check_figures_identity.py` passes byte for byte. Before the change both scripts reproduced the old render exactly.
+- Nothing in the model, the posterior or any number changes. `v1.0.0` moves to this commit: the repository is private
+  and the Zenodo record unpublished, so no one has the old tag. `CITATION.cff` keeps version 1.0.0 and
+  date-released 2026-11-22.
+
 ## 2026-11-22 — v1.0.0: Zenodo DOI reserved, release commit tagged
 
 - Marcus reserved the version DOI 10.5281/zenodo.24445689 on Zenodo (a manual upload, still an unpublished draft; the
